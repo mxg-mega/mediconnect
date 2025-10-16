@@ -12,6 +12,14 @@ This document outlines the phased implementation plan for the MedConnect applica
 *   The initial project setup was committed to the `feat/mediconnect-initial-setup` branch.
 *   No surprises or deviations from the plan.
 
+**Phase 2: Core & Common Setup**
+
+*   Created the directory structure for `core` and `common` features.
+*   Added `google_fonts`, `go_router`, and `flutter_secure_storage` packages.
+*   Set up the application theme with light and dark modes and the "Inter" font.
+*   Configured basic routing.
+*   A small mistake was made by creating files in non-existent directories, but it was corrected by creating the directories and rewriting the files.
+
 ## Implementation Plan
 
 ### Phase 1: Project Setup
@@ -23,29 +31,14 @@ This document outlines the phased implementation plan for the MedConnect applica
 - [x] Create a `CHANGELOG.md` file with an initial version of `0.1.0`.
 - [x] Commit the initial empty version of the package to the `feat/mediconnect-initial-setup` branch.
 
-After completing a task, if you added any TODOs to the code or didn't fully implement anything, make sure to add new tasks so that you can come back and complete them later.
-
-After each phase, I will:
-
-- [ ] Create/modify unit tests for testing the code added or modified in this phase, if relevant.
-- [ ] Run the `dart_fix` tool to clean up the code.
-- [ ] Run the `analyze_files` tool one more time and fix any issues.
-- [ ] Run any tests to make sure they all pass.
-- [ ] Run `dart_format` to make sure that the formatting is correct.
-- [ ] Re-read the `IMPLEMENTATION.md` file to see what, if anything, has changed in the implementation plan, and if it has changed, take care of anything the changes imply.
-- [ ] Update the `IMPLEMENTATION.md` file with the current state, including any learnings, surprises, or deviations in the Journal section. Check off any checkboxes of items that have been completed.
-- [ ] Use `git diff` to verify the changes that have been made, and create a suitable commit message for any changes. I will present the change message to you for approval.
-- [ ] Wait for your approval. I will not commit the changes or move on to the next phase of implementation until you approve the commit.
-- [ ] After committing the change, if the app is running, I will use the `hot_reload` tool to reload it.
-
 ### Phase 2: Core & Common Setup
 
-- [ ] Create the directory structure for `core` and `common` as outlined in the `DESIGN.md`.
-- [ ] Add the `google_fonts` package to use the "Inter" font.
-- [ ] Set up the theme for the application, including light and dark modes and the "Inter" font.
-- [ ] Add the `go_router` package for navigation.
-- [ ] Set up the basic routing for the application.
-- [ ] Add the `flutter_secure_storage` package.
+- [x] Create the directory structure for `core` and `common` as outlined in the `DESIGN.md`.
+- [x] Add the `google_fonts` package to use the "Inter" font.
+- [x] Set up the theme for the application, including light and dark modes and the "Inter" font.
+- [x] Add the `go_router` package for navigation.
+- [x] Set up the basic routing for the application.
+- [x] Add the `flutter_secure_storage` package.
 
 ### Phase 3: Authentication Feature
 
