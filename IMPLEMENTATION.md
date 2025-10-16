@@ -4,18 +4,24 @@ This document outlines the phased implementation plan for the MedConnect applica
 
 ## Journal
 
-This section will be updated after each phase to log actions taken, things learned, surprises, and deviations from the plan.
+**Phase 1: Project Setup**
+
+*   Successfully created the Flutter project and removed the boilerplate code.
+*   Updated the `pubspec.yaml` with the correct version number.
+*   Created the `README.md` and `CHANGELOG.md` files.
+*   The initial project setup was committed to the `feat/mediconnect-initial-setup` branch.
+*   No surprises or deviations from the plan.
 
 ## Implementation Plan
 
 ### Phase 1: Project Setup
 
-- [ ] Create a new Flutter project named `mediconnect` in the current directory.
-- [ ] Remove the boilerplate code in `lib/main.dart` and the `test` directory.
-- [ ] Update the `description` in `pubspec.yaml` to "A new Flutter project." and set the version to `0.1.0`.
-- [ ] Create a placeholder `README.md` file with a short description of the project.
-- [ ] Create a `CHANGELOG.md` file with an initial version of `0.1.0`.
-- [ ] Commit the initial empty version of the package to the `feat/mediconnect-initial-setup` branch.
+- [x] Create a new Flutter project named `mediconnect` in the current directory.
+- [x] Remove the boilerplate code in `lib/main.dart` and the `test` directory.
+- [x] Update the `description` in `pubspec.yaml` to "A new Flutter project." and set the version to `0.1.0`.
+- [x] Create a placeholder `README.md` file with a short description of the project.
+- [x] Create a `CHANGELOG.md` file with an initial version of `0.1.0`.
+- [x] Commit the initial empty version of the package to the `feat/mediconnect-initial-setup` branch.
 
 After completing a task, if you added any TODOs to the code or didn't fully implement anything, make sure to add new tasks so that you can come back and complete them later.
 
