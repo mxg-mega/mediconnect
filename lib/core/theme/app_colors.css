@@ -1,0 +1,24 @@
+.colors {
+    background: var(--main---neutral-BG-00, #669F77);
+    background: var(--main---neutral-BG, #607D8B);
+    background: var(--main---neutral-border, #90A4AE);
+    background: var(--main---neutral-BG-Tint, #ECEFF1);
+    background: var(--main---placeholder---disabled, #B0BEC5);
+    background: var(--main--primary-text, #212121);
+    background: var(--main---secondary-text, #37474F);
+    background: var(--main---tertiary-text, #8CAAC3);
+    background: var(--main---button-text---white, #FFFFFF);
+    background: var(--main---patient-BG, #0058FF);
+    background: var(--main---patient-BG-Tint, #2196F31A);
+    background: var(--main---patient-border, #2196F333);
+    background: var(--main---patient-disabled, #2196F380);
+    background: var(--main---pharmacist-BG, #228B22);
+    background: var(--main---pharmacist-BG-Tint, #228B221A);
+    background: var(--main---pharmacist-border, #228B2233);
+    background: var(--main---pharmacist-disabled, #228B2280);
+    background: var(--main---primary--tint, #21212180);
+    background: var(--main---support---red, #CF0606);
+    background: var(--main---support---link, #C42454);
+    background: var(--main---support-green, #50D261);
+    background: var(--00-subtle-reminder, #6C7C9C);
+}

@@ -1,0 +1,18 @@
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
+import 'package:mediconnect/common/auth/domain/repositories/auth_repository.dart';
+
+class SignInUseCase {
+  final AuthRepository repository;
+
+  SignInUseCase(this.repository);
+
+  Future<UserModel> call({
+    required String email,
+    required String password,
+  }) async {
+    return await repository.signIn(
+      email: email,
+      password: password,
+    );
+  }
+}

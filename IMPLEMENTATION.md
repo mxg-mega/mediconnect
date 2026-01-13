@@ -42,10 +42,14 @@ This document outlines the phased implementation plan for the MedConnect applica
 
 ### Phase 3: Authentication Feature
 
-- [ ] Implement the authentication feature under `lib/common/auth`.
-- [ ] Create the data, domain, and presentation layers for authentication.
-- [ ] Implement the UI for the sign-up and login screens.
+- [x] Implement the authentication feature under `lib/common/auth`.
+- [x] Create the data, domain, and presentation layers for authentication.
+- [x] Implement the UI for the sign-up and login screens.
 - [ ] Implement the logic for email/phone number verification.
+
+### Phase 3.5: Onboarding Flow
+
+- [x] Implement the onboarding pages and flow.
 
 ### Phase 4: Patient App - Home & Medication
 

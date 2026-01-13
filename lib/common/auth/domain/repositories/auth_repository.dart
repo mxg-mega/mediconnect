@@ -1,6 +1,20 @@
-import 'package:mediconnect/common/auth/domain/entities/user_entity.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
 
 abstract class AuthRepository {
-  Future<UserEntity> login(String email, String password);
-  Future<UserEntity> signup(String name, String email, String password);
+  Future<UserModel> signUp({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String phoneNumber,
+  });
+
+  Future<UserModel> signIn({
+    required String email,
+    required String password,
+  });
+
+  Future<void> signOut();
+
+  Future<UserModel?> getCurrentUser();
 }

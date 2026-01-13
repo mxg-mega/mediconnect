@@ -1,19 +1,47 @@
-import 'package:mediconnect/common/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:mediconnect/common/auth/domain/entities/user_entity.dart';
+import 'package:mediconnect/common/auth/data/datasources/auth_data_source.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
+  final AuthDataSource remoteDataSource;
 
   AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<UserEntity> login(String email, String password) {
-    return remoteDataSource.login(email, password);
+  Future<UserModel> signUp({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String phoneNumber,
+  }) async {
+    return await remoteDataSource.signUp(
+      email: email,
+      password: password,
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: phoneNumber,
+    );
   }
 
   @override
-  Future<UserEntity> signup(String name, String email, String password) {
-    return remoteDataSource.signup(name, email, password);
+  Future<UserModel> signIn({
+    required String email,
+    required String password,
+  }) async {
+    return await remoteDataSource.signIn(
+      email: email,
+      password: password,
+    );
+  }
+
+  @override
+  Future<void> signOut() async {
+    await remoteDataSource.signOut();
+  }
+
+  @override
+  Future<UserModel?> getCurrentUser() async {
+    return await remoteDataSource.getCurrentUser();
   }
 }
