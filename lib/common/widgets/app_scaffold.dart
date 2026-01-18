@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
+import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
 class AppScaffold extends ConsumerWidget {
   const AppScaffold({
@@ -57,7 +58,13 @@ class AppScaffold extends ConsumerWidget {
                           )
                         : null))
                 : null,
-            body: body,
+            body: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: context.figmaWidth(40),
+                horizontal: context.figmaWidth(24),
+              ),
+              child: body,
+            ),
           ),
         ),
       ),

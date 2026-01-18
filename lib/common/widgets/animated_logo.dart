@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:mediconnect/common/widgets/logo.dart';
+import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
@@ -46,10 +46,8 @@ class AnimatedLogo extends StatelessWidget {
                     scale: 0.00,
                     child: Text(
                       'MedConnect',
-                      style: GoogleFonts.poppins(
+                      style: AppTextStyles.inter32M.copyWith(
                         color: colors.neutral.buttonTextWhite,
-                        fontSize: context.figmaFontSize(32),
-                        fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
                     ),

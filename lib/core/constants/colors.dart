@@ -26,11 +26,11 @@ class AppColors {
       bg00: Color(0xFF669F77),
       bg: Color(0xFF607D8B),
       border: Color(0xFF90A4AE),
-      bgTint: Color(0xFFECEFF1),
+      bgTint: Color(0xFFF7F7F7),
       placeholderDisabled: Color(0xFFB0BEC5),
       primaryText: Color(0xFF212121),
       secondaryText: Color(0xFF37474F),
-      tertiaryText: Color(0xFF8CAAC3),
+      tertiaryText: Color(0xFFA6B4BF),
       buttonTextWhite: Color(0xFFFFFFFF),
     ),
     patient: PatientColors(

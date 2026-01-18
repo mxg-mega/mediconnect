@@ -89,7 +89,7 @@ class AppScaffoldNotifier extends StateNotifier<AppScaffoldState> {
         return AppColors.lightTheme.pharmacist.bgTint;
       case UserRole.none:
       default:
-        return AppColors.lightTheme.neutral.bg00;
+        return AppColors.lightTheme.neutral.bgTint;
     }
   }
 }
@@ -111,4 +111,7 @@ final appScaffoldScaffoldColorProvider = Provider<Color>((ref) {
 
 final appScaffoldRoleProvider = Provider<UserRole>((ref) {
   return ref.watch(appScaffoldProvider).currentRole;
+});
+final appScaffoldFlowProvider = Provider<AppFlow>((ref) {
+  return ref.watch(appScaffoldProvider).currentFlow;
 });

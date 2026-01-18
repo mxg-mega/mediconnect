@@ -9,31 +9,45 @@ class AppTheme {
   // Text themes
   static TextTheme get _textTheme {
     final baseTextTheme = ThemeData.light().textTheme;
-    return GoogleFonts.interTextTheme(baseTextTheme).copyWith(
+    final inter = GoogleFonts.interTextTheme(baseTextTheme);
+
+    // Typography tokens from assets/fonts.css:
+    // - Inter: body + paragraphs
+    // - Outfit (SemiBold 600): headings H1..H5
+    return inter.copyWith(
       displayLarge: GoogleFonts.inter(
         fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: AppColors.lightTheme.neutral.primaryText,
-      ),
-      displayMedium: GoogleFonts.inter(
-        fontSize: 28,
-        fontWeight: FontWeight.w600,
-      ),
-      headlineSmall: GoogleFonts.inter(
-        fontSize: 18,
         fontWeight: FontWeight.w500,
-        height: 1.0,
-        letterSpacing: 0,
-        color: AppColors.lightTheme.neutral.secondaryText,
       ),
-      headlineMedium: GoogleFonts.inter(
+      titleLarge: GoogleFonts.inter(
         fontSize: 24,
-        fontWeight: FontWeight.w600,
-        height: 22 / 24,
-        letterSpacing: 0,
-        color: AppColors.lightTheme.neutral.primaryText,
+        fontWeight: FontWeight.normal,
       ),
-      // Add more text styles as needed
+      titleMedium: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w500),
+      bodyLarge: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.normal),
+      bodyMedium: GoogleFonts.inter(
+        fontSize: 16,
+        fontWeight: FontWeight.normal,
+        height: 1.38,
+      ),
+      bodySmall: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.normal),
+      labelLarge: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+      labelMedium: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500),
+      labelSmall: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.normal,
+      ),
+      headlineMedium: GoogleFonts.outfit(
+        fontSize: 22,
+        fontWeight: FontWeight.w600,
+        height: 1.26,
+      ),
+      headlineSmall: GoogleFonts.outfit(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        height: 1.26,
+      ),
+      titleSmall: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600),
     );
   }
 

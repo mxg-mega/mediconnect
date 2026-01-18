@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
@@ -29,15 +30,12 @@ class PresentationWidget extends StatelessWidget {
         ),
         Text(
           title,
-          style: AppTheme.textTheme(
-            context,
-          ).headlineMedium!.copyWith(fontSize: context.figmaFontSize(24)),
+          style: AppTextStyles.inter24M,
           textAlign: TextAlign.center,
         ),
         Text(
           description,
-          style: AppTheme.textTheme(context).headlineSmall!.copyWith(
-            fontSize: context.figmaFontSize(18),
+          style: AppTextStyles.interP18R.copyWith(
             color: AppTheme.colors(context).neutral.secondaryText,
           ),
           textAlign: TextAlign.center,
