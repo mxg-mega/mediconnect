@@ -47,6 +47,10 @@ dependencies:
   firebase_auth: ^5.3.1
   shared_preferences: 
   flutter_svg: ^2.0.17
+  uuid: ^4.3.1
+  intl: ^0.18.1
+  flutter_dotenv: ^5.0.2
+  file_picker: ^10.3.10
 
 dev_dependencies:
   flutter_test:
@@ -77,6 +81,7 @@ flutter:
     - assets/images/
     - assets/fonts/
     - assets/svg/
+    - assets/svg/icons/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

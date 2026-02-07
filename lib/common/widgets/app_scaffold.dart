@@ -13,6 +13,9 @@ class AppScaffold extends ConsumerWidget {
     this.appBar,
     this.hasAppBar = true,
     this.extendBodyBehindAppBar = false,
+    this.bottomNavigationBar,
+    this.floatingActionButton,
+    this.removeBodyPadding = false,
   });
 
   final Widget body;
@@ -22,6 +25,9 @@ class AppScaffold extends ConsumerWidget {
   final PreferredSizeWidget? appBar;
   final bool hasAppBar;
   final bool extendBodyBehindAppBar;
+  final Widget? bottomNavigationBar;
+  final bool removeBodyPadding;
+  final Widget? floatingActionButton;
 
   static const _surfaceRadius = Radius.circular(28);
 
@@ -32,18 +38,19 @@ class AppScaffold extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: backgroundColor,
+      bottomNavigationBar: bottomNavigationBar,
       body: SafeArea(
         bottom: false,
         child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topRight: _surfaceRadius,
-          ),
+          borderRadius: const BorderRadius.only(topRight: _surfaceRadius),
           child: Scaffold(
             backgroundColor: surfaceColor,
             extendBodyBehindAppBar: extendBodyBehindAppBar,
             appBar: hasAppBar
                 ? (appBar ??
-                    (title != null || onBack != null || scaffoldActions != null
+                    (title != null ||
+                            onBack != null ||
+                            scaffoldActions != null
                         ? AppBar(
                             title: title,
                             leading: onBack != null
@@ -58,13 +65,16 @@ class AppScaffold extends ConsumerWidget {
                           )
                         : null))
                 : null,
-            body: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: context.figmaWidth(40),
-                horizontal: context.figmaWidth(24),
-              ),
-              child: body,
-            ),
+            body: removeBodyPadding
+                ? body
+                : Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: context.figmaHeight(40),
+                      horizontal: context.figmaWidth(24),
+                    ),
+                    child: body,
+                  ),
+            floatingActionButton: floatingActionButton,
           ),
         ),
       ),

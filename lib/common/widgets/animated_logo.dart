@@ -41,17 +41,14 @@ class AnimatedLogo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Logo(),
-                  SizedBox(width: context.figmaWidth(4)),
-                  Transform.scale(
-                    scale: 0.00,
-                    child: Text(
-                      'MedConnect',
-                      style: AppTextStyles.inter32M.copyWith(
-                        color: colors.neutral.buttonTextWhite,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                  // SizedBox(width: context.figmaWidth(4)),
+                  // Text(
+                  //   'MedConnect',
+                  //   style: AppTextStyles.inter32M.copyWith(
+                  //     color: colors.neutral.buttonTextWhite,
+                  //   ),
+                  //   textAlign: TextAlign.center,
+                  // ),
                 ],
               ),
             ),

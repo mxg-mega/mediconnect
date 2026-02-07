@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mediconnect/common/auth/presentation/widgets/k_input_field.dart';
+import 'package:mediconnect/common/widgets/k_input_field.dart';
 import 'package:mediconnect/common/auth/presentation/providers/password_visibility_provider.dart';
 
 class PasswordFieldExample extends ConsumerWidget {

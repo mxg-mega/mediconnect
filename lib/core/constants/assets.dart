@@ -75,4 +75,13 @@ class AppIcons {
       'assets/svg/icons/ph_file-plus-duotone.svg';
   static const String streamlinePharmacySolid =
       'assets/svg/icons/streamline_pharmacy-solid.svg';
+
+  static const String success = 'assets/svg/icons/Success.svg';
+  static const String pulsating_success = 'assets/svg/pulsating.svg';
+  static const String image88 = 'assets/svg/image 88.svg';
+
+  static const String notification_bell_available =
+      'assets/svg/icons/notification_bell_available.svg';
+
+  static const String approved_badge = 'assets/svg/approved_badge.svg';
 }

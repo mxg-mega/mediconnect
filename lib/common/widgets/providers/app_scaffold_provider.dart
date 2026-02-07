@@ -84,9 +84,9 @@ class AppScaffoldNotifier extends StateNotifier<AppScaffoldState> {
     final effectiveRole = getEffectiveRole();
     switch (effectiveRole) {
       case UserRole.patient:
-        return AppColors.lightTheme.patient.bgTint;
+        return AppColors.lightTheme.neutral.bgTint;
       case UserRole.pharmacist:
-        return AppColors.lightTheme.pharmacist.bgTint;
+        return AppColors.lightTheme.neutral.bgTint;
       case UserRole.none:
       default:
         return AppColors.lightTheme.neutral.bgTint;
@@ -102,11 +102,13 @@ final appScaffoldProvider =
 
 // Convenience providers for specific values
 final appScaffoldBackgroundColorProvider = Provider<Color>((ref) {
-  return ref.watch(appScaffoldProvider.notifier).getBackgroundColor();
+  ref.watch(appScaffoldProvider);
+  return ref.read(appScaffoldProvider.notifier).getBackgroundColor();
 });
 
 final appScaffoldScaffoldColorProvider = Provider<Color>((ref) {
-  return ref.watch(appScaffoldProvider.notifier).getScaffoldColor();
+  ref.watch(appScaffoldProvider);
+  return ref.read(appScaffoldProvider.notifier).getScaffoldColor();
 });
 
 final appScaffoldRoleProvider = Provider<UserRole>((ref) {

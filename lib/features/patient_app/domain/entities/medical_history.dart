@@ -1,45 +1,46 @@
 import 'package:equatable/equatable.dart';
+import 'package:mediconnect/common/auth/data/models/medical_history_model.dart';
 
-enum ConditionStatus {
-  active,
-  resolved,
-  chronic;
+// enum ConditionStatus {
+//   active,
+//   resolved,
+//   chronic;
 
-  String get value {
-    switch (this) {
-      case ConditionStatus.active:
-        return 'active';
-      case ConditionStatus.resolved:
-        return 'resolved';
-      case ConditionStatus.chronic:
-        return 'chronic';
-    }
-  }
+//   String get value {
+//     switch (this) {
+//       case ConditionStatus.active:
+//         return 'active';
+//       case ConditionStatus.resolved:
+//         return 'resolved';
+//       case ConditionStatus.chronic:
+//         return 'chronic';
+//     }
+//   }
 
-  String get displayName {
-    switch (this) {
-      case ConditionStatus.active:
-        return 'Active';
-      case ConditionStatus.resolved:
-        return 'Resolved';
-      case ConditionStatus.chronic:
-        return 'Chronic';
-    }
-  }
+//   String get displayName {
+//     switch (this) {
+//       case ConditionStatus.active:
+//         return 'Active';
+//       case ConditionStatus.resolved:
+//         return 'Resolved';
+//       case ConditionStatus.chronic:
+//         return 'Chronic';
+//     }
+//   }
 
-  static ConditionStatus fromString(String value) {
-    switch (value.toLowerCase()) {
-      case 'active':
-        return ConditionStatus.active;
-      case 'resolved':
-        return ConditionStatus.resolved;
-      case 'chronic':
-        return ConditionStatus.chronic;
-      default:
-        return ConditionStatus.active;
-    }
-  }
-}
+//   static ConditionStatus fromString(String value) {
+//     switch (value.toLowerCase()) {
+//       case 'active':
+//         return ConditionStatus.active;
+//       case 'resolved':
+//         return ConditionStatus.resolved;
+//       case 'chronic':
+//         return ConditionStatus.chronic;
+//       default:
+//         return ConditionStatus.active;
+//     }
+//   }
+// }
 
 enum RecoveryStatus {
   cured,

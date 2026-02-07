@@ -31,6 +31,7 @@ class LabeledInput extends StatelessWidget {
                   text: ' *',
                   style: AppTextStyles.interP14R.copyWith(
                     color: AppTheme.colors(context).support.red,
+                    overflow: TextOverflow.fade
                   ),
                 ),
             ],

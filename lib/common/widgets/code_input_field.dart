@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mediconnect/common/auth/presentation/widgets/otp_input_field.dart';
+import 'package:mediconnect/common/widgets/otp_input_field.dart';
 
 class CodeInputField extends StatefulWidget {
   final void Function(String code) onCompleted;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mediconnect/core/constants/text_styles.dart';
 import '../constants/colors.dart';
 
 class AppTheme {
@@ -88,6 +89,7 @@ class AppTheme {
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          textStyle: AppTextStyles.interP18M,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -99,6 +101,8 @@ class AppTheme {
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
+        prefixIconColor: AppColors.lightTheme.neutral.secondaryText,
+        suffixIconColor: AppColors.lightTheme.neutral.secondaryText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: AppColors.lightTheme.neutral.border),

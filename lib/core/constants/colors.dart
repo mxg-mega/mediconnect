@@ -50,6 +50,9 @@ class AppColors {
       link: Color(0xFFC42454),
       green: Color(0xFF50D261),
       subtleReminder: Color(0xFF6C7C9C),
+      orange: Color(0xFFFFA500),
+      yellow: Color(0xFFFFEB3B),
+      blue: Color(0xFF5273FA)
     ),
   );
 
@@ -203,12 +206,18 @@ class SupportColors {
   final Color link;
   final Color green;
   final Color subtleReminder;
+  final Color orange;
+  final Color yellow;
+  final Color blue;
 
   const SupportColors({
     required this.red,
     required this.link,
     required this.green,
     required this.subtleReminder,
+    required this.orange,
+    required this.yellow,
+    required this.blue,
   });
 
   SupportColors copyWith({
@@ -216,12 +225,18 @@ class SupportColors {
     Color? link,
     Color? green,
     Color? subtleReminder,
+    Color? orange,
+    Color? yellow,
+    Color? blue,
   }) {
     return SupportColors(
       red: red ?? this.red,
       link: link ?? this.link,
       green: green ?? this.green,
       subtleReminder: subtleReminder ?? this.subtleReminder,
+      orange: orange ?? this.orange,
+      yellow: yellow ?? this.yellow,
+      blue: blue ?? this.blue,
     );
   }
 }

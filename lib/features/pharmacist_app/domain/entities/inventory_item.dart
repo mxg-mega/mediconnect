@@ -3,7 +3,8 @@ import 'package:equatable/equatable.dart';
 enum StockStatus {
   inStock,
   lowStock,
-  outOfStock;
+  outOfStock,
+  expiringSoon;
 
   String get value {
     switch (this) {
@@ -13,6 +14,8 @@ enum StockStatus {
         return 'low_stock';
       case StockStatus.outOfStock:
         return 'out_of_stock';
+      case StockStatus.expiringSoon:
+        return 'expiring_soon';
     }
   }
 
@@ -24,6 +27,8 @@ enum StockStatus {
         return 'Low Stock';
       case StockStatus.outOfStock:
         return 'Out of Stock';
+      case StockStatus.expiringSoon:
+        return 'Expiring Soon';
     }
   }
 
@@ -35,6 +40,8 @@ enum StockStatus {
         return StockStatus.lowStock;
       case 'out_of_stock':
         return StockStatus.outOfStock;
+      case 'expiring_soon':
+        return StockStatus.expiringSoon;
       default:
         return StockStatus.outOfStock;
     }
@@ -55,7 +62,10 @@ class InventoryItem extends Equatable {
   final String id; // Primary key
   final String pharmacyId; // Foreign key to Pharmacy
   final String medicationId; // Foreign key to Medication
+  final String medicationName; // Name of the medication
   final String brandName; // Brand name of the medication
+  final String form; // e.g., Tablet, Capsule
+  final String? imageUrl; // URL for the medication image
   final int quantityInStock; // Current stock
   final String? batchNumber; // Batch/lot number
   final DateTime expiryDate; // Expiry date
@@ -72,7 +82,10 @@ class InventoryItem extends Equatable {
     required this.id,
     required this.pharmacyId,
     required this.medicationId,
+    required this.medicationName,
     required this.brandName,
+    required this.form,
+    this.imageUrl,
     required this.quantityInStock,
     this.batchNumber,
     required this.expiryDate,
@@ -106,28 +119,34 @@ class InventoryItem extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    pharmacyId,
-    medicationId,
-    brandName,
-    quantityInStock,
-    batchNumber,
-    expiryDate,
-    purchasePrice,
-    sellingPrice,
-    minimumStockLevel,
-    stockStatus,
-    supplierName,
-    lastRestocked,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        pharmacyId,
+        medicationId,
+        medicationName,
+        brandName,
+        form,
+        imageUrl,
+        quantityInStock,
+        batchNumber,
+        expiryDate,
+        purchasePrice,
+        sellingPrice,
+        minimumStockLevel,
+        stockStatus,
+        supplierName,
+        lastRestocked,
+        createdAt,
+        updatedAt,
+      ];
 
   InventoryItem copyWith({
     String? id,
     String? pharmacyId,
     String? medicationId,
+    String? medicationName,
     String? brandName,
+    String? form,
+    String? imageUrl,
     int? quantityInStock,
     String? batchNumber,
     DateTime? expiryDate,
@@ -144,7 +163,10 @@ class InventoryItem extends Equatable {
       id: id ?? this.id,
       pharmacyId: pharmacyId ?? this.pharmacyId,
       medicationId: medicationId ?? this.medicationId,
+      medicationName: medicationName ?? this.medicationName,
       brandName: brandName ?? this.brandName,
+      form: form ?? this.form,
+      imageUrl: imageUrl ?? this.imageUrl,
       quantityInStock: quantityInStock ?? this.quantityInStock,
       batchNumber: batchNumber ?? this.batchNumber,
       expiryDate: expiryDate ?? this.expiryDate,
@@ -184,5 +206,51 @@ class InventoryItem extends Equatable {
       lastRestocked: DateTime.now(),
       updatedAt: DateTime.now(),
     );
+  }
+
+  factory InventoryItem.fromJson(Map<String, dynamic> json) {
+    return InventoryItem(
+      id: json['id'] as String,
+      pharmacyId: json['pharmacyId'] as String,
+      medicationId: json['medicationId'] as String,
+      medicationName: json['medicationName'] as String,
+      brandName: json['brandName'] as String,
+      form: json['form'] as String,
+      imageUrl: json['imageUrl'] as String?,
+      quantityInStock: json['quantityInStock'] as int,
+      batchNumber: json['batchNumber'] as String?,
+      expiryDate: DateTime.parse(json['expiryDate'] as String),
+      purchasePrice: (json['purchasePrice'] as num).toDouble(),
+      sellingPrice: (json['sellingPrice'] as num).toDouble(),
+      minimumStockLevel: json['minimumStockLevel'] as int,
+      stockStatus: StockStatus.fromString(json['stockStatus'] as String),
+      supplierName: json['supplierName'] as String?,
+      lastRestocked: DateTime.parse(json['lastRestocked'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'pharmacyId': pharmacyId,
+      'medicationId': medicationId,
+      'medicationName': medicationName,
+      'brandName': brandName,
+      'form': form,
+      'imageUrl': imageUrl,
+      'quantityInStock': quantityInStock,
+      'batchNumber': batchNumber,
+      'expiryDate': expiryDate.toIso8601String(),
+      'purchasePrice': purchasePrice,
+      'sellingPrice': sellingPrice,
+      'minimumStockLevel': minimumStockLevel,
+      'stockStatus': stockStatus.value,
+      'supplierName': supplierName,
+      'lastRestocked': lastRestocked.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
   }
 }

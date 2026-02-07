@@ -17,9 +17,12 @@ class AuthMethodButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        minimumSize: Size(double.infinity, context.figmaHeight(50)),
+      ),
       onPressed: onPressed,
       label: label,
-      icon: path == null
+      icon: path != null
           ? SvgPicture.asset(
               path!,
               width: context.figmaWidth(22.7),

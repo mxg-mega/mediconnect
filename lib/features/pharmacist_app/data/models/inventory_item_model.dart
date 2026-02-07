@@ -82,6 +82,8 @@ class InventoryItemModel extends Equatable {
       lastRestocked: lastRestocked,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      // TODO: The medicationName and form are not stored in the inventory item, but they are needed to create the entity. We can set them to empty strings or fetch them from a medication repository if needed.
+      medicationName: '', form: '',
     );
   }
 
