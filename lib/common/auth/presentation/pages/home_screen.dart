@@ -5,6 +5,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Depending on the user role patient or pharmacist, you can navigate to different screens here.
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),

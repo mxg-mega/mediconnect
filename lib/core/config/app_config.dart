@@ -1,6 +1,6 @@
 class AppConfig {
   // API Configuration
-  static const String baseUrl = 'https://api.mediconnect.com';
+  static const String baseUrl = 'https://api.medconnect.com';
   static const Duration connectTimeout = Duration(seconds: 10);
   static const Duration receiveTimeout = Duration(seconds: 30);
 
@@ -25,7 +25,7 @@ class AppConfig {
   static const String userTypePharmacist = 'pharmacist';
 
   // App Constants
-  static const String appName = 'MediConnect';
+  static const String appName = 'MedConnect';
   static const String appVersion = '1.0.0';
   static const int maxLoginAttempts = 5;
   static const Duration sessionTimeout = Duration(hours: 24);
@@ -49,10 +49,10 @@ class AppConfig {
 
   // Cache Configuration
   static const Duration cacheTimeout = Duration(minutes: 30);
-  static const String cacheKeyPrefix = 'mediconnect_';
+  static const String cacheKeyPrefix = 'medconnect_';
 
   // Notification Settings
-  static const String notificationChannelId = 'mediconnect_channel';
-  static const String notificationChannelName = 'MediConnect Notifications';
-  static const String notificationChannelDescription = 'App notifications for MediConnect';
+  static const String notificationChannelId = 'medconnect_channel';
+  static const String notificationChannelName = 'MedConnect Notifications';
+  static const String notificationChannelDescription = 'App notifications for MedConnect';
 }

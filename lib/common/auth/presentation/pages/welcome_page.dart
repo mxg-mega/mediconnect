@@ -10,6 +10,7 @@ import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart'
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/features/patient_app/presentation/main_nav/patient_main_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_main_page.dart';
 
 class WelcomePage extends ConsumerWidget {
@@ -49,7 +50,10 @@ class WelcomePage extends ConsumerWidget {
                 KElevatedButton(
                   onPressed: () {
                     // input logic for the cross flow (patient flow, or pharmacist flow)
-                    navigateToPage(context, PharmacistMainPage());
+                    provider.getEffectiveRole() == UserRole.patient
+                        ? navigateToPage(context, PatientMainPage())
+                        : navigateToPage(context, PharmacistMainPage());
+                    // navigateToPage(context, PharmacistMainPage());
                   },
                   child: Text('Go To Dashboard'),
                 ),

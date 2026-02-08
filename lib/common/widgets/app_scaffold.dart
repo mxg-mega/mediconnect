@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
+import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
 class AppScaffold extends ConsumerWidget {
@@ -16,6 +17,8 @@ class AppScaffold extends ConsumerWidget {
     this.bottomNavigationBar,
     this.floatingActionButton,
     this.removeBodyPadding = false,
+    this.titleText,
+    this.titleTextStyle, 
   });
 
   final Widget body;
@@ -28,6 +31,8 @@ class AppScaffold extends ConsumerWidget {
   final Widget? bottomNavigationBar;
   final bool removeBodyPadding;
   final Widget? floatingActionButton;
+  final String? titleText;
+  final TextStyle? titleTextStyle;
 
   static const _surfaceRadius = Radius.circular(28);
 
@@ -40,6 +45,8 @@ class AppScaffold extends ConsumerWidget {
       backgroundColor: backgroundColor,
       bottomNavigationBar: bottomNavigationBar,
       body: SafeArea(
+        // TODO: fix this later on to match the design and find a way to change the color of the default phone status bar icons to white when the background is dark and vice versa
+        // minimum: EdgeInsets.only(top: context.figmaHeight(10)),
         bottom: false,
         child: ClipRRect(
           borderRadius: const BorderRadius.only(topRight: _surfaceRadius),
@@ -48,28 +55,37 @@ class AppScaffold extends ConsumerWidget {
             extendBodyBehindAppBar: extendBodyBehindAppBar,
             appBar: hasAppBar
                 ? (appBar ??
-                    (title != null ||
-                            onBack != null ||
-                            scaffoldActions != null
-                        ? AppBar(
-                            title: title,
-                            leading: onBack != null
-                                ? IconButton(
-                                    onPressed: onBack,
-                                    icon: const Icon(Icons.arrow_back),
-                                  )
-                                : null,
-                            backgroundColor: surfaceColor,
-                            elevation: 0,
-                            actions: scaffoldActions,
-                          )
-                        : null))
+                      (title != null ||
+                              onBack != null ||
+                              scaffoldActions != null
+                          ? AppBar(
+                              title:
+                                  title ??
+                                  Text(
+                                    titleText ?? '',
+                                    style:
+                                        titleTextStyle ??
+                                        AppTextStyles.interP18M,
+                                  ),
+                              toolbarHeight: context.figmaHeight(87),
+                              centerTitle: true,
+                              leading: onBack != null
+                                  ? IconButton(
+                                      onPressed: onBack,
+                                      icon: const Icon(Icons.arrow_back),
+                                    )
+                                  : null,
+                              backgroundColor: surfaceColor,
+                              elevation: 0,
+                              actions: scaffoldActions,
+                            )
+                          : null))
                 : null,
             body: removeBodyPadding
                 ? body
                 : Padding(
                     padding: EdgeInsets.symmetric(
-                      vertical: context.figmaHeight(40),
+                      vertical: context.figmaHeight(20),
                       horizontal: context.figmaWidth(24),
                     ),
                     child: body,

@@ -4,6 +4,7 @@ import 'package:mediconnect/common/auth/presentation/pages/login_screen.dart';
 import 'package:mediconnect/common/auth/presentation/pages/signup_screen.dart';
 import 'package:mediconnect/common/auth/presentation/widgets/auth_wrapper.dart';
 import 'package:mediconnect/common/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:mediconnect/features/patient_app/presentation/main_nav/patient_main_page.dart';
 
 final GoRouter router = GoRouter(
   redirect: (BuildContext context, GoRouterState state) {
@@ -36,5 +37,12 @@ final GoRouter router = GoRouter(
         return const LoginScreen();
       },
     ),
+    GoRoute(
+      path: '/patient',
+      builder: (BuildContext context, GoRouterState state) {
+        return const PatientMainPage();
+      },
+    ),
   ],
 );
+

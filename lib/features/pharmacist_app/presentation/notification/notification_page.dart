@@ -6,6 +6,7 @@ import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/widgets/k_navigate.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
+import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/notification/domain/notification_item.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/notification/providers/notification_provider.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/notification/widgets/notification_list_item.dart';
@@ -18,12 +19,24 @@ class NotificationPage extends ConsumerWidget {
     final notifications = ref.watch(notificationProvider);
 
     return AppScaffold(
-      title: Text('Notification', style: AppTextStyles.interP18M),
+      title: Text(
+        'Notification',
+        style: AppTextStyles.interP18M,
+        textAlign: TextAlign.center,
+      ),
       onBack: () => navigateBack(context),
       scaffoldActions: [
         Padding(
           padding: const EdgeInsets.only(right: 16.0),
-          child: SvgPicture.asset(AppIcons.filter3, width: 24, height: 24),
+          child: SvgPicture.asset(
+            AppIcons.filter3,
+            width: 20,
+            height: 20,
+            colorFilter: ColorFilter.mode(
+              AppTheme.colors(context).neutral.primaryText,
+              BlendMode.srcIn,
+            ),
+          ),
         ),
       ],
       body: notifications.isEmpty
@@ -59,20 +72,21 @@ class NotificationPage extends ConsumerWidget {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                ref.read(notificationProvider.notifier).markAllAsRead();
-              },
-              child: const Text('Mark all as read'),
-            ),
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        //   child: Align(
+        //     alignment: Alignment.centerRight,
+        //     child: TextButton(
+        //       onPressed: () {
+        //         ref.read(notificationProvider.notifier).markAllAsRead();
+        //       },
+        //       child: const Text('Mark all as read'),
+        //     ),
+        //   ),
+        // ),
         Expanded(
           child: ListView.builder(
+            padding: EdgeInsets.zero,
             itemCount: dateSections.length,
             itemBuilder: (context, index) {
               final dateSection = dateSections[index];
@@ -82,10 +96,30 @@ class NotificationPage extends ConsumerWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
+                      horizontal: 8.0,
                       vertical: 8.0,
                     ),
-                    child: Text(dateSection, style: AppTextStyles.h4Sb),
+                    child: dateSection == 'Today'
+                        ? Row(
+                            children: [
+                              Text(dateSection, style: AppTextStyles.h4Sb),
+                              Spacer(),
+                              TextButton(
+                                onPressed: () {
+                                  ref
+                                      .read(notificationProvider.notifier)
+                                      .markAllAsRead();
+                                },
+                                child: Text(
+                                  'Mark all as read',
+                                  style: AppTextStyles.interP14R.copyWith(
+                                    color: AppTheme.colors(context).support.red,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text(dateSection, style: AppTextStyles.h4Sb),
                   ),
                   ...items.map((item) => NotificationListItem(item: item)),
                 ],

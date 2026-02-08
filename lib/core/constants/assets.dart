@@ -30,6 +30,7 @@ class AppIcons {
   static const String eyeSlash = 'assets/svg/icons/Eye-Slash.svg';
   static const String female = 'assets/svg/icons/Female.svg';
   static const String file = 'assets/svg/icons/File.svg';
+  static const String file2 = 'assets/svg/icons/file2.svg';
   static const String filter2 = 'assets/svg/icons/Filter 2.svg';
   static const String filter3 = 'assets/svg/icons/Filter 3.svg';
   static const String filter = 'assets/svg/icons/Filter.svg';

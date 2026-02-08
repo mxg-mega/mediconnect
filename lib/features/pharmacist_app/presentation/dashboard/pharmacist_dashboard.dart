@@ -22,7 +22,6 @@ class PharmacistDashboard extends StatelessWidget {
 
     return AppScaffold(
       body: SingleChildScrollView(
-        // padding: EdgeInsets.all(context.figmaWidth(2)),
         child: Column(
           children: [
             // Header Section
