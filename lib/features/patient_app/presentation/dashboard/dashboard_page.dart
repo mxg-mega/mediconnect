@@ -23,78 +23,101 @@ class DashboardPage extends ConsumerWidget {
       slivers: [
         SliverAppBar(
           backgroundColor: colors.patient.bg,
-          expandedHeight: 150.0,
+          expandedHeight: 250.0,
           pinned: true,
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(130),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Card(
+                elevation: 2,
+                shadowColor: Colors.black.withOpacity(0.1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildActionItem(
+                        context,
+                        AppIcons.pill,
+                        'Browse\nMedications',
+                      ),
+                      _buildActionItem(
+                        context,
+                        AppIcons.location,
+                        'Nearby\nPharmacies',
+                      ),
+                      _buildActionItem(
+                        context,
+                        AppIcons.pill2,
+                        'My\nPrescriptions',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           flexibleSpace: FlexibleSpaceBar(
             background: Container(color: colors.patient.bg),
-            title: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage(
-                        'https://picsum.photos/seed/pfp/200/200',
+            title: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 10.0,
+              ),
+              // titlePadding: EdgeInsets.zero,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const CircleAvatar(
+                        radius: 20,
+                        backgroundImage: NetworkImage(
+                          'https://picsum.photos/seed/pfp/200/200',
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hi, Muneer',
-                          style: AppTextStyles.interP12R.copyWith(
-                            color: Colors.white,
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hi, Muneer',
+                            style: AppTextStyles.interP12R.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'How are you today?',
+                            style: AppTextStyles.interP12R.copyWith(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: SvgPicture.asset(
+                          AppIcons.notification_bell_available,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
                           ),
                         ),
-                        Text(
-                          'How are you today?',
-                          style: AppTextStyles.interP12R.copyWith(
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: SvgPicture.asset(
-                        AppIcons.notification_bell_available,
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
+                        onPressed: () {},
                       ),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SearchBar(
-                  leading: Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: SvgPicture.asset(
-                      AppIcons.search,
-                      width: 20,
-                      colorFilter: ColorFilter.mode(
-                        colors.neutral.secondaryText,
-                        BlendMode.srcIn,
-                      ),
-                    ),
+                    ],
                   ),
-                  hintText: 'Search Medications by name...',
-                  hintStyle: WidgetStateProperty.all(
-                    AppTextStyles.interP14R.copyWith(
-                      color: colors.neutral.secondaryText,
-                    ),
-                  ),
-                  onChanged: (value) {},
-                  trailing: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
+                  const SizedBox(height: 16),
+                  SearchBar(
+                    leading: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
                       child: SvgPicture.asset(
-                        AppIcons.filter,
+                        AppIcons.search,
                         width: 20,
                         colorFilter: ColorFilter.mode(
                           colors.neutral.secondaryText,
@@ -102,35 +125,31 @@ class DashboardPage extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  ],
-                  backgroundColor: WidgetStateProperty.all(
-                    colors.neutral.buttonTextWhite,
+                    hintText: 'Search Medications/Pharmacy',
+                    hintStyle: WidgetStateProperty.all(
+                      AppTextStyles.interP14R.copyWith(
+                        color: colors.neutral.secondaryText,
+                      ),
+                    ),
+                    onChanged: (value) {},
+                    trailing: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(
+                          AppIcons.filter,
+                          width: 20,
+                          colorFilter: ColorFilter.mode(
+                            colors.neutral.secondaryText,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                    ],
+                    backgroundColor: WidgetStateProperty.all(
+                      colors.neutral.buttonTextWhite,
+                    ),
+                    elevation: WidgetStateProperty.all(0),
                   ),
-                  elevation: WidgetStateProperty.all(0),
-                ),
-              ],
-            ),
-            titlePadding: const EdgeInsets.only(bottom: 70),
-          ),
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(context.figmaHeight(146)),
-            child: Container(
-              color: colors.neutral.buttonTextWhite,
-              height: context.figmaHeight(146),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildActionItem(
-                    context,
-                    AppIcons.pill,
-                    'Browse\nMedications',
-                  ),
-                  _buildActionItem(
-                    context,
-                    AppIcons.location,
-                    'Locate\nPharmacy',
-                  ),
-                  _buildActionItem(context, AppIcons.history, 'View\nActivity'),
                 ],
               ),
             ),
@@ -138,7 +157,6 @@ class DashboardPage extends ConsumerWidget {
         ),
         SliverToBoxAdapter(
           child: Container(
-            // color: colors.neutral.bg,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -180,19 +198,17 @@ class DashboardPage extends ConsumerWidget {
                   const SizedBox(height: 24),
                   _buildSectionTitle(context, 'Top Pharmacies'),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    height: 240,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: pharmacies.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 16),
-                      itemBuilder: (context, index) {
-                        return PharmacyCard(
-                          pharmacy: pharmacies.reversed.toList()[index],
-                        );
-                      },
-                    ),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: pharmacies.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      return PharmacyCard(
+                        pharmacy: pharmacies.reversed.toList()[index],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -208,14 +224,23 @@ class DashboardPage extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: colors.patient.bg.withOpacity(0.1),
-          child: SvgPicture.asset(
-            iconPath,
-            colorFilter: ColorFilter.mode(colors.patient.bg, BlendMode.srcIn),
-            width: 24,
-            height: 24,
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: colors.patient.bg,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              iconPath,
+              colorFilter: const ColorFilter.mode(
+                Colors.white,
+                BlendMode.srcIn,
+              ),
+              width: 28,
+              height: 28,
+            ),
           ),
         ),
         const SizedBox(height: 8),

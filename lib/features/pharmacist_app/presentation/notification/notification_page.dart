@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
-import 'package:mediconnect/common/widgets/k_navigate.dart';
+import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';

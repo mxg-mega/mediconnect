@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/new_password_page.dart';
 import 'package:mediconnect/common/widgets/code_input_field.dart';
-import 'package:mediconnect/common/widgets/k_navigate.dart';
+import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mediconnect/common/widgets/k_navigate.dart';
+import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/profile/domain/pharmacist_profile.dart';

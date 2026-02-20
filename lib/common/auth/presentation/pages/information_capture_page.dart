@@ -9,7 +9,7 @@ import 'package:mediconnect/common/auth/presentation/pages/pharmacist_infomation
 import 'package:mediconnect/common/auth/presentation/pages/pharmacist_infomation_capture/pharmacy_verification_form.dart';
 import 'package:mediconnect/common/auth/presentation/pages/setup_finalization_page.dart';
 import 'package:mediconnect/common/auth/presentation/pages/welcome_page.dart';
-import 'package:mediconnect/common/widgets/k_navigate.dart';
+import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';

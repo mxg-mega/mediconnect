@@ -9,7 +9,7 @@ import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dar
 import 'package:mediconnect/common/auth/presentation/widgets/auth_method_button.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/k_form_field.dart';
-import 'package:mediconnect/common/widgets/k_navigate.dart';
+import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/labeled_input.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/constants/assets.dart';

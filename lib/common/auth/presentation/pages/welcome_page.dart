@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
-import 'package:mediconnect/common/widgets/k_navigate.dart';
+import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/logo.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';

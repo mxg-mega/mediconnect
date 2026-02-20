@@ -22,6 +22,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeDataProvider);
+    final router = ref.watch(goRouterProvider);
 
     return MaterialApp.router(
       title: 'MedConnect',
