@@ -1,0 +1,40 @@
+{
+  "Flutter Mediconnect Page": {
+    "prefix": "flpage",
+    "body": [
+      "import 'package:flutter/material.dart';",
+      "import 'package:flutter_riverpod/flutter_riverpod.dart';",
+      "import 'package:flutter_svg/flutter_svg.dart';",
+      "import 'package:mediconnect/common/widgets/app_scaffold.dart';",
+      "import 'package:mediconnect/core/theme/app_theme.dart';",
+      "import 'package:mediconnect/core/constants/text_styles.dart';",
+      "import 'package:mediconnect/core/constants/assets.dart';",
+      "",
+      "class ${1:PageName} extends ConsumerWidget {",
+      "  const ${1:PageName}({super.key});",
+      "",
+      "  @override",
+      "  Widget build(BuildContext context, WidgetRef ref) {",
+      "    final colors = AppTheme.colors(context);",
+      "",
+      "    return AppScaffold(",
+      "      child: Center(",
+      "        child: Column(",
+      "          mainAxisAlignment: MainAxisAlignment.center,",
+      "          children: [",
+      "            SvgPicture.asset(AppIcons.${2:iconName}),",
+      "            const SizedBox(height: 16),",
+      "            Text(",
+      "              '${1:PageName}',",
+      "              style: AppTextStyles.title,",
+      "            ),",
+      "          ],",
+      "        ),",
+      "      ),",
+      "    );",
+      "  }",
+      "}"
+    ],
+    "description": "Create Mediconnect Page Template Unique to Medconnect Project"
+  }
+}

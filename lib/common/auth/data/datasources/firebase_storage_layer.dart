@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mediconnect/common/auth/data/datasources/storage_layer.dart';
 import 'package:mediconnect/core/errors/exceptions.dart';
-import 'dart:convert';
 
 class FirebaseStorageLayer implements StorageLayer {
   final FirebaseAuth _firebaseAuth;

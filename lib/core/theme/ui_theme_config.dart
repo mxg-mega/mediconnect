@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
-import 'package:mediconnect/core/config/app_config.dart';
-import 'package:mediconnect/core/utils/responsive_utils.dart';
 
 /// Theme extension for responsive design access
 class ResponsiveThemeExtension extends ThemeExtension<ResponsiveThemeExtension> {

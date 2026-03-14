@@ -85,4 +85,6 @@ class AppIcons {
       'assets/svg/icons/notification_bell_available.svg';
 
   static const String approved_badge = 'assets/svg/approved_badge.svg';
+
+  static const String image_upload_placeholder = 'assets/svg/image_upload_placeholder.svg';
 }

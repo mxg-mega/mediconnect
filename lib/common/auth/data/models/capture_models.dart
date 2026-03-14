@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:mediconnect/common/auth/data/models/medical_history_model.dart';
 import 'package:mediconnect/common/auth/data/models/medication_model.dart';
-import 'package:mediconnect/common/auth/data/models/pharmacy_model.dart';
 import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
 import 'package:mediconnect/features/patient_app/domain/entities/medical_history.dart'
     as domain_medical;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
@@ -34,7 +35,9 @@ class RecentDispenseSection extends StatelessWidget {
                     color: theme.neutral.primaryText,
                   )),
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  context.push('/pharmacist/dispense-history');
+                },
                 child: Text(
                   'View all',
                   style: AppTextStyles.interP14M

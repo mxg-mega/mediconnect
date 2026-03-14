@@ -182,7 +182,7 @@ extension ResponsiveExtension on BuildContext {
 class ResponsiveBuilder extends StatelessWidget {
   final Widget Function(BuildContext, BoxConstraints, bool) builder;
 
-  const ResponsiveBuilder({Key? key, required this.builder}) : super(key: key);
+  const ResponsiveBuilder({super.key, required this.builder});
 
   @override
   Widget build(BuildContext context) {
@@ -204,13 +204,13 @@ class ResponsiveContainer extends StatelessWidget {
   final double? maxHeight;
 
   const ResponsiveContainer({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
     this.maxWidth,
     this.maxHeight,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

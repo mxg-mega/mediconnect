@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:mediconnect/common/widgets/labeled_input.dart';
 import 'package:mediconnect/common/auth/data/models/medication_model.dart';
 import 'package:mediconnect/core/constants/assets.dart';
-import 'package:mediconnect/features/patient_app/domain/entities/medical_history.dart';
 
 class FormSection<T> extends StatelessWidget {
   const FormSection({
@@ -71,7 +69,7 @@ class FormSection<T> extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12.0),
               child: buildListItem(item, index),
             );
-          }).toList(),
+          }),
 
           // Add button to add more items
           Center(

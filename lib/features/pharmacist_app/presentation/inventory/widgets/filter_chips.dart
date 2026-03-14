@@ -8,7 +8,7 @@ import 'package:mediconnect/core/theme/app_theme.dart';
 final selectedFilterProvider = StateProvider<StockStatus?>((ref) => null);
 
 class InventoryFilterChips extends ConsumerWidget {
-  const InventoryFilterChips({Key? key}) : super(key: key);
+  const InventoryFilterChips({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

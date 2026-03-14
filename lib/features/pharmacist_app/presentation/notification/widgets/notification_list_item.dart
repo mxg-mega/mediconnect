@@ -4,9 +4,9 @@ import 'package:mediconnect/features/pharmacist_app/presentation/notification/do
 
 class NotificationListItem extends StatelessWidget {
   const NotificationListItem({
-    Key? key,
+    super.key,
     required this.item,
-  }) : super(key: key);
+  });
 
   final NotificationItem item;
 

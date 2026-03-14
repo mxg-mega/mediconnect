@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
-import 'package:mediconnect/common/auth/presentation/pages/information_capture_page.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
-import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/core/router/routes_names.dart';
 
 class SetupFinalizationPage extends ConsumerStatefulWidget {
   const SetupFinalizationPage({super.key});
@@ -43,8 +42,8 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
         children: [
           Column(
             children: [
-              Text('Finalize Your Account Setup'),
-              Text(
+              const Text('Finalize Your Account Setup'),
+              const Text(
                 'Please select your account type: Patient or Pharmacist.',
                 textAlign: TextAlign.center,
               ),
@@ -66,7 +65,7 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
                     fit: BoxFit.cover,
                     'assets/svg/patient-medication.svg',
                   ),
-                  title: Text('Patient'),
+                  title: const Text('Patient'),
                   subtitle: const Text(
                     'I want to browse medications & manage my health.',
                   ),
@@ -98,7 +97,7 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
                     'assets/svg/pharmacist-stethoscope.svg',
                     fit: BoxFit.cover,
                   ),
-                  title: Text('Pharmacist'),
+                  title: const Text('Pharmacist'),
                   subtitle: const Text(
                     'I manage prescriptions, inventory & patients.',
                   ),
@@ -117,18 +116,12 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
                     : theme.pharmacist.bg,
                 onPressed: _selectedAccountType != null
                     ? () {
-                        // Finalize setup logic here
-                        print('Selected account type: $_selectedAccountType');
-                        // Role is already updated in AppScaffold provider
-
-                        // Navigate to the next onboarding page based on role
-                        var page = InformationCapturePage(
-                          role: _selectedAccountType == patientRole
+                        context.push(
+                          AppRoutes.informationCapture,
+                          extra: _selectedAccountType == patientRole
                               ? UserType.patient
                               : UserType.pharmacist,
                         );
-                        
-                        navigateToPage(context, page);
                       }
                     : null,
                 child: const Text('Continue'),

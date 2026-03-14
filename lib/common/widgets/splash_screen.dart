@@ -1,34 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/widgets/animated_logo.dart';
-import 'package:mediconnect/common/widgets/logo.dart';
-import 'package:mediconnect/core/config/app_config.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/features/splash_screen/splash_controller.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _polygonScale;
   late final Animation<double> _polygonPosYAnim;
   late final Animation<double> _logoTextConst;
   late final Animation<double> _logoTranslateX;
-  late final Animation<double> _appNameFadeInAnim;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 5),
+      duration: const Duration(seconds: 5),
     );
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        ref.read(splashFinishedProvider.notifier).state = true;
+      }
+    });
   }
 
   void _setupAnimations(BuildContext context) {

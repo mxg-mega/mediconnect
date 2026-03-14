@@ -1,22 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_dashboard_controller.dart';
 
 class PharmacistBottomNav extends ConsumerWidget {
   const PharmacistBottomNav({super.key});
 
+  int _calculateIndex(BuildContext context) {
+    final location = GoRouterState.of(context).matchedLocation;
+    if (location.contains('/pharmacist/dashboard')) return 0;
+    if (location.contains('/pharmacist/inventory')) return 1;
+    if (location.contains('/pharmacist/profile')) return 2;
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedIndex = ref.watch(pharmacistNavIndexProvider);
+    final selectedIndex = _calculateIndex(context);
     final theme = AppTheme.colors(context);
 
     final List<Map<String, dynamic>> navItems = [
-      {'icon': AppIcons.store, 'label': 'Home'},
-      {'icon': AppIcons.box, 'label': 'Inventory'},
-      {'icon': AppIcons.profile, 'label': 'Profile'},
+      {'icon': AppIcons.store, 'label': 'Home', 'route': '/pharmacist/dashboard'},
+      {'icon': AppIcons.box, 'label': 'Inventory', 'route': '/pharmacist/inventory'},
+      {'icon': AppIcons.profile, 'label': 'Profile', 'route': '/pharmacist/profile'},
     ];
 
     return Container(
@@ -33,7 +41,7 @@ class PharmacistBottomNav extends ConsumerWidget {
       child: BottomNavigationBar(
         currentIndex: selectedIndex,
         onTap: (index) {
-          ref.read(pharmacistNavIndexProvider.notifier).state = index;
+          context.go(navItems[index]['route']);
         },
         backgroundColor: Colors.transparent,
         elevation: 0,

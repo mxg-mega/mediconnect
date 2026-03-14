@@ -5,7 +5,7 @@ import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/inventory/providers/inventory_provider.dart';
 
 class InventorySearchBar extends ConsumerStatefulWidget {
-  const InventorySearchBar({Key? key}) : super(key: key);
+  const InventorySearchBar({super.key});
 
   @override
   ConsumerState<InventorySearchBar> createState() => _InventorySearchBarState();

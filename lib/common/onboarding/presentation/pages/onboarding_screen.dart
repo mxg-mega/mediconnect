@@ -7,7 +7,6 @@ import 'package:mediconnect/common/onboarding/presentation/pages/widgets/page_in
 import 'package:mediconnect/common/onboarding/presentation/pages/widgets/presentation_widget.dart';
 import 'package:mediconnect/common/onboarding/presentation/providers/onboarding_provider.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
-import 'package:mediconnect/core/constants/colors.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 

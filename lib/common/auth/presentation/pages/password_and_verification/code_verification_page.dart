@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/new_password_page.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/widgets/code_input_field.dart';
-import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/core/router/routes_names.dart';
 
 class CodeVerificationPage extends StatelessWidget {
   const CodeVerificationPage({super.key, required this.nextPage});
@@ -17,7 +16,7 @@ class CodeVerificationPage extends StatelessWidget {
     final appTheme = AppTheme.colors(context);
 
     return AppScaffold(
-      onBack: () {},
+      onBack: () => context.pop(),
       body: Column(
         children: [
           Text(
@@ -25,17 +24,19 @@ class CodeVerificationPage extends StatelessWidget {
             style: AppTextStyles.inter32M.copyWith(fontSize: 24),
           ),
           Text(
-            'Please enter the code we sent to your email to reset your account password.',
+            'Please enter the code we sent to your email to verify your account.',
             style: AppTextStyles.interP16R,
           ),
 
           CodeInputField(
             onCompleted: (code) {
-              navigateToPage(context, nextPage);
+              // In a real app, verify code then navigate
+              context.push(AppRoutes.setupFinalization);
             },
           ),
 
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(

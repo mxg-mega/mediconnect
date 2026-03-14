@@ -7,6 +7,7 @@ class RemoteAuthDataSource implements AuthDataSource {
   final StorageLayer storageLayer;
 
   RemoteAuthDataSource({required this.storageLayer});
+  
   @override
   Future<UserModel> signUp({
     required String email,
@@ -15,17 +16,14 @@ class RemoteAuthDataSource implements AuthDataSource {
     required String lastName,
     required String phoneNumber,
   }) async {
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
-    // In a real app, this would be an API call
-    return UserModel(
-      id: '123',
-      email: email,
-      firstName: firstName,
-      lastName: lastName,
-      phoneNumber: phoneNumber,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+    final response = await storageLayer.post('/auth/signup', {
+      'email': email,
+      'password': password,
+      'firstName': firstName,
+      'lastName': lastName,
+      'phoneNumber': phoneNumber,
+    });
+    return UserModel.fromJson(response);
   }
 
   @override
@@ -33,33 +31,25 @@ class RemoteAuthDataSource implements AuthDataSource {
     required String email,
     required String password,
   }) async {
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
-    // In a real app, this would be an API call
-    if (email == 'test@example.com' && password == 'password') {
-      return UserModel(
-        id: '123',
-        email: 'test@example.com',
-        firstName: 'Test',
-        lastName: 'User',
-        phoneNumber: '1234567890',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-    } else {
-      throw Exception('Invalid credentials');
-    }
+    final response = await storageLayer.post('/auth/login', {
+      'email': email,
+      'password': password,
+    });
+    return UserModel.fromJson(response);
   }
 
   @override
   Future<void> signOut() async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-    // In a real app, this would clear session/token
+    await storageLayer.delete('/auth/signout');
   }
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-    // In a real app, this would check for an existing session/token
-    return null; // For now, no user is logged in by default
+    try {
+      final response = await storageLayer.get('/auth/current-user');
+      return UserModel.fromJson(response);
+    } catch (e) {
+      return null;
+    }
   }
 }

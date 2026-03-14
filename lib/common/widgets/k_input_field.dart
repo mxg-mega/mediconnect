@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
 class KInputField extends ConsumerWidget {
   const KInputField({

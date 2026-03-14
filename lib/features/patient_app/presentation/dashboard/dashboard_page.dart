@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 // import 'package:mediconnect/features/patient_app/data/models/mock_data.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/category_card.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/pharmacy_card.dart';

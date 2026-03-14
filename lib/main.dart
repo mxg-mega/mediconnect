@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/core/router/app_router.dart';
 import 'package:mediconnect/core/providers/dependency_providers.dart';
 import 'package:mediconnect/core/theme/theme_provider.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env");
   runApp(
     ProviderScope(
       overrides: [

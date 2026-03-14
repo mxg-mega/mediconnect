@@ -1,6 +1,5 @@
 import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
 import 'package:mediconnect/common/auth/domain/repositories/pharmacy_repository.dart';
-import 'package:mediconnect/core/errors/failures.dart';
 
 class GetPharmacyInfoUseCase {
   final PharmacyRepository pharmacyRepository;

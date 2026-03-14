@@ -84,7 +84,7 @@ class _RecordedBySectionState extends State<RecordedBySection> {
               hintStyle: AppTextStyles.interP14R.copyWith(color: theme.neutral.secondaryText),
               contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
             ),
-            value: selectedRole,
+            initialValue: selectedRole,
             items: <String>['Pharmacist', 'Staff', 'Admin']
                 .map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(

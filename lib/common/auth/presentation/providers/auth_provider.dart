@@ -154,6 +154,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> mockSignIn(UserType type) async {
+    state = state.copyWith(status: AuthStatus.loading);
+    await Future.delayed(const Duration(milliseconds: 500));
+    final mockUser = UserModel(
+      id: 'mock-id',
+      email: 'mock@example.com',
+      firstName: 'Mock',
+      lastName: type.displayName,
+      phoneNumber: '0000000000',
+      userType: type,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    state = state.copyWith(
+      status: AuthStatus.authenticated,
+      user: mockUser,
+      errorMessage: null,
+    );
+  }
+
   void clearError() {
     state = state.copyWith(
       status: AuthStatus.unauthenticated,

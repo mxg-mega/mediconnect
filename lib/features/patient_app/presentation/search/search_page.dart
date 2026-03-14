@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-import 'package:mediconnect/features/patient_app/data/models/mock_data.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/medication_card.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/pharmacy_card.dart';
 import 'package:mediconnect/features/patient_app/providers/medication_provider.dart';

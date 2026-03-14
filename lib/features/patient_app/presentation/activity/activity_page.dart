@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
@@ -10,7 +9,8 @@ class ActivityPage extends StatefulWidget {
   State<ActivityPage> createState() => _ActivityPageState();
 }
 
-class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderStateMixin {
+class _ActivityPageState extends State<ActivityPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -28,7 +28,7 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colors(context);
-    
+
     return Scaffold(
       backgroundColor: colors.patient.bg,
       body: Column(
@@ -42,7 +42,7 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
               style: AppTextStyles.inter32M.copyWith(color: Colors.white),
             ),
           ),
-          
+
           // Tab Content Area
           Expanded(
             child: Container(
@@ -70,7 +70,9 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
                         indicatorSize: TabBarIndicatorSize.label,
                         labelColor: colors.neutral.primaryText,
                         unselectedLabelColor: colors.neutral.secondaryText,
-                        labelStyle: AppTextStyles.interP24R.copyWith(fontWeight: FontWeight.w500),
+                        labelStyle: AppTextStyles.interP24R.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                         unselectedLabelStyle: AppTextStyles.interP24R,
                         tabs: const [
                           Tab(text: 'Recent Activity'),
@@ -79,7 +81,7 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
                       ),
                     ),
                   ),
-                  
+
                   // Tab View
                   Expanded(
                     child: TabBarView(
@@ -105,30 +107,58 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
       children: [
         _buildSectionHeader(context, 'Recent Searches', onClearAll: () {}),
         const SizedBox(height: 16),
-        _buildSearchItem(context, 'Amoxicillin 500 mg', 'July 18, 2025 • 14:35'),
+        Dismissible(
+          key: Key('temp_item_1'),
+          direction: DismissDirection.horizontal,
+          onDismissed: (direction) => {
+            // TODO: dismissed item dhould be removed from the list
+          },
+          background: Container(
+            color: Colors.red,
+            alignment: Alignment.centerLeft,
+            padding: EdgeInsets.only(left: 10),
+            child: Icon(Icons.delete, color: Colors.white),
+          ),
+          secondaryBackground: Container(
+            color: Colors.red,
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.only(right: 10),
+            child: Icon(Icons.delete, color: Colors.white),
+          ),
+          child: _buildSearchItem(
+            context,
+            'Amoxicillin 500 mg',
+            'July 18, 2025 • 14:35',
+          ),
+        ),
         _buildSearchItem(context, 'Ibuprofen', 'July 17, 2025 • 09:12'),
-        _buildSearchItem(context, 'Pharmacy near me', 'July 16, 2025 • 18:47', isDeletable: true),
+        _buildSearchItem(
+          context,
+          'Pharmacy near me',
+          'July 16, 2025 • 18:47',
+          isDeletable: true,
+        ),
         _buildViewMoreButton(context, () {}),
-        
+
         const SizedBox(height: 24),
         _buildSectionHeader(context, 'Viewed Medications', onClearAll: () {}),
         const SizedBox(height: 16),
         _buildMedicationItem(
-          context, 
-          'Amoxicillin 500 mg Capsule', 
-          'Viewed July 18, 2025 • 14:37', 
+          context,
+          'Amoxicillin 500 mg Capsule',
+          'Viewed July 18, 2025 • 14:37',
           'assets/images/amoxicillin_gsk.png',
           isFavorited: false,
         ),
         _buildMedicationItem(
-          context, 
-          'Paracetamol 500 mg Tablet', 
-          'Viewed July 15, 2025 • 09:15', 
+          context,
+          'Paracetamol 500 mg Tablet',
+          'Viewed July 15, 2025 • 09:15',
           'assets/images/ibuprofen_pfizer.png', // Placeholder image
           isFavorited: false,
         ),
         _buildViewMoreButton(context, () {}),
-        
+
         const SizedBox(height: 24),
         _buildSectionHeader(context, 'Viewed Pharmacies', onClearAll: () {}),
         const SizedBox(height: 16),
@@ -160,30 +190,34 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
         _buildSectionHeader(context, 'Favorite Medications', onClearAll: () {}),
         const SizedBox(height: 16),
         _buildMedicationItem(
-          context, 
-          'Amoxicillin 500 mg Capsule', 
-          'Favorited July 18, 2025 • 14:37', 
+          context,
+          'Amoxicillin 500 mg Capsule',
+          'Favorited July 18, 2025 • 14:37',
           'assets/images/amoxicillin_gsk.png',
           isFavorited: true,
         ),
         _buildMedicationItem(
-          context, 
-          'Paracetamol 500 mg Tablet', 
-          'Favorited July 15, 2025 • 09:15', 
+          context,
+          'Paracetamol 500 mg Tablet',
+          'Favorited July 15, 2025 • 09:15',
           'assets/images/ibuprofen_pfizer.png',
           isFavorited: true,
         ),
         _buildMedicationItem(
-          context, 
-          'Ibuprofen 200 mg Tablet', 
-          'Favorited July 12, 2025 • 017:27', 
+          context,
+          'Ibuprofen 200 mg Tablet',
+          'Favorited July 12, 2025 • 017:27',
           'assets/images/ibuprofen_pfizer.png',
           isFavorited: true,
         ),
         _buildViewMoreButton(context, () {}),
-        
+
         const SizedBox(height: 24),
-        _buildSectionHeader(context, 'Bookmarked Pharmacies', onClearAll: () {}),
+        _buildSectionHeader(
+          context,
+          'Bookmarked Pharmacies',
+          onClearAll: () {},
+        ),
         const SizedBox(height: 16),
         _buildPharmacyItem(
           context,
@@ -208,14 +242,20 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, {required VoidCallback onClearAll}) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title, {
+    required VoidCallback onClearAll,
+  }) {
     final colors = AppTheme.colors(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: AppTextStyles.interP18M.copyWith(color: colors.neutral.primaryText),
+          style: AppTextStyles.interP18M.copyWith(
+            color: colors.neutral.primaryText,
+          ),
         ),
         TextButton(
           onPressed: onClearAll,
@@ -228,7 +268,12 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildSearchItem(BuildContext context, String query, String date, {bool isDeletable = false}) {
+  Widget _buildSearchItem(
+    BuildContext context,
+    String query,
+    String date, {
+    bool isDeletable = false,
+  }) {
     final colors = AppTheme.colors(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -255,12 +300,16 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
                   children: [
                     Text(
                       query,
-                      style: AppTextStyles.interP18M.copyWith(color: colors.neutral.primaryText),
+                      style: AppTextStyles.interP18M.copyWith(
+                        color: colors.neutral.primaryText,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       date,
-                      style: AppTextStyles.interP14R.copyWith(color: colors.neutral.tertiaryText),
+                      style: AppTextStyles.interP14R.copyWith(
+                        color: colors.neutral.tertiaryText,
+                      ),
                     ),
                   ],
                 ),
@@ -279,7 +328,13 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildMedicationItem(BuildContext context, String title, String subtitle, String imagePath, {required bool isFavorited}) {
+  Widget _buildMedicationItem(
+    BuildContext context,
+    String title,
+    String subtitle,
+    String imagePath, {
+    required bool isFavorited,
+  }) {
     final colors = AppTheme.colors(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -305,7 +360,12 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(8),
-            child: Image.asset(imagePath, fit: BoxFit.contain, errorBuilder: (context, error, stackTrace) => const Icon(Icons.medication)),
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.medication),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -314,19 +374,25 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.interP18M.copyWith(color: colors.neutral.primaryText),
+                  style: AppTextStyles.interP18M.copyWith(
+                    color: colors.neutral.primaryText,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: AppTextStyles.interP14R.copyWith(color: colors.neutral.tertiaryText),
+                  style: AppTextStyles.interP14R.copyWith(
+                    color: colors.neutral.tertiaryText,
+                  ),
                 ),
               ],
             ),
           ),
           Icon(
             isFavorited ? Icons.favorite : Icons.favorite_border,
-            color: isFavorited ? colors.support.red : colors.neutral.secondaryText,
+            color: isFavorited
+                ? colors.support.red
+                : colors.neutral.secondaryText,
           ),
         ],
       ),
@@ -334,13 +400,14 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
   }
 
   Widget _buildPharmacyItem(
-    BuildContext context, 
-    String name, 
-    String info, 
-    String? viewedDate, 
-    String? imagePath, 
-    {required bool isBookmarked, bool showDistance = true}
-  ) {
+    BuildContext context,
+    String name,
+    String info,
+    String? viewedDate,
+    String? imagePath, {
+    required bool isBookmarked,
+    bool showDistance = true,
+  }) {
     final colors = AppTheme.colors(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -364,9 +431,16 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
             decoration: BoxDecoration(
               color: colors.neutral.bgTint,
               borderRadius: BorderRadius.circular(8),
-              image: imagePath != null ? DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover) : null,
+              image: imagePath != null
+                  ? DecorationImage(
+                      image: AssetImage(imagePath),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: imagePath == null ? const Icon(Icons.local_pharmacy_outlined) : null,
+            child: imagePath == null
+                ? const Icon(Icons.local_pharmacy_outlined)
+                : null,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -375,30 +449,42 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
               children: [
                 Text(
                   name,
-                  style: AppTextStyles.interP18M.copyWith(color: colors.neutral.primaryText),
+                  style: AppTextStyles.interP18M.copyWith(
+                    color: colors.neutral.primaryText,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 if (showDistance)
                   Row(
                     children: [
-                      Icon(Icons.location_on_outlined, size: 14, color: colors.neutral.secondaryText),
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: colors.neutral.secondaryText,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         info,
-                        style: AppTextStyles.interP14R.copyWith(color: colors.neutral.secondaryText),
+                        style: AppTextStyles.interP14R.copyWith(
+                          color: colors.neutral.secondaryText,
+                        ),
                       ),
                     ],
                   )
                 else
                   Text(
                     info,
-                    style: AppTextStyles.interP14R.copyWith(color: colors.neutral.tertiaryText),
+                    style: AppTextStyles.interP14R.copyWith(
+                      color: colors.neutral.tertiaryText,
+                    ),
                   ),
                 if (viewedDate != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     viewedDate,
-                    style: AppTextStyles.interP14R.copyWith(color: colors.neutral.tertiaryText),
+                    style: AppTextStyles.interP14R.copyWith(
+                      color: colors.neutral.tertiaryText,
+                    ),
                   ),
                 ],
               ],
@@ -406,7 +492,9 @@ class _ActivityPageState extends State<ActivityPage> with SingleTickerProviderSt
           ),
           Icon(
             isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-            color: isBookmarked ? colors.patient.bg : colors.neutral.secondaryText,
+            color: isBookmarked
+                ? colors.patient.bg
+                : colors.neutral.secondaryText,
           ),
         ],
       ),

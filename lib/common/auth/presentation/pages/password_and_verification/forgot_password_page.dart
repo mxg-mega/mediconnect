@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/code_verification_page.dart';
 import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/new_password_page.dart';
 import 'package:mediconnect/common/widgets/k_form_field.dart';
-import 'package:mediconnect/common/widgets/k_input_field.dart';
 import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/labeled_input.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';

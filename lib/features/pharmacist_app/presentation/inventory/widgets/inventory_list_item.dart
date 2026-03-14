@@ -5,9 +5,9 @@ import 'package:mediconnect/features/pharmacist_app/domain/entities/inventory_it
 
 class InventoryListItem extends StatelessWidget {
   const InventoryListItem({
-    Key? key,
+    super.key,
     required this.item,
-  }) : super(key: key);
+  });
 
   final InventoryItem item;
 

@@ -31,11 +31,11 @@ class KElevatedButton extends ConsumerWidget {
     if (useProvider) {
       return _KElevatedButtonWithProvider(
         onPressed: onPressed,
-        child: child,
         color: color,
         buttonId: buttonId,
         role: role,
         useRoleBasedStyling: useRoleBasedStyling,
+        child: child,
       );
     }
 
@@ -64,10 +64,13 @@ class KElevatedButton extends ConsumerWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: getRoleBasedColor(),
-        disabledBackgroundColor: AppTheme.colors(
-          context,
-        ).neutral.bg00,
-        minimumSize: Size(double.infinity, context.figmaHeight(50)),
+        disabledBackgroundColor: AppTheme.colors(context).neutral.bg00,
+        minimumSize: Size(
+          // double.infinity, --- IGNORE ---
+          //  look more into a better way to handle this
+          MediaQuery.widthOf(context) - 16 ,
+          context.figmaHeight(50),
+        ),
       ),
       onPressed: isActuallyLoading ? null : onPressed,
       child: isActuallyLoading

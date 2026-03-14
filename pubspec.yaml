@@ -49,9 +49,9 @@ dependencies:
   flutter_svg: ^2.0.17
   uuid: ^4.3.1
   intl: ^0.18.1
-  flutter_dotenv: ^5.0.2
   file_picker: ^10.3.10
-  google_maps_flutter: 
+  google_maps_flutter:
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +65,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   json_serializable: ^6.11.1
   build_runner: ^2.4.13
+  go_router_builder:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -83,6 +84,7 @@ flutter:
     - assets/fonts/
     - assets/svg/
     - assets/svg/icons/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

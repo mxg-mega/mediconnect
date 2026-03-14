@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:mediconnect/common/auth/presentation/pages/capture_models.dart';
+import 'package:mediconnect/common/auth/data/models/capture_models.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/k_form_field.dart';
 import 'package:mediconnect/common/widgets/labeled_input.dart';

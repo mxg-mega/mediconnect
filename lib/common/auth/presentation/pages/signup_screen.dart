@@ -3,13 +3,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/code_verification_page.dart';
 import 'package:mediconnect/common/auth/presentation/pages/setup_finalization_page.dart';
 import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/common/auth/presentation/widgets/auth_method_button.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/k_form_field.dart';
-import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/labeled_input.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/constants/assets.dart';
@@ -254,10 +252,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 // Temporarily commented out to avoid errors
                 // onPressed: authState.isLoading ? null : _submitForm,
                 onPressed: () {
-                  navigateToPage(
-                    context,
-                    CodeVerificationPage(nextPage: SetupFinalizationPage()),
-                  );
+                  context.push('/code-verification', extra: const SetupFinalizationPage());
                 },
                 child: authState.isLoading
                     ? const CircularProgressIndicator()

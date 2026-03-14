@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/forgot_password_page.dart';
 import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
-import 'package:mediconnect/common/auth/presentation/widgets/auth_method_button.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/constants/colors.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
-import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
 class LoginForm extends ConsumerStatefulWidget {
   const LoginForm(

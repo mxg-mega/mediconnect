@@ -6,7 +6,7 @@ import 'package:mediconnect/features/pharmacist_app/domain/entities/inventory_it
 import 'package:mediconnect/features/pharmacist_app/presentation/inventory/providers/inventory_provider.dart';
 
 class InventorySummaryCards extends ConsumerWidget {
-  const InventorySummaryCards({Key? key}) : super(key: key);
+  const InventorySummaryCards({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,11 +34,11 @@ class InventorySummaryCards extends ConsumerWidget {
 
 class SummaryCard extends StatelessWidget {
   const SummaryCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.color,
-  }) : super(key: key);
+  });
 
   final String title;
   final String value;

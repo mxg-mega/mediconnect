@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mediconnect/common/auth/data/models/medical_history_model.dart';
-import 'package:mediconnect/common/auth/presentation/pages/capture_models.dart';
+import 'package:mediconnect/common/auth/data/models/capture_models.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/k_form_field.dart';
 import 'package:mediconnect/common/widgets/k_input_field.dart';
@@ -109,7 +109,7 @@ class _MedicalHistoryFormState extends State<MedicalHistoryForm> {
             label: 'Current Status',
             child: KInputField(
               child: DropdownButtonFormField(
-                value: selectedConditionStatus,
+                initialValue: selectedConditionStatus,
                 hint: const Text('Select'),
                 items: [
                   DropdownMenuItem(
@@ -596,7 +596,7 @@ class _MedicalHistoryFormState extends State<MedicalHistoryForm> {
           label: 'Recovery Status',
           child: DropdownButtonFormField<RecoveryStatus>(
             hint: const Text('Select'),
-            value: selectedRecoveryStatus,
+            initialValue: selectedRecoveryStatus,
             items: RecoveryStatus.values.map((status) {
               return DropdownMenuItem(
                 value: status,

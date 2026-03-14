@@ -1,27 +1,27 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/common/widgets/logo.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
+import 'package:mediconnect/core/router/routes_names.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
-import 'package:mediconnect/features/patient_app/presentation/main_nav/patient_main_page.dart';
-import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_main_page.dart';
 
 class WelcomePage extends ConsumerWidget {
   const WelcomePage({super.key});
-
-  // final UserType role;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = ref.read(appScaffoldProvider.notifier);
     final theme = AppTheme.colors(context);
+    final authState = ref.watch(authProvider);
 
     return AppScaffold(
       body: Column(
@@ -47,15 +47,20 @@ class WelcomePage extends ConsumerWidget {
                     color: theme.neutral.primaryText,
                   ),
                 ),
+                const SizedBox(height: 40),
                 KElevatedButton(
-                  onPressed: () {
-                    // input logic for the cross flow (patient flow, or pharmacist flow)
-                    provider.getEffectiveRole() == UserRole.patient
-                        ? navigateToPage(context, PatientMainPage())
-                        : navigateToPage(context, PharmacistMainPage());
-                    // navigateToPage(context, PharmacistMainPage());
+                  onPressed: authState.isLoading ? null : () async {
+                    final role = provider.getEffectiveRole();
+                    final userType = role == UserRole.patient 
+                        ? UserType.patient 
+                        : UserType.pharmacist;
+                    
+                    await ref.read(authProvider.notifier).mockSignIn(userType);
+                    // Redirect is handled by app_router.dart automatically
                   },
-                  child: Text('Go To Dashboard'),
+                  child: authState.isLoading 
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Continue'),
                 ),
               ],
             ),
