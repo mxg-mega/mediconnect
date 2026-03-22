@@ -10,62 +10,50 @@ class InventorySummaryCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inventory = ref.watch(inventoryProvider);
+    final allItems = ref.watch(inventoryProvider.select((s) => s.allItems));
 
-    final totalSkus = inventory.length;
-    final inStock = inventory.where((item) => item.stockStatus == StockStatus.inStock).length;
-    final lowStock = inventory.where((item) => item.stockStatus == StockStatus.lowStock).length;
-    final expiringSoon = inventory.where((item) => item.isExpiringSoon).length;
+    final totalSkus = allItems.length;
+    final inStock = allItems.where((item) => item.stockStatus == StockStatus.inStock).length;
+    final lowStock = allItems.where((item) => item.stockStatus == StockStatus.lowStock).length;
+    final expiringSoon = allItems.where((item) => item.stockStatus == StockStatus.expiringSoon).length;
+
+    final theme = AppTheme.colors(context);
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          SummaryCard(title: 'Total SKUs', value: totalSkus.toString(), color: Colors.blue.shade100),
-          SummaryCard(title: 'In Stock', value: inStock.toString(), color: Colors.green.shade100),
-          SummaryCard(title: 'Low Stock', value: lowStock.toString(), color: Colors.orange.shade100),
-          SummaryCard(title: 'Expiring', value: expiringSoon.toString(), color: Colors.red.shade100),
+          _buildSummaryCard('TOTAL SKUs', totalSkus.toString(), theme.support.blue.withValues(alpha: 0.1), theme.support.blue),
+          _buildSummaryCard('IN STOCK', inStock.toString(), theme.support.green.withValues(alpha: 0.1), theme.support.green),
+          _buildSummaryCard('LOW STOCK', lowStock.toString(), theme.support.red.withValues(alpha: 0.1), theme.support.red),
+          _buildSummaryCard('EXPIRING', expiringSoon.toString(), theme.support.orange.withValues(alpha: 0.1), theme.support.orange),
         ],
       ),
     );
   }
-}
 
-class SummaryCard extends StatelessWidget {
-  const SummaryCard({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.color,
-  });
-
-  final String title;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppTheme.colors(context);
-    return Card(
-      color: color,
+  Widget _buildSummaryCard(String title, String value, Color bgColor, Color valueColor) {
+    return Container(
       margin: const EdgeInsets.only(right: 8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: AppTextStyles.interP12M.copyWith(color: colors.neutral.secondaryText),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: AppTextStyles.inter24M.copyWith(color: colors.neutral.primaryText),
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTextStyles.interP12M.copyWith(color: valueColor),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: AppTextStyles.interP18M.copyWith(color: valueColor, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }

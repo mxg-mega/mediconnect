@@ -44,26 +44,14 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
     super.initState();
     final med = widget.medication;
     _nameController = TextEditingController(text: med?.name ?? '');
-    _brandNameController = TextEditingController(
-      text: med?.brandNames.isNotEmpty == true ? med!.brandNames.first : '',
-    );
-    _manufacturerController = TextEditingController(
-      text: med?.manufacturer ?? '',
-    );
+    _brandNameController = TextEditingController(text: med?.brandNames.isNotEmpty == true ? med!.brandNames.first : '');
+    _manufacturerController = TextEditingController(text: med?.manufacturer ?? '');
     _categoryController = TextEditingController(text: med?.category ?? '');
-    _strengthController = TextEditingController(
-      text: med?.strengths.isNotEmpty == true ? med!.strengths.first : '',
-    );
-    _dosageFormController = TextEditingController(
-      text: med?.dosageForms.isNotEmpty == true ? med!.dosageForms.first : '',
-    );
+    _strengthController = TextEditingController(text: med?.strengths.isNotEmpty == true ? med!.strengths.first : '');
+    _dosageFormController = TextEditingController(text: med?.dosageForms.isNotEmpty == true ? med!.dosageForms.first : '');
     _quantityController = TextEditingController();
-    _descriptionController = TextEditingController(
-      text: med?.description ?? '',
-    );
-    _benefitsController = TextEditingController(
-      text: med?.usageInstructions ?? '',
-    );
+    _descriptionController = TextEditingController(text: med?.description ?? '');
+    _benefitsController = TextEditingController(text: med?.usageInstructions ?? '');
     _stockController = TextEditingController();
     _reorderController = TextEditingController();
     _expiryController = TextEditingController();
@@ -95,7 +83,6 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
     final theme = AppTheme.colors(context);
 
     return AppScaffold(
-      removeBodyPadding: true,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -111,101 +98,26 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
                     _buildImageUpload(theme),
                     SizedBox(height: context.figmaHeight(24)),
                     _buildSectionHeader('Medication Info', theme),
-                    _buildTextField(
-                      'Medication Name(API)',
-                      _nameController,
-                      theme,
-                      isDropdown: true,
-                    ),
-                    _buildDropdownField(
-                      'Medication Type',
-                      ['Brand', 'Generic'],
-                      _medicationType,
-                      (val) => setState(() => _medicationType = val!),
-                      theme,
-                    ),
-                    _buildTextField(
-                      'Medication Type Name',
-                      _brandNameController,
-                      theme,
-                      isDropdown: true,
-                    ),
-                    _buildTextField(
-                      'Manufacturer',
-                      _manufacturerController,
-                      theme,
-                      isDropdown: true,
-                    ),
-                    _buildTextField(
-                      'Tags/Preferred Name(Optional)',
-                      TextEditingController(),
-                      theme,
-                    ),
+                    _buildTextField('Medication Name(API)', _nameController, theme, isDropdown: true),
+                    _buildDropdownField('Medication Type', ['Brand', 'Generic'], _medicationType, (val) => setState(() => _medicationType = val!), theme),
+                    _buildTextField('Medication Type Name', _brandNameController, theme, isDropdown: true),
+                    _buildTextField('Manufacturer', _manufacturerController, theme, isDropdown: true),
+                    _buildTextField('Tags/Preferred Name(Optional)', TextEditingController(), theme),
                     SizedBox(height: context.figmaHeight(16)),
-                    _buildTextField(
-                      'Category',
-                      _categoryController,
-                      theme,
-                      isDropdown: true,
-                    ),
-                    _buildTextField(
-                      'Strength/Concentration',
-                      _strengthController,
-                      theme,
-                      isDropdown: true,
-                    ),
-                    _buildTextField(
-                      'Dosage Form',
-                      _dosageFormController,
-                      theme,
-                      isDropdown: true,
-                    ),
-                    _buildTextField(
-                      'Quantity per Pack',
-                      _quantityController,
-                      theme,
-                      isDropdown: true,
-                    ),
-                    _buildTextField(
-                      'Description',
-                      _descriptionController,
-                      theme,
-                      maxLines: 5,
-                    ),
-                    _buildTextField(
-                      'Benefits & Uses',
-                      _benefitsController,
-                      theme,
-                      maxLines: 4,
-                    ),
+                    _buildTextField('Category', _categoryController, theme, isDropdown: true),
+                    _buildTextField('Strength/Concentration', _strengthController, theme, isDropdown: true),
+                    _buildTextField('Dosage Form', _dosageFormController, theme, isDropdown: true),
+                    _buildTextField('Quantity per Pack', _quantityController, theme, isDropdown: true),
+                    _buildTextField('Description', _descriptionController, theme, maxLines: 5),
+                    _buildTextField('Benefits & Uses', _benefitsController, theme, maxLines: 4),
                     SizedBox(height: context.figmaHeight(24)),
                     _buildSectionHeader('Inventory', theme),
-                    _buildTextField(
-                      'Current Stock Units',
-                      _stockController,
-                      theme,
-                      hint: 'Total stock available',
-                    ),
-                    _buildTextField(
-                      'Reorder Point',
-                      _reorderController,
-                      theme,
-                      hint: 'e.g. "Reorder when ≤ 10 units',
-                    ),
-                    _buildTextField(
-                      'Expiration Date',
-                      _expiryController,
-                      theme,
-                      hint: 'e.g. 2027-08-31',
-                    ),
+                    _buildTextField('Current Stock Units', _stockController, theme, hint: 'Total stock available'),
+                    _buildTextField('Reorder Point', _reorderController, theme, hint: 'e.g. "Reorder when ≤ 10 units'),
+                    _buildTextField('Expiration Date', _expiryController, theme, hint: 'e.g. 2027-08-31'),
                     SizedBox(height: context.figmaHeight(24)),
                     _buildSectionHeader('Medication Price', theme),
-                    _buildTextField(
-                      'Price(₦)',
-                      _priceController,
-                      theme,
-                      hint: 'e.g. 1000, 2000',
-                    ),
+                    _buildTextField('Price(₦)', _priceController, theme, hint: 'e.g. 1000, 2000'),
                     SizedBox(height: context.figmaHeight(40)),
                   ],
                 ),
@@ -232,17 +144,13 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
           ),
           Text(
             'Add Medication',
-            style: AppTextStyles.interP18M.copyWith(
-              color: theme.neutral.primaryText,
-            ),
+            style: AppTextStyles.interP18M.copyWith(color: theme.neutral.primaryText),
           ),
           TextButton(
             onPressed: _onSave,
             child: Text(
               'Save',
-              style: AppTextStyles.interP16M.copyWith(
-                color: theme.pharmacist.bg,
-              ),
+              style: AppTextStyles.interP16M.copyWith(color: theme.pharmacist.bg),
             ),
           ),
         ],
@@ -255,7 +163,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
       margin: EdgeInsets.only(bottom: context.figmaHeight(16)),
       padding: EdgeInsets.all(context.figmaWidth(12)),
       decoration: BoxDecoration(
-        color: theme.support.green.withOpacity(0.1),
+        color: theme.support.green.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(context.figmaWidth(8)),
       ),
       child: Row(
@@ -269,9 +177,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
               children: [
                 Text(
                   'Fields below were automatically populated from the MedConnect medication catalog (description, benefits, dosage). Please review and edit if needed, then add the item to your inventory.',
-                  style: AppTextStyles.interP12R.copyWith(
-                    color: theme.neutral.secondaryText,
-                  ),
+                  style: AppTextStyles.interP12R.copyWith(color: theme.neutral.secondaryText),
                 ),
                 Align(
                   alignment: Alignment.centerRight,
@@ -279,10 +185,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
                     onTap: () => setState(() => _showInfoBox = false),
                     child: Text(
                       'Dismiss',
-                      style: AppTextStyles.interP12R.copyWith(
-                        color: theme.support.green,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyles.interP12R.copyWith(color: theme.support.green, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -305,10 +208,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          SvgPicture.asset(
-            AppIcons.image_upload_placeholder,
-            width: context.figmaWidth(150),
-          ),
+          SvgPicture.asset(AppIcons.image_upload_placeholder, width: context.figmaWidth(150)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -324,10 +224,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
 
   Widget _buildImageButton(IconData icon, String label, AppColorsTheme theme) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: context.figmaWidth(16),
-        vertical: context.figmaHeight(8),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: context.figmaWidth(16), vertical: context.figmaHeight(8)),
       decoration: BoxDecoration(
         color: theme.neutral.buttonTextWhite,
         borderRadius: BorderRadius.circular(context.figmaWidth(8)),
@@ -348,12 +245,10 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
       children: [
         Text(
           title,
-          style: AppTextStyles.interP18M.copyWith(
-            color: theme.neutral.primaryText,
-          ),
+          style: AppTextStyles.interP18M.copyWith(color: theme.neutral.primaryText),
         ),
         Container(
-          margin: EdgeInsets.only(top: 4, bottom: 16),
+          margin: const EdgeInsets.only(top: 4, bottom: 16),
           height: 2,
           width: 40,
           color: theme.pharmacist.bg,
@@ -362,45 +257,29 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
     );
   }
 
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller,
-    AppColorsTheme theme, {
-    bool isDropdown = false,
-    int maxLines = 1,
-    String? hint,
-  }) {
+  Widget _buildTextField(String label, TextEditingController controller, AppColorsTheme theme, {bool isDropdown = false, int maxLines = 1, String? hint}) {
     return Padding(
       padding: EdgeInsets.only(bottom: context.figmaHeight(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: AppTextStyles.interP14M.copyWith(
-              color: theme.neutral.secondaryText,
-            ),
-          ),
-          SizedBox(height: 8),
+          Text(label, style: AppTextStyles.interP14M.copyWith(color: theme.neutral.secondaryText)),
+          const SizedBox(height: 8),
           TextFormField(
             controller: controller,
             maxLines: maxLines,
             decoration: InputDecoration(
               hintText: hint,
-              suffixIcon: isDropdown ? Icon(Icons.keyboard_arrow_down) : null,
+              suffixIcon: isDropdown ? const Icon(Icons.keyboard_arrow_down) : null,
               filled: true,
               fillColor: theme.neutral.bgTint,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(context.figmaWidth(8)),
-                borderSide: BorderSide(
-                  color: theme.neutral.border.withOpacity(0.3),
-                ),
+                borderSide: BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(context.figmaWidth(8)),
-                borderSide: BorderSide(
-                  color: theme.neutral.border.withOpacity(0.3),
-                ),
+                borderSide: BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
               ),
             ),
           ),
@@ -409,45 +288,28 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
     );
   }
 
-  Widget _buildDropdownField(
-    String label,
-    List<String> items,
-    String value,
-    Function(String?) onChanged,
-    AppColorsTheme theme,
-  ) {
+  Widget _buildDropdownField(String label, List<String> items, String value, Function(String?) onChanged, AppColorsTheme theme) {
     return Padding(
       padding: EdgeInsets.only(bottom: context.figmaHeight(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: AppTextStyles.interP14M.copyWith(
-              color: theme.neutral.secondaryText,
-            ),
-          ),
-          SizedBox(height: 8),
+          Text(label, style: AppTextStyles.interP14M.copyWith(color: theme.neutral.secondaryText)),
+          const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             initialValue: value,
-            items: items
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                .toList(),
+            items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             onChanged: onChanged,
             decoration: InputDecoration(
               filled: true,
               fillColor: theme.neutral.bgTint,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(context.figmaWidth(8)),
-                borderSide: BorderSide(
-                  color: theme.neutral.border.withOpacity(0.3),
-                ),
+                borderSide: BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(context.figmaWidth(8)),
-                borderSide: BorderSide(
-                  color: theme.neutral.border.withOpacity(0.3),
-                ),
+                borderSide: BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
               ),
             ),
           ),
@@ -459,32 +321,27 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
   void _onSave() {
     if (_formKey.currentState!.validate()) {
       // In a real app, you'd create an InventoryItem and save to a repository
-
+      
       final newItem = InventoryItem(
         id: const Uuid().v4(),
-        pharmacyId: 'current-pharmacy-id',
+        pharmacyId: 'current-pharmacy-id', 
         medicationId: widget.medication?.id ?? const Uuid().v4(),
         medicationName: _nameController.text,
         brandName: _brandNameController.text,
         form: _dosageFormController.text,
         quantityInStock: int.tryParse(_stockController.text) ?? 0,
-        expiryDate:
-            DateTime.tryParse(_expiryController.text) ??
-            DateTime.now().add(const Duration(days: 365)),
-        purchasePrice: (double.tryParse(_priceController.text) ?? 0.0) * 0.8,
+        expiryDate: DateTime.tryParse(_expiryController.text) ?? DateTime.now().add(const Duration(days: 365)),
+        purchasePrice: (double.tryParse(_priceController.text) ?? 0.0) * 0.8, 
         sellingPrice: double.tryParse(_priceController.text) ?? 0.0,
         minimumStockLevel: int.tryParse(_reorderController.text) ?? 10,
-        stockStatus: StockStatus.determineStatus(
-          int.tryParse(_stockController.text) ?? 0,
-          int.tryParse(_reorderController.text) ?? 10,
-        ),
+        stockStatus: StockStatus.determineStatus(int.tryParse(_stockController.text) ?? 0, int.tryParse(_reorderController.text) ?? 10),
         lastRestocked: DateTime.now(),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
       debugPrint('Saving new item: ${newItem.medicationName}');
-
+      
       context.pop(); // Go back to catalog
       context.pop(); // Go back to inventory
     }

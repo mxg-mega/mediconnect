@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mediconnect/core/constants/colors.dart';
 import 'package:mediconnect/features/pharmacist_app/domain/entities/inventory_item.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/inventory/providers/inventory_provider.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-
-final selectedFilterProvider = StateProvider<StockStatus?>((ref) => null);
+import 'package:mediconnect/core/constants/colors.dart';
 
 class InventoryFilterChips extends ConsumerWidget {
   const InventoryFilterChips({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedFilter = ref.watch(selectedFilterProvider);
+    final selectedFilter = ref.watch(inventoryProvider.select((s) => s.quickFilterStatus));
     final colors = AppTheme.colors(context);
 
     return SingleChildScrollView(
@@ -32,7 +30,7 @@ class InventoryFilterChips extends ConsumerWidget {
           _buildChip(
             context,
             ref,
-            'Low-stock',
+            'Low-Stock',
             StockStatus.lowStock,
             selectedFilter,
             colors,
@@ -69,27 +67,24 @@ class InventoryFilterChips extends ConsumerWidget {
     final isSelected = status == selectedFilter;
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
-      child: FilterChip(
+      child: ChoiceChip(
         label: Text(label),
         selected: isSelected,
         onSelected: (bool selected) {
-          if (selected) {
-            ref.read(selectedFilterProvider.notifier).state = status;
-            ref.read(inventoryProvider.notifier).filterByStatus(status);
-          }
+          ref.read(inventoryProvider.notifier).updateQuickFilter(status);
         },
-        backgroundColor: isSelected
-            ? colors.patient.bg.withOpacity(0.1)
-            : colors.neutral.bg00,
-        selectedColor: colors.patient.bg.withOpacity(0.2),
+        backgroundColor: colors.neutral.bgTint,
+        selectedColor: colors.pharmacist.bg,
         labelStyle: TextStyle(
-          color: isSelected ? colors.patient.bg : colors.neutral.primaryText,
+          color: isSelected ? Colors.white : colors.neutral.secondaryText,
         ),
-        shape: StadiumBorder(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
           side: BorderSide(
-            color: isSelected ? colors.patient.bg : colors.neutral.border,
+            color: isSelected ? colors.pharmacist.bg : colors.neutral.border.withOpacity(0.2),
           ),
         ),
+        showCheckmark: false,
       ),
     );
   }

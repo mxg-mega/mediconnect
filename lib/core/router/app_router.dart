@@ -21,9 +21,12 @@ import 'package:mediconnect/features/pharmacist_app/presentation/profile/profile
 import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_main_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_dashboard.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/inventory/inventory_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/inventory/pages/inventory_item_view_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/inventory/pages/inventory_item_edit_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/medication_catalog/pages/medication_catalog_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/medication_catalog/pages/add_medication_page.dart';
 import 'package:mediconnect/features/pharmacist_app/domain/models/dispense_record.dart';
+import 'package:mediconnect/features/pharmacist_app/domain/entities/inventory_item.dart';
 import 'package:mediconnect/common/domain/entities/medication.dart' as entity;
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/pages/dispense_history_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/pages/dispense_receipt_page.dart';
@@ -110,6 +113,20 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Pharmacist Full Screen Pages (WITHOUT bottom nav)
+      GoRoute(
+        path: '/pharmacist/inventory/item',
+        builder: (context, state) {
+          final item = state.extra as InventoryItem;
+          return InventoryItemViewPage(item: item);
+        },
+      ),
+      GoRoute(
+        path: '/pharmacist/inventory/edit',
+        builder: (context, state) {
+          final item = state.extra as InventoryItem;
+          return InventoryItemEditPage(item: item);
+        },
+      ),
       GoRoute(
         path: '/pharmacist/medication-catalog',
         builder: (context, state) => const MedicationCatalogPage(),
