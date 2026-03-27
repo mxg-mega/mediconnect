@@ -47,13 +47,17 @@ class ProfilePage extends ConsumerWidget {
       children: [
         CircleAvatar(
           radius: 50,
-          backgroundImage: NetworkImage(profile.avatarUrl, ),
-          backgroundColor: colors.pharmacist.bg,
-          child: const Icon(
-            Icons.person,
-            size: 50,
-            color: Colors.white,
-          ),
+          backgroundImage: profile.avatarUrl.isNotEmpty
+              ? NetworkImage(profile.avatarUrl)
+              : null,
+          backgroundColor: colors.neutral.bgTint,
+          child: profile.avatarUrl.isEmpty
+              ? Icon(
+                  Icons.person,
+                  size: 50,
+                  color: colors.pharmacist.bg,
+                )
+              : null,
         ),
         const SizedBox(height: 16),
         Row(

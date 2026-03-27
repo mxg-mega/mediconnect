@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/core/router/routes_names.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/profile/domain/pharmacist_profile.dart';
 
 final profileProvider = Provider<PharmacistProfile>((ref) {
   return PharmacistProfile(
     name: 'Pharmacist Muneer',
     isVerified: true,
-    avatarUrl: 'https://via.placeholder.com/150', // Placeholder
+    avatarUrl: '', // Use empty string to trigger local placeholder
     sections: [
       ProfileSection(
         title: 'Account',
@@ -15,19 +16,19 @@ final profileProvider = Provider<PharmacistProfile>((ref) {
             title: 'Personal Details',
             subtitle: 'View or edit your name & contact info',
             icon: Icons.person_outline,
-            route: '/profile/personal_details',
+            route: AppRoutes.pharmacistPersonalDetails,
           ),
           ProfileItem(
             title: 'Pharmacy Information',
             subtitle: 'Track conditions, medications & allergies',
             icon: Icons.local_pharmacy_outlined,
-            route: '/profile/pharmacy_information',
+            route: AppRoutes.pharmacistPharmacyInformation,
           ),
           ProfileItem(
             title: 'Pharmacy Verification',
             subtitle: 'Track conditions, medications & allergies',
             icon: Icons.verified_user_outlined,
-            route: '/profile/pharmacy_verification',
+            route: AppRoutes.pharmacistPharmacyVerification,
           ),
         ],
       ),
@@ -38,7 +39,7 @@ final profileProvider = Provider<PharmacistProfile>((ref) {
             title: 'Preferences',
             subtitle: 'Customize notifications & theme',
             icon: Icons.settings_outlined,
-            route: '/profile/preferences',
+            route: AppRoutes.pharmacistPreferences,
           ),
           ProfileItem(
             title: 'Security',
@@ -61,7 +62,7 @@ final profileProvider = Provider<PharmacistProfile>((ref) {
             title: 'Term and policy',
             subtitle: 'Read our legal agreements & privacy info',
             icon: Icons.policy_outlined,
-            route: '/profile/terms',
+            route: AppRoutes.pharmacistTermsAndPrivacy,
           ),
         ],
       ),

@@ -11,12 +11,20 @@ import 'package:mediconnect/common/auth/presentation/pages/information_capture_p
 import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/common/widgets/splash_screen.dart';
 import 'package:mediconnect/common/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:mediconnect/core/router/routes_names.dart';
 import 'package:mediconnect/features/patient_app/presentation/activity/activity_page.dart';
 import 'package:mediconnect/features/patient_app/presentation/dashboard/dashboard_page.dart';
 import 'package:mediconnect/features/patient_app/presentation/main_nav/patient_main_page.dart';
 import 'package:mediconnect/features/patient_app/presentation/search/search_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/pages/dispense_entry_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/profile/profile_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/personal_details_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/pharmacy_information_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/pharmacy_verification_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/preferences_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/notification_settings_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/display_settings_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/language_settings_page.dart';
 
 import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_main_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_dashboard.dart';
@@ -31,6 +39,9 @@ import 'package:mediconnect/common/domain/entities/medication.dart' as entity;
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/pages/dispense_history_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/pages/dispense_receipt_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/pages/export_receipt_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/terms_and_conditions/data/terms_and_conditions_text.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/terms_and_conditions/display_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/terms_and_conditions/terms_and_conditions_page.dart';
 import 'package:mediconnect/features/splash_screen/splash_controller.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -54,8 +65,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isVerification = state.matchedLocation == '/code-verification';
       final isFinalization = state.matchedLocation == '/setup-finalization';
       final isCapture = state.matchedLocation == '/information-capture';
-      
-      final isAuthFlow = isLoggingIn || isSigningUp || isWelcome || isVerification || isFinalization || isCapture;
+
+      final isAuthFlow =
+          isLoggingIn ||
+          isSigningUp ||
+          isWelcome ||
+          isVerification ||
+          isFinalization ||
+          isCapture;
       final role = authState.user?.userType ?? UserType.unknown;
 
       if (!isLoggedIn) {
@@ -78,9 +95,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
     routes: [
       GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/welcome', builder: (context, state) => const WelcomePage()),
-      GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
-      GoRoute(path: '/signup', builder: (context, state) => const SignupScreen()),
+      GoRoute(
+        path: '/welcome',
+        builder: (context, state) => const WelcomePage(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignupScreen(),
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/code-verification',
@@ -88,12 +114,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final nextPage = state.extra as Widget?;
           if (nextPage == null) {
-            return const Scaffold(body: Center(child: Text('No page to navigate to')));
+            return const Scaffold(
+              body: Center(child: Text('No page to navigate to')),
+            );
           }
           return CodeVerificationPage(nextPage: nextPage);
         },
       ),
-      GoRoute(path: '/setup-finalization', builder: (context, state) => const SetupFinalizationPage()),
+      GoRoute(
+        path: '/setup-finalization',
+        builder: (context, state) => const SetupFinalizationPage(),
+      ),
       GoRoute(
         path: '/information-capture',
         builder: (context, state) {
@@ -106,13 +137,91 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => PharmacistMainPage(child: child),
         routes: [
-          GoRoute(path: '/pharmacist/dashboard', builder: (context, state) => const PharmacistDashboard()),
-          GoRoute(path: '/pharmacist/inventory', builder: (context, state) => const InventoryPage()),
-          GoRoute(path: '/pharmacist/profile', builder: (context, state) => const ProfilePage()),
+          GoRoute(
+            path: '/pharmacist/dashboard',
+            builder: (context, state) => const PharmacistDashboard(),
+          ),
+          GoRoute(
+            path: '/pharmacist/inventory',
+            builder: (context, state) => const InventoryPage(),
+          ),
+          GoRoute(
+            path: '/pharmacist/profile',
+            builder: (context, state) => const ProfilePage(),
+          ),
         ],
       ),
 
       // Pharmacist Full Screen Pages (WITHOUT bottom nav)
+      GoRoute(
+        path: '/pharmacist/profile/personal-details',
+        builder: (context, state) => const PersonalDetailsPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/pharmacy-information',
+        builder: (context, state) => const PharmacyInformationPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/pharmacy-verification',
+        builder: (context, state) => const PharmacyVerificationPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/preferences',
+        builder: (context, state) => const PreferencesPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/notification-settings',
+        builder: (context, state) => const NotificationSettingsPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/display-settings',
+        builder: (context, state) => const DisplaySettingsPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/language-settings',
+        builder: (context, state) => const LanguageSettingsPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/terms-privacy',
+        builder: (context, state) => const TermsAndConditionsPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/terms-privacy',
+        builder: (context, state) {
+          if (state.extra as String == AppRoutes.pharmacistPrivacyPolicy) {
+            return DisplayPage(
+              title: 'Privacy Policy',
+              content: termsAndConditionsText[1],
+            );
+          } else if (state.extra as String ==
+              AppRoutes.pharmacistTermsOfService) {
+            return DisplayPage(
+              title: 'Terms of Service',
+              content: termsAndConditionsText[0],
+            );
+          } else {
+            return const Scaffold(body: Center(child: Text('Page not found')));
+          }
+        },
+      ),
+      GoRoute(
+        path: '/pharmacist/terms-privacy/privacy-policy',
+        builder: (context, state) {
+          return DisplayPage(
+            title: 'Privacy Policy',
+            content: termsAndConditionsText[1],
+          );
+        },
+      ),
+      GoRoute(
+        path: '/pharmacist/terms-privacy/terms-of-service',
+        builder: (context, state) {
+          return DisplayPage(
+            title: 'Terms of Service',
+            content: termsAndConditionsText[0],
+          );
+        },
+      ),
       GoRoute(
         path: '/pharmacist/inventory/item',
         builder: (context, state) {
@@ -149,7 +258,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               return DispenseReceiptPage(record: record);
             },
           ),
-          GoRoute(path: 'export', builder: (context, state) => const ExportReceiptPage()),
+          GoRoute(
+            path: 'export',
+            builder: (context, state) => const ExportReceiptPage(),
+          ),
         ],
       ),
       GoRoute(
@@ -161,10 +273,22 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => PatientMainPage(child: child),
         routes: [
-          GoRoute(path: '/patient/dashboard', builder: (context, state) => const DashboardPage()),
-          GoRoute(path: '/patient/search', builder: (context, state) => const SearchPage()),
-          GoRoute(path: '/patient/activity', builder: (context, state) => const ActivityPage()),
-          GoRoute(path: '/patient/profile', builder: (context, state) => const ProfilePage()),
+          GoRoute(
+            path: '/patient/dashboard',
+            builder: (context, state) => const DashboardPage(),
+          ),
+          GoRoute(
+            path: '/patient/search',
+            builder: (context, state) => const SearchPage(),
+          ),
+          GoRoute(
+            path: '/patient/activity',
+            builder: (context, state) => const ActivityPage(),
+          ),
+          GoRoute(
+            path: '/patient/profile',
+            builder: (context, state) => const ProfilePage(),
+          ),
         ],
       ),
     ],

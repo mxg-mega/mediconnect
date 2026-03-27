@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
@@ -19,7 +20,7 @@ class ProfileListItem extends StatelessWidget {
         title: Text(item.title, style: AppTextStyles.interP16M),
         subtitle: Text(item.subtitle, style: AppTextStyles.interP14R),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () => navigateTo(context, item.route),
+        onTap: () => context.push(item.route),
       ),
     );
   }

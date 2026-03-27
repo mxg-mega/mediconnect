@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
@@ -13,20 +14,23 @@ class DisplayPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      onBack: () => navigateBack(context),
+      onBack: () => context.pop(),
       titleText: title,
-      body: Column(
-        children: [
-          const SizedBox(height: 16),
-          Text(content.title, style: AppTextStyles.interP18M),
-          const SizedBox(height: 16),
-          ...content.description.map(
-            (paragraph) => Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Text(paragraph, style: AppTextStyles.interP16R),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 16),
+            Text(content.title, style: AppTextStyles.interP18M),
+            const SizedBox(height: 16),
+            ...content.description.map(
+              (paragraph) => Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text(paragraph, style: AppTextStyles.interP16R),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

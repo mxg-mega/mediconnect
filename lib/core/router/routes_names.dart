@@ -18,8 +18,19 @@ class AppRoutes {
   static const pharmacistInventoryItem = '/pharmacist/inventory/item';
   static const pharmacistInventoryEdit = '/pharmacist/inventory/edit';
   static const pharmacistProfile = '/pharmacist/profile';
+  static const pharmacistPersonalDetails = '/pharmacist/profile/personal-details';
+  static const pharmacistPharmacyInformation = '/pharmacist/profile/pharmacy-information';
+  static const pharmacistPharmacyVerification = '/pharmacist/profile/pharmacy-verification';
+  static const pharmacistPreferences = '/pharmacist/profile/preferences';
+  static const pharmacistDisplaySettings = '/pharmacist/profile/display-settings';
+  static const pharmacistLanguageSettings = '/pharmacist/profile/language-settings';
+  static const pharmacistNotificationSettings = '/pharmacist/profile/notification-settings';
   static const pharmacistMedicationCatalog = '/pharmacist/medication-catalog';
   static const pharmacistAddMedication = '/pharmacist/add-medication';
+
+  static const pharmacistTermsAndPrivacy = '/pharmacist/terms-privacy';
+  static const pharmacistPrivacyPolicy = '/pharmacist/terms-privacy/privacy-policy';
+  static const pharmacistTermsOfService = '/pharmacist/terms-privacy/terms-of-service';
 
   static const dispenseHistory = '/pharmacist/dispense-history';
   static const dispenseReceipt = '/pharmacist/dispense-history/receipt';
