@@ -19,8 +19,7 @@ PatientProfileModel _$PatientProfileModelFromJson(Map<String, dynamic> json) =>
       emergencyContactRelation: json['emergency_contact_relation'] as String?,
       medicalHistoryPrivacy:
           json['medical_history_privacy'] as String? ?? 'private',
-      allowedPharmacistIds:
-          (json['allowed_pharmacist_ids'] as List<dynamic>?)
+      allowedPharmacistIds: (json['allowed_pharmacist_ids'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
@@ -29,19 +28,19 @@ PatientProfileModel _$PatientProfileModelFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$PatientProfileModelToJson(
-  PatientProfileModel instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'user_id': instance.userId,
-  'full_name': instance.fullName,
-  'date_of_birth': instance.dateOfBirth.toIso8601String(),
-  'gender': instance.gender,
-  'blood_type': instance.bloodType,
-  'emergency_contact_name': instance.emergencyContactName,
-  'emergency_contact_phone': instance.emergencyContactPhone,
-  'emergency_contact_relation': instance.emergencyContactRelation,
-  'medical_history_privacy': instance.medicalHistoryPrivacy,
-  'allowed_pharmacist_ids': instance.allowedPharmacistIds,
-  'created_at': instance.createdAt.toIso8601String(),
-  'updated_at': instance.updatedAt.toIso8601String(),
-};
+        PatientProfileModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'user_id': instance.userId,
+      'full_name': instance.fullName,
+      'date_of_birth': instance.dateOfBirth.toIso8601String(),
+      'gender': instance.gender,
+      'blood_type': instance.bloodType,
+      'emergency_contact_name': instance.emergencyContactName,
+      'emergency_contact_phone': instance.emergencyContactPhone,
+      'emergency_contact_relation': instance.emergencyContactRelation,
+      'medical_history_privacy': instance.medicalHistoryPrivacy,
+      'allowed_pharmacist_ids': instance.allowedPharmacistIds,
+      'created_at': instance.createdAt.toIso8601String(),
+      'updated_at': instance.updatedAt.toIso8601String(),
+    };

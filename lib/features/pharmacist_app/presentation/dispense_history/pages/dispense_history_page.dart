@@ -169,7 +169,7 @@ class _DispenseHistoryPageState extends ConsumerState<DispenseHistoryPage> {
                   hintText: 'Search by Sale ID or Name',
                   hintStyle: WidgetStateProperty.all(
                     AppTextStyles.interP14R.copyWith(
-                      color: theme.neutral.secondaryText.withOpacity(0.5),
+                      color: theme.neutral.secondaryText.withValues(alpha: 0.5),
                     ),
                   ),
                   trailing: [
@@ -193,7 +193,7 @@ class _DispenseHistoryPageState extends ConsumerState<DispenseHistoryPage> {
                         context.figmaWidth(8),
                       ),
                       side: BorderSide(
-                        color: theme.neutral.border.withOpacity(0.5),
+                        color: theme.neutral.border.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -306,7 +306,7 @@ class _DispenseHistoryPageState extends ConsumerState<DispenseHistoryPage> {
               child: Icon(
                 Icons.assignment_outlined,
                 size: 100,
-                color: theme.neutral.secondaryText.withOpacity(0.2),
+                color: theme.neutral.secondaryText.withValues(alpha: 0.2),
               ),
             ),
           ),

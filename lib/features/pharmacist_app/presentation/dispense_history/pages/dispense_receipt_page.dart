@@ -54,7 +54,7 @@ class DispenseReceiptPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(context.figmaWidth(12)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
@@ -67,7 +67,7 @@ class DispenseReceiptPage extends StatelessWidget {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: theme.pharmacist.bg.withOpacity(0.6),
+                  color: theme.pharmacist.bg.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(context.figmaWidth(12)),
                   ),
@@ -110,7 +110,7 @@ class DispenseReceiptPage extends StatelessWidget {
                     Text(
                       'RECORDED BY',
                       style: AppTextStyles.interP12M.copyWith(
-                        color: theme.pharmacist.bg.withOpacity(0.7),
+                        color: theme.pharmacist.bg.withValues(alpha: 0.7),
                         letterSpacing: 1.1,
                       ),
                     ),
@@ -131,7 +131,7 @@ class DispenseReceiptPage extends StatelessWidget {
                     Text(
                       'RECORDED',
                       style: AppTextStyles.interP12M.copyWith(
-                        color: theme.pharmacist.bg.withOpacity(0.7),
+                        color: theme.pharmacist.bg.withValues(alpha: 0.7),
                         letterSpacing: 1.1,
                       ),
                     ),

@@ -22,6 +22,13 @@ class AppRoutes {
   static const pharmacistPharmacyInformation = '/pharmacist/profile/pharmacy-information';
   static const pharmacistPharmacyVerification = '/pharmacist/profile/pharmacy-verification';
   static const pharmacistPreferences = '/pharmacist/profile/preferences';
+  static const pharmacistSecurity = '/pharmacist/profile/security';
+  static const pharmacistChangePassword = '/pharmacist/profile/security/change-password';
+  static const pharmacistContactInfo = '/pharmacist/profile/security/contact-info';
+  static const pharmacistAddEmail = '/pharmacist/profile/security/add-email';
+  static const pharmacistAddPhone = '/pharmacist/profile/security/add-phone';
+  static const pharmacistSecurityVerification = '/pharmacist/profile/security/verification';
+  static const pharmacistSecuritySuccess = '/pharmacist/profile/security/success';
   static const pharmacistDisplaySettings = '/pharmacist/profile/display-settings';
   static const pharmacistLanguageSettings = '/pharmacist/profile/language-settings';
   static const pharmacistNotificationSettings = '/pharmacist/profile/notification-settings';

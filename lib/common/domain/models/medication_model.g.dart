@@ -7,24 +7,23 @@ part of 'medication_model.dart';
 // **************************************************************************
 
 MedicationRatingModel _$MedicationRatingModelFromJson(
-  Map<String, dynamic> json,
-) => MedicationRatingModel(
-  averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
-  totalReviews: (json['total_reviews'] as num?)?.toInt() ?? 0,
-  ratingBreakdown:
-      (json['rating_breakdown'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ) ??
-      const {},
-);
+        Map<String, dynamic> json) =>
+    MedicationRatingModel(
+      averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
+      totalReviews: (json['total_reviews'] as num?)?.toInt() ?? 0,
+      ratingBreakdown: (json['rating_breakdown'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, (e as num).toInt()),
+          ) ??
+          const {},
+    );
 
 Map<String, dynamic> _$MedicationRatingModelToJson(
-  MedicationRatingModel instance,
-) => <String, dynamic>{
-  'average_rating': instance.averageRating,
-  'total_reviews': instance.totalReviews,
-  'rating_breakdown': instance.ratingBreakdown,
-};
+        MedicationRatingModel instance) =>
+    <String, dynamic>{
+      'average_rating': instance.averageRating,
+      'total_reviews': instance.totalReviews,
+      'rating_breakdown': instance.ratingBreakdown,
+    };
 
 MedicationModel _$MedicationModelFromJson(Map<String, dynamic> json) =>
     MedicationModel(
@@ -38,34 +37,28 @@ MedicationModel _$MedicationModelFromJson(Map<String, dynamic> json) =>
       dosageForms: (json['dosage_forms'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
-      strengths: (json['strengths'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      strengths:
+          (json['strengths'] as List<dynamic>).map((e) => e as String).toList(),
       description: json['description'] as String?,
       usageInstructions: json['usage_instructions'] as String?,
-      sideEffects:
-          (json['side_effects'] as List<dynamic>?)
+      sideEffects: (json['side_effects'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
-      contraindications:
-          (json['contraindications'] as List<dynamic>?)
+      contraindications: (json['contraindications'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
       prescriptionRequired: json['prescription_required'] as bool? ?? false,
-      imageUrls:
-          (json['image_urls'] as List<dynamic>?)
+      imageUrls: (json['image_urls'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],
       rating: json['rating'] == null
           ? const MedicationRatingModel()
           : MedicationRatingModel.fromJson(
-              json['rating'] as Map<String, dynamic>,
-            ),
-      alternativeIds:
-          (json['alternative_ids'] as List<dynamic>?)
+              json['rating'] as Map<String, dynamic>),
+      alternativeIds: (json['alternative_ids'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           const [],

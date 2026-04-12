@@ -11,7 +11,6 @@ import 'package:mediconnect/common/auth/presentation/pages/information_capture_p
 import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/common/widgets/splash_screen.dart';
 import 'package:mediconnect/common/onboarding/presentation/pages/onboarding_screen.dart';
-import 'package:mediconnect/core/router/routes_names.dart';
 import 'package:mediconnect/features/patient_app/presentation/activity/activity_page.dart';
 import 'package:mediconnect/features/patient_app/presentation/dashboard/dashboard_page.dart';
 import 'package:mediconnect/features/patient_app/presentation/main_nav/patient_main_page.dart';
@@ -25,6 +24,13 @@ import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/p
 import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/notification_settings_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/display_settings_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/language_settings_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/security/security_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/security/change_password_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/security/contact_info_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/security/add_email_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/security/add_phone_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/security/security_code_verification_page.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/profile/pages/security/security_success_page.dart';
 
 import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_main_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/pharmacist_dashboard.dart';
@@ -182,44 +188,37 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LanguageSettingsPage(),
       ),
       GoRoute(
-        path: '/pharmacist/terms-privacy',
-        builder: (context, state) => const TermsAndConditionsPage(),
+        path: '/pharmacist/profile/security',
+        builder: (context, state) => const SecurityPage(),
       ),
       GoRoute(
-        path: '/pharmacist/terms-privacy',
+        path: '/pharmacist/profile/security/change-password',
+        builder: (context, state) => const ChangePasswordPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/security/contact-info',
+        builder: (context, state) => const ContactInfoPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/security/add-email',
+        builder: (context, state) => const AddEmailPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/security/add-phone',
+        builder: (context, state) => const AddPhonePage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/profile/security/verification',
         builder: (context, state) {
-          if (state.extra as String == AppRoutes.pharmacistPrivacyPolicy) {
-            return DisplayPage(
-              title: 'Privacy Policy',
-              content: termsAndConditionsText[1],
-            );
-          } else if (state.extra as String ==
-              AppRoutes.pharmacistTermsOfService) {
-            return DisplayPage(
-              title: 'Terms of Service',
-              content: termsAndConditionsText[0],
-            );
-          } else {
-            return const Scaffold(body: Center(child: Text('Page not found')));
-          }
+          final data = state.extra as Map<String, dynamic>;
+          return SecurityCodeVerificationPage(data: data);
         },
       ),
       GoRoute(
-        path: '/pharmacist/terms-privacy/privacy-policy',
+        path: '/pharmacist/profile/security/success',
         builder: (context, state) {
-          return DisplayPage(
-            title: 'Privacy Policy',
-            content: termsAndConditionsText[1],
-          );
-        },
-      ),
-      GoRoute(
-        path: '/pharmacist/terms-privacy/terms-of-service',
-        builder: (context, state) {
-          return DisplayPage(
-            title: 'Terms of Service',
-            content: termsAndConditionsText[0],
-          );
+          final data = state.extra as Map<String, dynamic>;
+          return SecuritySuccessPage(data: data);
         },
       ),
       GoRoute(
@@ -267,6 +266,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dispense-entry',
         builder: (context, state) => const DispenseEntryPage(),
+      ),
+      GoRoute(
+        path: '/pharmacist/terms-privacy',
+        builder: (context, state) => const TermsAndConditionsPage(),
+      ),
+
+      GoRoute(
+        path: '/pharmacist/terms-privacy/privacy-policy',
+        builder: (context, state) => DisplayPage(
+          title: 'Privacy Policy',
+          content: termsAndConditionsText[1],
+        ),
+      ),
+
+      GoRoute(
+        path: '/pharmacist/terms-privacy/terms-of-service',
+        builder: (context, state) => DisplayPage(
+          title: 'Terms of Service',
+          content: termsAndConditionsText[0],
+        ),
       ),
 
       // Patient Shell

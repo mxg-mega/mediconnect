@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
-import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/terms_and_conditions/data/terms_and_conditions_text.dart';
 

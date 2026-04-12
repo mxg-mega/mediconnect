@@ -22,3 +22,11 @@ class AuthException extends AppException {
 class ValidationException extends AppException {
   ValidationException(super.message);
 }
+
+class CacheException implements Exception {
+  final String message;
+  CacheException(this.message);
+
+  @override
+  String toString() => 'CacheException: $message';
+}

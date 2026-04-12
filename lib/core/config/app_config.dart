@@ -4,6 +4,8 @@ class AppConfig {
   static const Duration connectTimeout = Duration(seconds: 10);
   static const Duration receiveTimeout = Duration(seconds: 30);
 
+  static const String openFdaBaseUrl = 'https://api.fda.gov';
+
   // API Endpoints
   static const String authLogin = '/auth/login';
   static const String authSignup = '/auth/signup';

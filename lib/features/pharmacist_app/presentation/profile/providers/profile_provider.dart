@@ -45,7 +45,7 @@ final profileProvider = Provider<PharmacistProfile>((ref) {
             title: 'Security',
             subtitle: 'Manage your passwords and verifications',
             icon: Icons.security_outlined,
-            route: '/profile/security',
+            route: AppRoutes.pharmacistSecurity,
           ),
         ],
       ),

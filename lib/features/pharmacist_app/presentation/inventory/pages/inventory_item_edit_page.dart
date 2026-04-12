@@ -7,6 +7,7 @@ import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 import 'package:mediconnect/features/pharmacist_app/domain/entities/inventory_item.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/inventory/providers/inventory_provider.dart';
 
 class InventoryItemEditPage extends ConsumerStatefulWidget {
   final InventoryItem item;
@@ -138,12 +139,7 @@ class _InventoryItemEditPageState extends ConsumerState<InventoryItemEditPage> {
             style: AppTextStyles.interP18M.copyWith(color: theme.neutral.primaryText),
           ),
           TextButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                // Save logic
-                context.pop();
-              }
-            },
+            onPressed: _onSave,
             child: Text(
               'Save',
               style: AppTextStyles.interP16M.copyWith(color: theme.pharmacist.bg),
@@ -171,7 +167,7 @@ class _InventoryItemEditPageState extends ConsumerState<InventoryItemEditPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -222,11 +218,11 @@ class _InventoryItemEditPageState extends ConsumerState<InventoryItemEditPage> {
               fillColor: theme.neutral.bgTint,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.neutral.border.withOpacity(0.3)),
+                borderSide: BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.neutral.border.withOpacity(0.3)),
+                borderSide: BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
               ),
             ),
           ),
@@ -252,16 +248,41 @@ class _InventoryItemEditPageState extends ConsumerState<InventoryItemEditPage> {
               fillColor: theme.neutral.bgTint,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.neutral.border.withOpacity(0.3)),
+                borderSide: BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.neutral.border.withOpacity(0.3)),
+                borderSide: BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _onSave() async {
+    if (_formKey.currentState!.validate()) {
+      final updatedItem = widget.item.copyWith(
+        medicationName: _nameController.text,
+        brandName: _brandNameController.text,
+        form: _dosageFormController.text,
+        quantityInStock: int.tryParse(_stockController.text) ?? 0,
+        expiryDate: DateTime.tryParse(_expiryController.text) ?? widget.item.expiryDate,
+        sellingPrice: double.tryParse(_priceController.text) ?? 0.0,
+        minimumStockLevel: int.tryParse(_reorderController.text) ?? 10,
+        stockStatus: StockStatus.determineStatus(
+          int.tryParse(_stockController.text) ?? 0,
+          int.tryParse(_reorderController.text) ?? 10,
+        ),
+        updatedAt: DateTime.now(),
+      );
+
+      await ref.read(inventoryProvider.notifier).updateItem(updatedItem);
+      
+      if (mounted) {
+        context.pop();
+      }
+    }
   }
 }

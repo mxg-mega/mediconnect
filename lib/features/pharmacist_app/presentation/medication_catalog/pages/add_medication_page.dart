@@ -4,12 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/domain/entities/medication.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/colors.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 import 'package:mediconnect/features/pharmacist_app/domain/entities/inventory_item.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/inventory/providers/inventory_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class AddMedicationPage extends ConsumerStatefulWidget {
@@ -113,7 +115,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
                     SizedBox(height: context.figmaHeight(24)),
                     _buildSectionHeader('Inventory', theme),
                     _buildTextField('Current Stock Units', _stockController, theme, hint: 'Total stock available'),
-                    _buildTextField('Reorder Point', _reorderController, theme, hint: 'e.g. "Reorder when ≤ 10 units'),
+                    _buildTextField('Reorder Point', _reorderController, theme, hint: 'e.g. \"Reorder when ≤ 10 units'),
                     _buildTextField('Expiration Date', _expiryController, theme, hint: 'e.g. 2027-08-31'),
                     SizedBox(height: context.figmaHeight(24)),
                     _buildSectionHeader('Medication Price', theme),
@@ -318,13 +320,19 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
     );
   }
 
-  void _onSave() {
+  void _onSave() async {
     if (_formKey.currentState!.validate()) {
-      // In a real app, you'd create an InventoryItem and save to a repository
-      
+      final user = ref.read(currentUserProvider);
+      if (user?.pharmacyId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: No pharmacy associated with your account.')),
+        );
+        return;
+      }
+
       final newItem = InventoryItem(
         id: const Uuid().v4(),
-        pharmacyId: 'current-pharmacy-id', 
+        pharmacyId: user!.pharmacyId!, 
         medicationId: widget.medication?.id ?? const Uuid().v4(),
         medicationName: _nameController.text,
         brandName: _brandNameController.text,
@@ -340,10 +348,12 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
         updatedAt: DateTime.now(),
       );
 
-      debugPrint('Saving new item: ${newItem.medicationName}');
+      await ref.read(inventoryProvider.notifier).addItem(newItem);
       
-      context.pop(); // Go back to catalog
-      context.pop(); // Go back to inventory
+      if (mounted) {
+        context.pop(); // Back to catalog
+        context.pop(); // Back to inventory
+      }
     }
   }
 }

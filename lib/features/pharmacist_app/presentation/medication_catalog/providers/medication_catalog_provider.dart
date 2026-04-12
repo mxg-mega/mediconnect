@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/domain/entities/medication.dart';
+import 'package:mediconnect/core/providers/dependency_providers.dart';
+import 'package:mediconnect/features/pharmacist_app/domain/repositories/medication_catalog_repository.dart';
 
 enum CatalogFilter { all, brand, generic }
 
@@ -40,116 +43,43 @@ class MedicationCatalogState {
 }
 
 class MedicationCatalogNotifier extends StateNotifier<MedicationCatalogState> {
-  MedicationCatalogNotifier() : super(MedicationCatalogState(allMedications: [], filteredMedications: [])) {
+  final MedicationCatalogRepository _repository;
+  Timer? _debounce;
+
+  MedicationCatalogNotifier({required MedicationCatalogRepository repository}) 
+      : _repository = repository,
+        super(MedicationCatalogState(allMedications: [], filteredMedications: [])) {
     _loadInitialData();
   }
 
   void _loadInitialData() {
-    final now = DateTime.now();
-    final mockMedications = [
-      Medication(
-        id: 'cat-1',
-        name: '2-Hydroxyethyl Salicylate (150ML)',
-        brandNames: ['BenGay® by Johnson & Johnson'],
-        category: 'Pain Reliever',
-        manufacturer: 'Johnson & Johnson',
-        dosageForms: ['Sprays'],
-        strengths: ['150ML'],
-        description: 'BenGay is a topical analgesic used for temporary relief of minor aches and pains of muscles and joints.',
-        createdAt: now,
-        updatedAt: now,
-      ),
-      Medication(
-        id: 'cat-2',
-        name: 'Acetaminophen',
-        brandNames: ['Tylenol® by Johnson & Johnson'],
-        category: 'Pain Reliever',
-        manufacturer: 'Johnson & Johnson',
-        dosageForms: ['Tablets'],
-        strengths: ['500mg'],
-        description: 'Acetaminophen is a pain reliever and a fever reducer.',
-        createdAt: now,
-        updatedAt: now,
-      ),
-      Medication(
-        id: 'cat-3',
-        name: 'Amlodipine',
-        brandNames: ['Norvasc by Pfizer'],
-        category: 'Antihypertensive',
-        manufacturer: 'Pfizer',
-        dosageForms: ['Tablets'],
-        strengths: ['5mg', '10mg'],
-        createdAt: now,
-        updatedAt: now,
-      ),
-      Medication(
-        id: 'cat-4',
-        name: 'Amoxicillin 200mg',
-        brandNames: ['Amoxil by GlaxoSmithKline'],
-        category: 'Antibiotic',
-        manufacturer: 'GlaxoSmithKline',
-        dosageForms: ['Tablets'],
-        strengths: ['200mg'],
-        createdAt: now,
-        updatedAt: now,
-      ),
-      Medication(
-        id: 'cat-5',
-        name: 'Amoxicillin 500mg',
-        brandNames: ['Amoxil by GlaxoSmithKline'],
-        category: 'Antibiotic',
-        manufacturer: 'GlaxoSmithKline',
-        dosageForms: ['Tablets'],
-        strengths: ['500mg'],
-        description: 'Amoxicillin is a penicillin antibiotic that fights bacteria.',
-        createdAt: now,
-        updatedAt: now,
-      ),
-      Medication(
-        id: 'cat-6',
-        name: 'Azithromycin',
-        brandNames: ['Zithromax by Pfizer'],
-        category: 'Antibiotic',
-        manufacturer: 'Pfizer',
-        dosageForms: ['Tablets'],
-        strengths: ['250mg', '500mg'],
-        createdAt: now,
-        updatedAt: now,
-      ),
-      Medication(
-        id: 'cat-7',
-        name: 'Ciprofloxacin',
-        brandNames: ['Cipro by Bayer'],
-        category: 'Antibiotic',
-        manufacturer: 'Bayer',
-        dosageForms: ['Tablets'],
-        strengths: ['250mg', '500mg'],
-        createdAt: now,
-        updatedAt: now,
-      ),
-      Medication(
-        id: 'cat-8',
-        name: 'Duloxetine',
-        brandNames: ['Cymbalta by Eli Lilly and Company'],
-        category: 'Antidepressant (SNRI)',
-        manufacturer: 'Eli Lilly and Company',
-        dosageForms: ['Capsules'],
-        strengths: ['20mg', '30mg', '60mg'],
-        createdAt: now,
-        updatedAt: now,
-      ),
-    ];
-
-    state = state.copyWith(
-      allMedications: mockMedications,
-      filteredMedications: mockMedications,
-      recentSearches: [mockMedications[4], mockMedications[9 % mockMedications.length]], // Mock recent
-    );
+    // We start empty, or we could load some common medications
+    state = state.copyWith(allMedications: [], filteredMedications: []);
   }
 
   void updateSearchQuery(String query) {
     state = state.copyWith(searchQuery: query);
-    _applyFilters();
+    
+    if (query.isEmpty) {
+      state = state.copyWith(allMedications: [], filteredMedications: [], isLoading: false);
+      return;
+    }
+
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
+      state = state.copyWith(isLoading: true);
+      try {
+        final results = await _repository.searchMedications(query);
+        state = state.copyWith(
+          allMedications: results,
+          filteredMedications: results,
+          isLoading: false,
+        );
+        _applyFilters();
+      } catch (e) {
+        state = state.copyWith(isLoading: false);
+      }
+    });
   }
 
   void updateFilter(CatalogFilter filter) {
@@ -160,33 +90,38 @@ class MedicationCatalogNotifier extends StateNotifier<MedicationCatalogState> {
   void _applyFilters() {
     List<Medication> results = state.allMedications;
 
-    // Apply search
-    if (state.searchQuery.isNotEmpty) {
-      final query = state.searchQuery.toLowerCase();
-      results = results.where((m) {
-        final matchesName = m.name.toLowerCase().contains(query);
-        final matchesBrand = m.brandNames.any((b) => b.toLowerCase().contains(query));
-        final matchesCategory = m.category.toLowerCase().contains(query);
-        return matchesName || matchesBrand || matchesCategory;
-      }).toList();
-    }
-
-    // Apply filter (mock logic for brand/generic)
+    // Filter by brand/generic (mock logic for OpenFDA results)
     if (state.filter == CatalogFilter.brand) {
-      // In a real app, Medication would have a isGeneric field
       results = results.where((m) => m.brandNames.isNotEmpty).toList();
     } else if (state.filter == CatalogFilter.generic) {
-      results = results.where((m) => m.brandNames.isEmpty || m.name.contains('Generic')).toList();
+      // In OpenFDA, if brand_name matches generic_name or brand is empty, treat as generic
+      results = results.where((m) => m.brandNames.isEmpty || m.brandNames.first.toLowerCase() == m.name.toLowerCase()).toList();
     }
 
     state = state.copyWith(filteredMedications: results);
   }
 
+  void addToRecent(Medication med) {
+    final current = List<Medication>.from(state.recentSearches);
+    if (!current.any((m) => m.id == med.id)) {
+      current.insert(0, med);
+      if (current.length > 5) current.removeLast();
+      state = state.copyWith(recentSearches: current);
+    }
+  }
+
   void clearRecentSearches() {
     state = state.copyWith(recentSearches: []);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
   }
 }
 
 final medicationCatalogProvider = StateNotifierProvider<MedicationCatalogNotifier, MedicationCatalogState>((ref) {
-  return MedicationCatalogNotifier();
+  final repository = ref.watch(medicationCatalogRepositoryProvider);
+  return MedicationCatalogNotifier(repository: repository);
 });

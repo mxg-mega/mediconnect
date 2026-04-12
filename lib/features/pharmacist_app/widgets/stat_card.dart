@@ -32,7 +32,7 @@ class StatCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(context.figmaWidth(12)),
         decoration: BoxDecoration(
-          color: backgroundColor.withOpacity(0.1),
+          color: backgroundColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(context.figmaWidth(12)),
         ),
         child: Column(

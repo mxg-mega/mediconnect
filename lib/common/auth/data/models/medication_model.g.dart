@@ -7,15 +7,15 @@ part of 'medication_model.dart';
 // **************************************************************************
 
 Medication _$MedicationFromJson(Map<String, dynamic> json) => Medication(
-  id: json['id'] as String,
-  medicationName: json['medication_name'] as String,
-  prescribedBy: json['prescribed_by'] as String,
-  dosage: json['dosage'] as String,
-  form: json['form'] as String,
-  prescriptionDate: json['prescription_date'] == null
-      ? null
-      : DateTime.parse(json['prescription_date'] as String),
-);
+      id: json['id'] as String,
+      medicationName: json['medication_name'] as String,
+      prescribedBy: json['prescribed_by'] as String,
+      dosage: json['dosage'] as String,
+      form: json['form'] as String,
+      prescriptionDate: json['prescription_date'] == null
+          ? null
+          : DateTime.parse(json['prescription_date'] as String),
+    );
 
 Map<String, dynamic> _$MedicationToJson(Medication instance) =>
     <String, dynamic>{
@@ -28,15 +28,15 @@ Map<String, dynamic> _$MedicationToJson(Medication instance) =>
     };
 
 Allergies _$AllergiesFromJson(Map<String, dynamic> json) => Allergies(
-  id: json['id'] as String,
-  allergenName: json['allergen_name'] as String,
-  type: json['type'] as String,
-  severity: json['severity'] as String,
-);
+      id: json['id'] as String,
+      allergenName: json['allergen_name'] as String,
+      type: json['type'] as String,
+      severity: json['severity'] as String,
+    );
 
 Map<String, dynamic> _$AllergiesToJson(Allergies instance) => <String, dynamic>{
-  'id': instance.id,
-  'allergen_name': instance.allergenName,
-  'type': instance.type,
-  'severity': instance.severity,
-};
+      'id': instance.id,
+      'allergen_name': instance.allergenName,
+      'type': instance.type,
+      'severity': instance.severity,
+    };

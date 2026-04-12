@@ -91,7 +91,7 @@ class ExportReceiptPage extends StatelessWidget {
           Text(
             subtitle,
             style: AppTextStyles.interP12R.copyWith(
-              color: theme.neutral.secondaryText.withOpacity(0.7),
+              color: theme.neutral.secondaryText.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -110,7 +110,7 @@ class ExportReceiptPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.neutral.bgTint,
         borderRadius: BorderRadius.circular(context.figmaWidth(8)),
-        border: Border.all(color: theme.neutral.border.withOpacity(0.5)),
+        border: Border.all(color: theme.neutral.border.withValues(alpha: 0.5)),
       ),
       child: Text(
         value,
@@ -132,7 +132,7 @@ class ExportReceiptPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.neutral.bgTint,
         borderRadius: BorderRadius.circular(context.figmaWidth(8)),
-        border: Border.all(color: theme.neutral.border.withOpacity(0.5)),
+        border: Border.all(color: theme.neutral.border.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -165,7 +165,7 @@ class ExportReceiptPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.neutral.bgTint,
         borderRadius: BorderRadius.circular(context.figmaWidth(8)),
-        border: Border.all(color: theme.neutral.border.withOpacity(0.5)),
+        border: Border.all(color: theme.neutral.border.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

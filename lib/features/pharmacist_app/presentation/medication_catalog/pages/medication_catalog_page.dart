@@ -47,7 +47,6 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
     final notifier = ref.read(medicationCatalogProvider.notifier);
 
     return AppScaffold(
-      removeBodyPadding: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -73,8 +72,23 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
           Expanded(
             child: Stack(
               children: [
-                _buildMedicationList(state, theme),
-                if (_showRecent && state.recentSearches.isNotEmpty)
+                if (state.isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else if (state.filteredMedications.isEmpty && state.searchQuery.isNotEmpty)
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.search_off, size: 64, color: theme.neutral.tertiaryText),
+                        const SizedBox(height: 16),
+                        Text('No medications found', style: AppTextStyles.interP16M),
+                      ],
+                    ),
+                  )
+                else
+                  _buildMedicationList(state, theme, notifier),
+                
+                if (_showRecent && state.recentSearches.isNotEmpty && _searchController.text.isEmpty)
                   _buildRecentOverlay(state, theme, notifier),
               ],
             ),
@@ -142,7 +156,7 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
       ),
       elevation: WidgetStateProperty.all(0),
       side: WidgetStateProperty.all(
-        BorderSide(color: theme.neutral.border.withOpacity(0.3)),
+        BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
       ),
     );
   }
@@ -195,7 +209,7 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
           color: isSelected ? theme.pharmacist.bg : theme.neutral.buttonTextWhite,
           borderRadius: BorderRadius.circular(context.figmaWidth(8)),
           border: Border.all(
-            color: isSelected ? theme.pharmacist.bg : theme.neutral.border.withOpacity(0.2),
+            color: isSelected ? theme.pharmacist.bg : theme.neutral.border.withValues(alpha: 0.2),
           ),
         ),
         child: Text(
@@ -208,20 +222,21 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
     );
   }
 
-  Widget _buildMedicationList(MedicationCatalogState state, AppColorsTheme theme) {
+  Widget _buildMedicationList(MedicationCatalogState state, AppColorsTheme theme, MedicationCatalogNotifier notifier) {
     return ListView.builder(
       padding: EdgeInsets.all(context.figmaWidth(16)),
       itemCount: state.filteredMedications.length,
       itemBuilder: (context, index) {
         final med = state.filteredMedications[index];
-        return _buildMedicationCard(med, theme);
+        return _buildMedicationCard(med, theme, notifier);
       },
     );
   }
 
-  Widget _buildMedicationCard(med, AppColorsTheme theme) {
+  Widget _buildMedicationCard(med, AppColorsTheme theme, MedicationCatalogNotifier notifier) {
     return GestureDetector(
       onTap: () {
+        notifier.addToRecent(med);
         context.push(AppRoutes.pharmacistAddMedication, extra: med);
       },
       child: Container(
@@ -246,7 +261,7 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
                   ),
                 ),
                 Text(
-                  med.dosageForms.join(', '),
+                  med.dosageForms.isNotEmpty ? med.dosageForms.join(', ') : 'Label',
                   style: AppTextStyles.interP12R.copyWith(
                     color: theme.neutral.primaryText,
                   ),
@@ -291,7 +306,7 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
           borderRadius: BorderRadius.circular(context.figmaWidth(12)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -329,6 +344,7 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
                   title: Text(med.name, style: AppTextStyles.interP14M),
                   subtitle: Text(med.brandNames.join(', '), style: AppTextStyles.interP12R),
                   onTap: () {
+                    notifier.addToRecent(med);
                     context.push(AppRoutes.pharmacistAddMedication, extra: med);
                   },
                 )),
