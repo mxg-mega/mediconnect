@@ -73,8 +73,8 @@ class KElevatedButtonExample extends ConsumerWidget {
             // Button with custom color (traditional)
             KElevatedButton(
               onPressed: () {},
-              color: Colors.purple,
-              child: const Text('Custom Color Button'),
+              backgroundColor: Colors.blue,
+              child: const Text('Primary Blue Button'),
             ),
 
             const SizedBox(height: 24),
@@ -170,7 +170,7 @@ class KElevatedButtonExample extends ConsumerWidget {
               useProvider: true,
               buttonId: 'no_role_styling',
               useRoleBasedStyling: false,
-              color: Colors.orange,
+              backgroundColor: Colors.orange,
               onPressed: () {},
               child: const Text('No Role-Based Styling'),
             ),

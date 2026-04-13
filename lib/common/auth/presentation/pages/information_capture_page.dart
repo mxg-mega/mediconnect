@@ -25,6 +25,9 @@ class _InformationCapturePageState extends State<InformationCapturePage>
   final GlobalKey<FormState> _firstFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _secondFormKey = GlobalKey<FormState>();
 
+  final _patientFormKey = GlobalKey<PatientPersonalInfoFormState>();
+  final _pharmacyFormKey = GlobalKey<PharmacyInfoFormState>();
+
   MedicalHistoryInput? medicalHistoryInput;
   PatientInfoInput? patientInfoInput;
   PharmacyInfoInput? pharmacyInfoInput;
@@ -40,6 +43,14 @@ class _InformationCapturePageState extends State<InformationCapturePage>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _quickFill() {
+    if (widget.role == UserType.patient) {
+      _patientFormKey.currentState?.quickFill();
+    } else {
+      _pharmacyFormKey.currentState?.quickFill();
+    }
   }
 
   void _goToNextTab() {
@@ -68,6 +79,13 @@ class _InformationCapturePageState extends State<InformationCapturePage>
     return AppScaffold(
       onBack: () => context.pop(),
       scaffoldActions: [
+        TextButton(
+          onPressed: _quickFill,
+          child: Text(
+            'Quick Fill',
+            style: TextStyle(color: AppTheme.colors(context).support.blue),
+          ),
+        ),
         TextButton(
           onPressed: () {
             context.go('/welcome');

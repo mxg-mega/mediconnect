@@ -19,16 +19,29 @@ class PharmacyInfoForm extends StatefulWidget {
   final void Function(PharmacyInfoInput input) onSubmit;
 
   @override
-  State<PharmacyInfoForm> createState() => _PharmacyInfoFormState();
+  State<PharmacyInfoForm> createState() => PharmacyInfoFormState();
 }
 
-class _PharmacyInfoFormState extends State<PharmacyInfoForm> {
+class PharmacyInfoFormState extends State<PharmacyInfoForm> {
   final TextEditingController pharmacyNameController = TextEditingController();
   final TextEditingController titleRoleController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+
+  void quickFill() {
+    setState(() {
+      pharmacyNameController.text = 'Test Pharmacy Ltd';
+      titleRoleController.text = 'Head Pharmacist';
+      contactController.text = '08011122233';
+      emailController.text = 'pharmacy@test.com';
+      addressController.text = '123 Business Way, Abuja';
+      descriptionController.text = 'A reliable pharmacy providing quality care.';
+      _selectedType = PharmacyType.retail;
+      _selectedOperatingHours = '24/7';
+    });
+  }
 
   @override
   void dispose() {

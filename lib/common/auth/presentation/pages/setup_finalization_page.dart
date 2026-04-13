@@ -111,7 +111,7 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
                 ),
               ),
               KElevatedButton(
-                color: _selectedAccountType == patientRole
+                backgroundColor: _selectedAccountType == patientRole
                     ? theme.patient.bg
                     : theme.pharmacist.bg,
                 onPressed: _selectedAccountType != null

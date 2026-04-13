@@ -24,8 +24,8 @@ void main() async {
   runApp(
     ProviderScope(
       overrides: [
-        // Override the useLocalAuth provider to enable local dummy auth
-        useLocalAuthProvider.overrideWithValue(true),
+        // Set to false to use real Firebase Auth
+        useLocalAuthProvider.overrideWithValue(false),
       ],
       child: const MyApp(),
     ),

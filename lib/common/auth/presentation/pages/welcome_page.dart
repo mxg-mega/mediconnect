@@ -1,13 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mediconnect/common/auth/data/models/user_model.dart';
-import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/widgets/logo.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
+import 'package:mediconnect/core/router/routes_names.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
@@ -18,7 +18,6 @@ class WelcomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = ref.read(appScaffoldProvider.notifier);
     final theme = AppTheme.colors(context);
-    final authState = ref.watch(authProvider);
 
     return AppScaffold(
       body: Column(
@@ -46,18 +45,15 @@ class WelcomePage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 40),
                 KElevatedButton(
-                  onPressed: authState.isLoading ? null : () async {
-                    final role = provider.getEffectiveRole();
-                    final userType = role == UserRole.patient 
-                        ? UserType.patient 
-                        : UserType.pharmacist;
-                    
-                    await ref.read(authProvider.notifier).mockSignIn(userType);
-                    // Redirect is handled by app_router.dart automatically
-                  },
-                  child: authState.isLoading 
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Continue'),
+                  onPressed: () => context.push(AppRoutes.login),
+                  child: const Text('Login'),
+                ),
+                const SizedBox(height: 16),
+                KElevatedButton(
+                  onPressed: () => context.push(AppRoutes.signup),
+                  backgroundColor: Colors.white,
+                  textColor: theme.pharmacist.bg,
+                  child: const Text('Sign Up'),
                 ),
               ],
             ),

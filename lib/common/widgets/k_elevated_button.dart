@@ -10,7 +10,9 @@ class KElevatedButton extends ConsumerWidget {
     super.key,
     required this.onPressed,
     required this.child,
-    this.color,
+    this.backgroundColor,
+    this.textColor,
+    this.borderColor,
     this.useProvider = false,
     this.buttonId,
     this.role,
@@ -19,7 +21,9 @@ class KElevatedButton extends ConsumerWidget {
 
   final void Function()? onPressed;
   final Widget child;
-  final Color? color;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final Color? borderColor;
   final bool useProvider;
   final String? buttonId;
   final UserRole? role;
@@ -31,7 +35,9 @@ class KElevatedButton extends ConsumerWidget {
     if (useProvider) {
       return _KElevatedButtonWithProvider(
         onPressed: onPressed,
-        color: color,
+        backgroundColor: backgroundColor,
+        textColor: textColor,
+        borderColor: borderColor,
         buttonId: buttonId,
         role: role,
         useRoleBasedStyling: useRoleBasedStyling,
@@ -47,8 +53,9 @@ class KElevatedButton extends ConsumerWidget {
     );
     final isActuallyLoading = globalLoading;
 
-    Color? getRoleBasedColor() {
-      if (!useRoleBasedStyling || color != null) return color;
+    Color? getBgColor() {
+      if (backgroundColor != null) return backgroundColor;
+      if (!useRoleBasedStyling) return AppTheme.colors(context).neutral.bg00;
 
       switch (effectiveRole) {
         case UserRole.patient:
@@ -63,13 +70,16 @@ class KElevatedButton extends ConsumerWidget {
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: getRoleBasedColor(),
+        backgroundColor: getBgColor(),
+        foregroundColor: textColor,
         disabledBackgroundColor: AppTheme.colors(context).neutral.bg00,
+        side: borderColor != null ? BorderSide(color: borderColor!) : null,
         minimumSize: Size(
-          // double.infinity, --- IGNORE ---
-          //  look more into a better way to handle this
-          MediaQuery.widthOf(context) - 16 ,
+          MediaQuery.sizeOf(context).width - 16,
           context.figmaHeight(50),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
       onPressed: isActuallyLoading ? null : onPressed,
@@ -93,7 +103,9 @@ class _KElevatedButtonWithProvider extends ConsumerWidget {
   const _KElevatedButtonWithProvider({
     required this.onPressed,
     required this.child,
-    this.color,
+    this.backgroundColor,
+    this.textColor,
+    this.borderColor,
     this.buttonId,
     this.role,
     this.useRoleBasedStyling = true,
@@ -101,7 +113,9 @@ class _KElevatedButtonWithProvider extends ConsumerWidget {
 
   final void Function()? onPressed;
   final Widget child;
-  final Color? color;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final Color? borderColor;
   final String? buttonId;
   final UserRole? role;
   final bool useRoleBasedStyling;
@@ -116,8 +130,9 @@ class _KElevatedButtonWithProvider extends ConsumerWidget {
     final effectiveRole = role ?? ref.watch(kButtonRoleProvider);
     final isActuallyLoading = buttonState.isLoading || buttonState.isDisabled;
 
-    Color? getRoleBasedColor() {
-      if (!useRoleBasedStyling || color != null) return color;
+    Color? getBgColor() {
+      if (backgroundColor != null) return backgroundColor;
+      if (!useRoleBasedStyling) return AppTheme.colors(context).neutral.bg;
 
       switch (effectiveRole) {
         case UserRole.patient:
@@ -181,11 +196,16 @@ class _KElevatedButtonWithProvider extends ConsumerWidget {
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: getRoleBasedColor(),
+        backgroundColor: getBgColor(),
+        foregroundColor: textColor,
         disabledBackgroundColor: AppTheme.colors(
           context,
         ).neutral.placeholderDisabled,
+        side: borderColor != null ? BorderSide(color: borderColor!) : null,
         minimumSize: Size(double.infinity, context.figmaHeight(50)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
       onPressed: isActuallyLoading ? null : onPressed,
       child: buildButtonContent(),

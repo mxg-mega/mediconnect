@@ -20,10 +20,10 @@ class PatientPersonalInfoForm extends StatefulWidget {
 
   @override
   State<PatientPersonalInfoForm> createState() =>
-      _PatientPersonalInfoFormState();
+      PatientPersonalInfoFormState();
 }
 
-class _PatientPersonalInfoFormState extends State<PatientPersonalInfoForm> {
+class PatientPersonalInfoFormState extends State<PatientPersonalInfoForm> {
   final fullName = TextEditingController();
 
   final phoneNumber = TextEditingController();
@@ -39,6 +39,19 @@ class _PatientPersonalInfoFormState extends State<PatientPersonalInfoForm> {
   final address = TextEditingController();
 
   final emergencyContact = TextEditingController();
+
+  void quickFill() {
+    setState(() {
+      fullName.text = 'Patient Test';
+      email.text = 'patient@test.com';
+      phoneNumber.text = '08012345678';
+      dateOfBirth = DateTime(1995, 5, 20);
+      dateOfBirthController.text = '20/5/1995';
+      genderValue = 'male';
+      address.text = '456 Test Street, Lagos';
+      emergencyContact.text = '08098765432';
+    });
+  }
 
   @override
   void dispose() {
