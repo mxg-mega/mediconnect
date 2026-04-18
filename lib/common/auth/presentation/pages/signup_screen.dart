@@ -51,10 +51,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           password: _passwordController.text,
           firstName: _firstNameController.text,
           lastName: _lastNameController.text,
-          phoneNumber: _phoneNumberController.text,
         );
         if (mounted) {
-          context.go('/'); // Navigate to home on successful signup
+          context.go('/code-verification', extra: const SetupFinalizationPage());
         }
       } catch (e) {
         if (mounted) {
@@ -249,11 +248,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               ),
               const SizedBox(height: 20),
               KElevatedButton(
-                // Temporarily commented out to avoid errors
-                // onPressed: authState.isLoading ? null : _submitForm,
-                onPressed: () {
-                  context.push('/code-verification', extra: const SetupFinalizationPage());
-                },
+                onPressed: authState.isLoading ? null : _submitForm,
                 child: authState.isLoading
                     ? const CircularProgressIndicator()
                     : const Text('Next'),

@@ -5,23 +5,16 @@ import 'package:mediconnect/core/constants/colors.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/core/providers/settings_provider.dart';
 
-class NotificationSettingsPage extends ConsumerStatefulWidget {
+class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
 
   @override
-  ConsumerState<NotificationSettingsPage> createState() => _NotificationSettingsPageState();
-}
-
-class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsPage> {
-  bool _lowStock = true;
-  bool _expiringMed = true;
-  bool _reviewUpdates = true;
-  bool _appUpdates = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = AppTheme.colors(context);
+    final settings = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
 
     return AppScaffold(
       title: const Text('Notification'),
@@ -30,34 +23,38 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
         child: Column(
           children: [
             _buildNotificationToggle(
+              context,
               'Low stock alerts',
               'Receive notifications when a medication is running low',
-              _lowStock,
-              (val) => setState(() => _lowStock = val),
+              settings.notifications['low_stock'] ?? true,
+              (val) => notifier.updateNotification('low_stock', val),
               theme,
             ),
             SizedBox(height: context.figmaHeight(16)),
             _buildNotificationToggle(
+              context,
               'Expiring medication reminders',
               'Receive notifications when a medication is about to expire',
-              _expiringMed,
-              (val) => setState(() => _expiringMed = val),
+              settings.notifications['expiry'] ?? true,
+              (val) => notifier.updateNotification('expiry', val),
               theme,
             ),
             SizedBox(height: context.figmaHeight(16)),
             _buildNotificationToggle(
+              context,
               'Review Updates',
               'Receive notifications when someone comments or drops a review',
-              _reviewUpdates,
-              (val) => setState(() => _reviewUpdates = val),
+              settings.notifications['reviews'] ?? true,
+              (val) => notifier.updateNotification('reviews', val),
               theme,
             ),
             SizedBox(height: context.figmaHeight(16)),
             _buildNotificationToggle(
+              context,
               'App updates',
               'Receive notifications about new features and updates',
-              _appUpdates,
-              (val) => setState(() => _appUpdates = val),
+              settings.notifications['app_updates'] ?? false,
+              (val) => notifier.updateNotification('app_updates', val),
               theme,
             ),
           ],
@@ -67,6 +64,7 @@ class _NotificationSettingsPageState extends ConsumerState<NotificationSettingsP
   }
 
   Widget _buildNotificationToggle(
+    BuildContext context,
     String title,
     String subtitle,
     bool value,

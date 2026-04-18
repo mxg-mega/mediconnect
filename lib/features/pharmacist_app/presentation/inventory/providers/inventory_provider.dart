@@ -179,10 +179,11 @@ class InventoryNotifier extends StateNotifier<InventoryState> {
 
 final inventoryProvider = StateNotifierProvider<InventoryNotifier, InventoryState>((ref) {
   final repository = ref.watch(inventoryRepositoryProvider);
-  final user = ref.watch(currentUserProvider);
+  final pharmacyIdAsync = ref.watch(currentPharmacyIdProvider);
+  final pharmacyId = pharmacyIdAsync.valueOrNull;
   
   return InventoryNotifier(
     repository: repository,
-    pharmacyId: user?.pharmacyId,
+    pharmacyId: pharmacyId,
   );
 });

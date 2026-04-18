@@ -1,13 +1,12 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/widgets/logo.dart';
-import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
-import 'package:mediconnect/core/router/routes_names.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
@@ -16,73 +15,58 @@ class WelcomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = ref.read(appScaffoldProvider.notifier);
     final theme = AppTheme.colors(context);
+    final user = ref.watch(currentUserProvider);
 
     return AppScaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  height: context.figmaHeight(100),
-                  width: context.figmaWidth(90),
-                  decoration: ShapeDecoration(
-                    shape: StarBorder.polygon(sides: 6.0),
-                    color: provider.getBackgroundColor(),
-                  ),
-                  child: Center(child: Logo()),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(context.figmaWidth(24)),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: context.figmaHeight(120),
+                width: context.figmaWidth(120),
+                decoration: BoxDecoration(
+                  color: user?.userType == UserType.patient
+                      ? theme.patient.bg.withValues(alpha: 0.1)
+                      : theme.pharmacist.bg.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
                 ),
-                Text(
-                  'Welcome to Medconnect!',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.interP22R.copyWith(
-                    color: theme.neutral.primaryText,
-                  ),
+                child: Center(child: Logo()),
+              ),
+              SizedBox(height: context.figmaHeight(32)),
+              Text(
+                'Account Setup Complete!',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.inter24M.copyWith(
+                  color: theme.neutral.primaryText,
                 ),
-                const SizedBox(height: 40),
-                KElevatedButton(
-                  onPressed: () => context.push(AppRoutes.login),
-                  child: const Text('Login'),
+              ),
+              SizedBox(height: context.figmaHeight(16)),
+              Text(
+                'Welcome to Medconnect, ${user?.firstName ?? 'User'}. Your account is ready. You can now access your dashboard.',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.interP16R.copyWith(
+                  color: theme.neutral.secondaryText,
                 ),
-                const SizedBox(height: 16),
-                KElevatedButton(
-                  onPressed: () => context.push(AppRoutes.signup),
-                  backgroundColor: Colors.white,
-                  textColor: theme.pharmacist.bg,
-                  child: const Text('Sign Up'),
-                ),
-              ],
-            ),
+              ),
+              const Spacer(),
+              KElevatedButton(
+                onPressed: () {
+                  if (user?.userType == UserType.patient) {
+                    context.go('/patient/dashboard');
+                  } else {
+                    context.go('/pharmacist/dashboard');
+                  }
+                },
+                child: const Text('Go to Dashboard'),
+              ),
+              SizedBox(height: context.figmaHeight(20)),
+            ],
           ),
-
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text:
-                      'If you see your application status still pending. Contact us at ',
-                  style: AppTextStyles.p14Sm.copyWith(
-                    color: theme.neutral.secondaryText,
-                  ),
-                ),
-                TextSpan(
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      // Handle tap on email
-                    },
-                  text: ' MedConnect@gmail.com',
-                  style: AppTextStyles.interP14M.copyWith(
-                    color: theme.neutral.bg00,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

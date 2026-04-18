@@ -9,6 +9,7 @@ import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart'
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/router/routes_names.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 
 class SetupFinalizationPage extends ConsumerStatefulWidget {
   const SetupFinalizationPage({super.key});
@@ -20,6 +21,7 @@ class SetupFinalizationPage extends ConsumerStatefulWidget {
 
 class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
   String? _selectedAccountType;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -36,6 +38,8 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
     const String patientRole = 'patient';
     const String pharmacistRole = 'pharmacist';
 
+    print(_selectedAccountType);
+    print(ref.read(currentUserProvider)?.userType);
     return AppScaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -114,17 +118,61 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
                 backgroundColor: _selectedAccountType == patientRole
                     ? theme.patient.bg
                     : theme.pharmacist.bg,
-                onPressed: _selectedAccountType != null
-                    ? () {
-                        context.push(
-                          AppRoutes.informationCapture,
-                          extra: _selectedAccountType == patientRole
-                              ? UserType.patient
-                              : UserType.pharmacist,
-                        );
+                onPressed: _selectedAccountType != null && !_isLoading
+                    ? () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+
+                        final userType = _selectedAccountType == patientRole
+                            ? UserType.patient
+                            : UserType.pharmacist;
+
+                        try {
+                          final currentUser = ref.read(currentUserProvider);
+                          if (currentUser != null) {
+                            final updatedUser = currentUser.copyWith(
+                              userType: userType,
+                            );
+                            await ref
+                                .read(authProvider.notifier)
+                                .updateProfileInfo(updatedUser: updatedUser);
+                          }
+
+                          if (!mounted) return;
+
+                          setState(() {
+                            _isLoading = false;
+                          });
+
+                          print("userType: " + userType.toString());
+                          context.push(
+                            AppRoutes.informationCapture,
+                            extra: userType,
+                          );
+                        } catch (e) {
+                          if (!mounted) return;
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to update role: $e'),
+                            ),
+                          );
+                        }
                       }
                     : null,
-                child: const Text('Continue'),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Continue'),
               ),
             ],
           ),

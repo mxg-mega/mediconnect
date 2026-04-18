@@ -11,7 +11,6 @@ abstract class AuthDataSource {
     required String password,
     required String firstName,
     required String lastName,
-    required String phoneNumber,
   });
 
   Future<UserModel> signIn({
@@ -22,4 +21,6 @@ abstract class AuthDataSource {
   Future<void> signOut();
 
   Future<UserModel?> getCurrentUser();
+
+  Future<UserModel> updateUser(UserModel user);
 }

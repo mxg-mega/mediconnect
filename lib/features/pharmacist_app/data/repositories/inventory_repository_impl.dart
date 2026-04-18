@@ -9,7 +9,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> _inventoryRef(String pharmacyId) =>
-      _firestore.collection('pharmacies').doc(pharmacyId).collection('inventory');
+      _firestore.collection('businesses').doc(pharmacyId).collection('inventory');
 
   @override
   Stream<List<InventoryItem>> getInventory(String pharmacyId) {

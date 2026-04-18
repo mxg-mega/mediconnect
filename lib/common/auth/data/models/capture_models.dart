@@ -211,25 +211,25 @@ class PharmacyInfoInput extends Equatable {
 }
 
 class PharmacyVerificationInput extends Equatable {
-  final String frontalImagePath;
-  final String licensePath;
-  final String businessRegPath;
-  final String pcnIdNumber;
-  final String agencySelection;
-  final String pcnCertificatePath;
-  final String addressProofPath;
-  final String additionalCertPath;
+  final String? frontalImagePath;
+  final String? licensePath;
+  final String? businessRegPath;
+  final String? pcnIdNumber;
+  final String? agencySelection;
+  final String? pcnCertificatePath;
+  final String? addressProofPath;
+  final String? additionalCertPath;
   final bool consentAccepted;
 
   const PharmacyVerificationInput({
-    required this.frontalImagePath,
-    required this.licensePath,
-    required this.businessRegPath,
-    required this.pcnIdNumber,
-    required this.agencySelection,
-    required this.pcnCertificatePath,
-    required this.addressProofPath,
-    required this.additionalCertPath,
+    this.frontalImagePath,
+    this.licensePath,
+    this.businessRegPath,
+    this.pcnIdNumber,
+    this.agencySelection,
+    this.pcnCertificatePath,
+    this.addressProofPath,
+    this.additionalCertPath,
     required this.consentAccepted,
   });
 

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/core/router/routes_names.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/profile/domain/pharmacist_profile.dart';
 
 final profileProvider = Provider<PharmacistProfile>((ref) {
+  final user = ref.watch(currentUserProvider);
+  
   return PharmacistProfile(
-    name: 'Pharmacist Muneer',
-    isVerified: true,
-    avatarUrl: '', // Use empty string to trigger local placeholder
+    name: user?.fullName ?? 'Pharmacist',
+    isVerified: user?.isVerified ?? false,
+    avatarUrl: user?.profileImageUrl ?? '',
     sections: [
       ProfileSection(
         title: 'Account',
@@ -26,7 +29,7 @@ final profileProvider = Provider<PharmacistProfile>((ref) {
           ),
           ProfileItem(
             title: 'Pharmacy Verification',
-            subtitle: 'Track conditions, medications & allergies',
+            subtitle: 'Track status of your pharmacy verification',
             icon: Icons.verified_user_outlined,
             route: AppRoutes.pharmacistPharmacyVerification,
           ),

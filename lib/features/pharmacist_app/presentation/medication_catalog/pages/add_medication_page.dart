@@ -322,8 +322,10 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
 
   void _onSave() async {
     if (_formKey.currentState!.validate()) {
-      final user = ref.read(currentUserProvider);
-      if (user?.pharmacyId == null) {
+      final pharmacyIdAsync = ref.read(currentPharmacyIdProvider);
+      final pharmacyId = pharmacyIdAsync.valueOrNull;
+      
+      if (pharmacyId == null || pharmacyId.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error: No pharmacy associated with your account.')),
         );
@@ -332,7 +334,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
 
       final newItem = InventoryItem(
         id: const Uuid().v4(),
-        pharmacyId: user!.pharmacyId!, 
+        pharmacyId: pharmacyId, 
         medicationId: widget.medication?.id ?? const Uuid().v4(),
         medicationName: _nameController.text,
         brandName: _brandNameController.text,

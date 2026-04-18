@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/core/constants/assets.dart';
@@ -9,6 +10,7 @@ import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 import 'package:mediconnect/features/pharmacist_app/domain/models/dispense_record.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/providers/dispense_history_provider.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/widgets/dispense_record_card.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/widgets/filter_bottom_sheet.dart';
 
@@ -23,81 +25,18 @@ class DispenseHistoryPage extends ConsumerStatefulWidget {
 class _DispenseHistoryPageState extends ConsumerState<DispenseHistoryPage> {
   final TextEditingController _searchController = TextEditingController();
 
-  // Dummy data
-  final List<DispenseRecord> dummyRecords = [
-    DispenseRecord(
-      id: '1',
-      saleId: '-S-20260106-0001',
-      recordedByRole: 'Staff',
-      recordedByName: 'Yusuf A.',
-      recordedAt: DateTime(2026, 1, 6, 20, 47, 10),
-      totalAmount: 8500,
-      items: [
-        DispensedItem(
-          medicationName: 'Amoxicillin 500 mg',
-          brandName: 'Amoxil',
-          manufacturer: 'GSK',
-          isBrand: true,
-          quantity: 2,
-          unitPrice: 2500,
-          totalPrice: 5000,
-        ),
-        DispensedItem(
-          medicationName: 'Ibuprofen 500mg',
-          brandName: 'Advil',
-          manufacturer: 'Pfizer',
-          isBrand: true,
-          quantity: 1,
-          unitPrice: 3500,
-          totalPrice: 3500,
-        ),
-      ],
-    ),
-    DispenseRecord(
-      id: '2',
-      saleId: '-S-20260106-0002',
-      recordedByRole: 'Staff',
-      recordedByName: 'Yusuf A.',
-      recordedAt: DateTime(2026, 1, 6, 19, 03, 40),
-      totalAmount: 4700,
-      items: [
-        DispensedItem(
-          medicationName: 'Panadol 500 mg',
-          brandName: 'Panadol',
-          manufacturer: 'GSK',
-          isBrand: true,
-          quantity: 2,
-          unitPrice: 1000,
-          totalPrice: 2000,
-        ),
-      ],
-    ),
-    DispenseRecord(
-      id: '3',
-      saleId: '-S-20260105-0001',
-      recordedByRole: 'Staff',
-      recordedByName: 'Yusuf A.',
-      recordedAt: DateTime(2026, 1, 5, 15, 24, 40),
-      totalAmount: 8500,
-      items: [],
-    ),
-    DispenseRecord(
-      id: '4',
-      saleId: '-S-20251219-0001',
-      recordedByRole: 'Staff',
-      recordedByName: 'Yusuf A.',
-      recordedAt: DateTime(2025, 12, 19, 15, 24, 40),
-      totalAmount: 8500,
-      items: [],
-    ),
-  ];
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.colors(context);
-
-    // Grouping records by Month for dummy purpose
-    final groupedRecords = _groupRecords(dummyRecords);
+    final historyState = ref.watch(dispenseHistoryProvider);
+    final records = historyState.filteredRecords;
+    final groupedRecords = _groupRecords(records);
 
     return AppScaffold(
       hasAppBar: true,
@@ -172,6 +111,9 @@ class _DispenseHistoryPageState extends ConsumerState<DispenseHistoryPage> {
                       color: theme.neutral.secondaryText.withValues(alpha: 0.5),
                     ),
                   ),
+                  onChanged: (value) {
+                    ref.read(dispenseHistoryProvider.notifier).updateSearch(value);
+                  },
                   trailing: [
                     IconButton(
                       icon: SvgPicture.asset(
@@ -201,35 +143,37 @@ class _DispenseHistoryPageState extends ConsumerState<DispenseHistoryPage> {
               ),
               SizedBox(height: context.figmaHeight(24)),
               Expanded(
-                child: dummyRecords.isEmpty
-                    ? _buildEmptyState(context)
-                    : ListView.builder(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: context.figmaWidth(20),
-                        ),
-                        itemCount: groupedRecords.length,
-                        itemBuilder: (context, index) {
-                          final group = groupedRecords[index];
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildDateHeader(context, group.header),
-                              SizedBox(height: context.figmaHeight(16)),
-                              ...group.records.map(
-                                (record) => DispenseRecordCard(
-                                  record: record,
-                                  onTap: () {
-                                    context.push(
-                                      '/pharmacist/dispense-history/receipt',
-                                      extra: record,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                child: historyState.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : records.isEmpty
+                        ? _buildEmptyState(context)
+                        : ListView.builder(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: context.figmaWidth(20),
+                            ),
+                            itemCount: groupedRecords.length,
+                            itemBuilder: (context, index) {
+                              final group = groupedRecords[index];
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildDateHeader(context, group.header),
+                                  SizedBox(height: context.figmaHeight(16)),
+                                  ...group.records.map(
+                                    (record) => DispenseRecordCard(
+                                      record: record,
+                                      onTap: () {
+                                        context.push(
+                                          '/pharmacist/dispense-history/receipt',
+                                          extra: record,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
               ),
             ],
           ),
@@ -294,7 +238,6 @@ class _DispenseHistoryPageState extends ConsumerState<DispenseHistoryPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Illustration placeholder
           Container(
             width: context.figmaWidth(200),
             height: context.figmaHeight(200),
@@ -332,35 +275,33 @@ class _DispenseHistoryPageState extends ConsumerState<DispenseHistoryPage> {
   }
 
   List<_RecordGroup> _groupRecords(List<DispenseRecord> records) {
-    // Simplified grouping for dummy data
-    // In a real app, this would be more dynamic
+    if (records.isEmpty) return [];
+
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final monthFormat = DateFormat('MMM yyyy');
+
     final todayRecords = records
-        .where(
-          (r) =>
-              r.recordedAt.year == 2026 &&
-              r.recordedAt.month == 1 &&
-              r.recordedAt.day == 6,
-        )
+        .where((r) => r.recordedAt.isAfter(todayStart))
         .toList();
-    final janRecords = records
-        .where(
-          (r) =>
-              r.recordedAt.year == 2026 &&
-              r.recordedAt.month == 1 &&
-              r.recordedAt.day != 6,
-        )
+
+    final olderRecords = records
+        .where((r) => !r.recordedAt.isAfter(todayStart))
         .toList();
-    final decRecords = records
-        .where((r) => r.recordedAt.year == 2025 && r.recordedAt.month == 12)
-        .toList();
+
+    // Group older records by month
+    final Map<String, List<DispenseRecord>> monthGroups = {};
+    for (final record in olderRecords) {
+      final key = monthFormat.format(record.recordedAt);
+      monthGroups.putIfAbsent(key, () => []).add(record);
+    }
 
     return [
       if (todayRecords.isNotEmpty)
         _RecordGroup(header: 'Today', records: todayRecords),
-      if (janRecords.isNotEmpty)
-        _RecordGroup(header: 'Jan', records: janRecords),
-      if (decRecords.isNotEmpty)
-        _RecordGroup(header: 'Dec', records: decRecords),
+      ...monthGroups.entries.map(
+        (entry) => _RecordGroup(header: entry.key, records: entry.value),
+      ),
     ];
   }
 }

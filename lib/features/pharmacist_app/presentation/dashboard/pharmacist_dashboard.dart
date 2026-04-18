@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/router/k_navigate.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/dashboard/dashboard_provider.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/pages/dispense_entry_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/notification/notification_page.dart';
 import 'package:mediconnect/features/pharmacist_app/widgets/recent_dispense_section.dart';
 import 'package:mediconnect/features/pharmacist_app/widgets/sales_activity_card.dart';
 import 'package:mediconnect/features/pharmacist_app/widgets/stat_card.dart';
 
-class PharmacistDashboard extends StatelessWidget {
+class PharmacistDashboard extends ConsumerWidget {
   const PharmacistDashboard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = AppTheme.colors(context);
-    bool hasNotification = true;
+    final authState = ref.watch(authProvider);
+    final dashboard = ref.watch(dashboardProvider);
+
+    final userName = authState.user?.firstName ?? 'Pharmacist';
 
     return AppScaffold(
       body: SingleChildScrollView(
@@ -43,8 +49,8 @@ class PharmacistDashboard extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: context.figmaWidth(24),
-                            backgroundColor: Colors.blue.shade50.withOpacity(
-                              0.2,
+                            backgroundColor: Colors.blue.shade50.withValues(
+                              alpha: 0.2,
                             ),
                             child: SvgPicture.asset(
                               AppIcons.profile,
@@ -72,7 +78,7 @@ class PharmacistDashboard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hello, Pharmacist Muneer',
+                            'Hello, $userName',
                             style: AppTextStyles.p14Sm.copyWith(
                               color: theme.neutral.buttonTextWhite,
                               overflow: TextOverflow.ellipsis,
@@ -81,8 +87,8 @@ class PharmacistDashboard extends StatelessWidget {
                           Text(
                             'How are you today?',
                             style: AppTextStyles.interP12R.copyWith(
-                              color: theme.neutral.buttonTextWhite.withOpacity(
-                                0.8,
+                              color: theme.neutral.buttonTextWhite.withValues(
+                                alpha: 0.8,
                               ),
                             ),
                           ),
@@ -143,7 +149,10 @@ class PharmacistDashboard extends StatelessWidget {
             SizedBox(height: context.figmaHeight(24)),
 
             // Sales Activity
-            const SalesActivityCard(),
+            SalesActivityCard(
+              totalSales: dashboard.todaySalesTotal,
+              itemsSold: dashboard.todayItemsSold,
+            ),
             SizedBox(height: context.figmaHeight(24)),
 
             // Stats Grid
@@ -153,7 +162,7 @@ class PharmacistDashboard extends StatelessWidget {
                 children: [
                   StatCard(
                     title: 'Average Rating',
-                    value: '4.0',
+                    value: dashboard.averageRating.toStringAsFixed(1),
                     subtitle: 'Inventory',
                     backgroundColor: theme.support.yellow,
                     valueColor: theme.neutral.primaryText,
@@ -171,7 +180,7 @@ class PharmacistDashboard extends StatelessWidget {
                   SizedBox(width: context.figmaWidth(16)),
                   StatCard(
                     title: 'Total SKUs',
-                    value: '1,028',
+                    value: _formatNumber(dashboard.totalSkus),
                     subtitle: 'Inventory',
                     backgroundColor: theme.support.blue,
                     valueColor: theme.support.blue,
@@ -188,7 +197,7 @@ class PharmacistDashboard extends StatelessWidget {
                 children: [
                   StatCard(
                     title: 'Low Stock',
-                    value: '53',
+                    value: dashboard.lowStockCount.toString(),
                     subtitle: 'Needs attention',
                     backgroundColor: theme.support.red,
                     valueColor: theme.support.red,
@@ -197,7 +206,7 @@ class PharmacistDashboard extends StatelessWidget {
                   SizedBox(width: context.figmaWidth(16)),
                   StatCard(
                     title: 'Expiring',
-                    value: '28',
+                    value: dashboard.expiringCount.toString(),
                     subtitle: 'Within 30 days',
                     backgroundColor: theme.support.orange,
                     valueColor: theme.support.orange,
@@ -209,18 +218,27 @@ class PharmacistDashboard extends StatelessWidget {
             SizedBox(height: context.figmaHeight(24)),
 
             // Recent Dispense
-            const RecentDispenseSection(),
+            RecentDispenseSection(
+              records: dashboard.recentDispenses,
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: theme.pharmacist.bg,
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         onPressed: () {
           navigateToPage(context, const DispenseEntryPage());
         },
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(0)},${(number % 1000).toString().padLeft(3, '0')}';
+    }
+    return number.toString();
   }
 }

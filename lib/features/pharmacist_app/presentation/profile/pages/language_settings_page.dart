@@ -5,20 +5,16 @@ import 'package:mediconnect/core/constants/colors.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/core/providers/settings_provider.dart';
 
-class LanguageSettingsPage extends ConsumerStatefulWidget {
+class LanguageSettingsPage extends ConsumerWidget {
   const LanguageSettingsPage({super.key});
 
   @override
-  ConsumerState<LanguageSettingsPage> createState() => _LanguageSettingsPageState();
-}
-
-class _LanguageSettingsPageState extends ConsumerState<LanguageSettingsPage> {
-  String _selectedLanguage = 'English';
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = AppTheme.colors(context);
+    final settings = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
 
     return AppScaffold(
       title: const Text('Language'),
@@ -26,20 +22,27 @@ class _LanguageSettingsPageState extends ConsumerState<LanguageSettingsPage> {
         padding: EdgeInsets.all(context.figmaWidth(16)),
         child: Column(
           children: [
-            _buildLanguageOption('English', 'English', theme),
-            _buildLanguageOption('Hausa', 'Harshen Hausa', theme),
-            _buildLanguageOption('Yoruba', 'Èdè Yorùbá', theme),
-            _buildLanguageOption('Igbo', 'Asụsụ Igbo', theme),
+            _buildLanguageOption(context, 'English', 'English', settings.languageCode, theme, notifier),
+            _buildLanguageOption(context, 'Hausa', 'Harshen Hausa', settings.languageCode, theme, notifier),
+            _buildLanguageOption(context, 'Yoruba', 'Èdè Yorùbá', settings.languageCode, theme, notifier),
+            _buildLanguageOption(context, 'Igbo', 'Asụsụ Igbo', settings.languageCode, theme, notifier),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLanguageOption(String label, String subtitle, AppColorsTheme theme) {
-    final isSelected = _selectedLanguage == label;
+  Widget _buildLanguageOption(
+    BuildContext context,
+    String label, 
+    String subtitle, 
+    String currentCode, 
+    AppColorsTheme theme,
+    SettingsNotifier notifier,
+  ) {
+    final isSelected = currentCode == label;
     return InkWell(
-      onTap: () => setState(() => _selectedLanguage = label),
+      onTap: () => notifier.updateLanguage(label),
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: context.figmaHeight(16)),
         child: Row(

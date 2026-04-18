@@ -16,7 +16,6 @@ class RemoteAuthDataSource extends AuthDataSource {
     required String password,
     required String firstName,
     required String lastName,
-    required String phoneNumber,
   }) async {
     try {
       final response = await storageLayer.post('/auth/signup', {
@@ -24,7 +23,6 @@ class RemoteAuthDataSource extends AuthDataSource {
         'password': password,
         'firstName': firstName,
         'lastName': lastName,
-        'phoneNumber': phoneNumber,
       });
 
       return UserModel.fromJson(response);
@@ -66,6 +64,16 @@ class RemoteAuthDataSource extends AuthDataSource {
       return UserModel.fromJson(response);
     } catch (e) {
       return null; // User not signed in
+    }
+  }
+
+  @override
+  Future<UserModel> updateUser(UserModel user) async {
+    try {
+      final response = await storageLayer.put('/auth/user/${user.id}', user.toJson());
+      return UserModel.fromJson(response);
+    } on Exception catch (e) {
+      throw ServerException(e.toString());
     }
   }
 }

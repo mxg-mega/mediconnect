@@ -45,22 +45,35 @@ import 'package:mediconnect/common/domain/entities/medication.dart' as entity;
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/pages/dispense_history_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/pages/dispense_receipt_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_history/pages/export_receipt_page.dart';
-import 'package:mediconnect/features/pharmacist_app/presentation/terms_and_conditions/data/terms_and_conditions_text.dart';
-import 'package:mediconnect/features/pharmacist_app/presentation/terms_and_conditions/display_page.dart';
-import 'package:mediconnect/features/pharmacist_app/presentation/terms_and_conditions/terms_and_conditions_page.dart';
 import 'package:mediconnect/features/splash_screen/splash_controller.dart';
+import 'package:mediconnect/core/providers/settings_provider.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
   final isSplashFinished = ref.watch(splashFinishedProvider);
+  final settings = ref.watch(settingsProvider);
 
   return GoRouter(
     initialLocation: '/',
     debugLogDiagnostics: true,
 
     redirect: (context, state) {
-      if (!isSplashFinished) return null;
-      if (authState.status == AuthStatus.uninitialized) return null;
+      print('--- ROUTER REDIRECT TRIGGERED ---');
+      print('Current Location: ${state.matchedLocation}');
+      print('Splash Finished: $isSplashFinished');
+      print('Auth Status: ${authState.status}');
+
+      // 1. Wait for splash animation to finish
+      if (!isSplashFinished) {
+        print('Redirect: Waiting for splash to finish (returning null)');
+        return null;
+      }
+
+      // 2. Wait for auth to initialize
+      if (authState.status == AuthStatus.uninitialized) {
+        print('Redirect: Auth is uninitialized (returning null)');
+        return null;
+      }
 
       final isLoggedIn = authState.isAuthenticated;
       final isLoggingIn = state.matchedLocation == '/login';
@@ -72,6 +85,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isFinalization = state.matchedLocation == '/setup-finalization';
       final isCapture = state.matchedLocation == '/information-capture';
 
+      print('Is Logged In: $isLoggedIn');
+      print('Has Seen Onboarding: ${settings.hasSeenOnboarding}');
+
       final isAuthFlow =
           isLoggingIn ||
           isSigningUp ||
@@ -79,23 +95,98 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           isVerification ||
           isFinalization ||
           isCapture;
-      final role = authState.user?.userType ?? UserType.unknown;
 
+      // 3. Unauthenticated flow
       if (!isLoggedIn) {
-        if (isAuthFlow || isOnboarding) return null;
+        if (!settings.hasSeenOnboarding) {
+          if (isOnboarding) {
+            print(
+              'Redirect: Unauthenticated, not seen onboarding, already on onboarding (returning null)',
+            );
+            return null;
+          }
+          print(
+            'Redirect: Unauthenticated, not seen onboarding -> going to /onboarding',
+          );
+          return '/onboarding';
+        }
+
+        // If they've seen onboarding, they must be on an auth page or login
+        // We removed `|| isSplash` here so that the splash screen actually redirects to login when finished!
+        if (isAuthFlow || isOnboarding) {
+          print(
+            'Redirect: Unauthenticated, seen onboarding, on auth flow -> returning null',
+          );
+          return null;
+        }
+
+        if (isSplash) {
+          print(
+            'Redirect: Unauthenticated, seen onboarding, currently on splash -> redirecting to /login',
+          );
+        } else {
+          print(
+            'Redirect: Unauthenticated, seen onboarding, unexpected location -> going to /login',
+          );
+        }
+        return '/login';
+      }
+
+      // 4. Authenticated flow
+      final user = authState.user;
+      final role = user?.userType ?? UserType.unknown;
+      final isProfileComplete = user?.isProfileComplete ?? false;
+
+      print('Role: $role');
+      print('Is Profile Complete: $isProfileComplete');
+
+      // a. Role selection
+      if (role == UserType.unknown) {
+        if (isFinalization) {
+          print(
+            'Redirect: Authenticated, unknown role, on setup-finalization (returning null)',
+          );
+          return null;
+        }
+        print(
+          'Redirect: Authenticated, unknown role -> going to /setup-finalization',
+        );
+        return '/setup-finalization';
+      }
+
+      // b. Information capture
+      if (!isProfileComplete) {
+        if (isCapture) {
+          print(
+            'Redirect: Authenticated, profile incomplete, on capture (returning null)',
+          );
+          return null;
+        }
+        print(
+          'Redirect: Authenticated, profile incomplete -> going to /information-capture',
+        );
+        return '/information-capture';
+      }
+
+      // c. Welcome (Success) Page - User lands here after capture
+      // If they are logged in and complete but still on auth/setup pages, show Welcome
+      if (isAuthFlow || isSplash || isOnboarding) {
+        if (isWelcome) {
+          print(
+            'Redirect: Authenticated, profile complete, on welcome (returning null)',
+          );
+          return null;
+        }
+        print(
+          'Redirect: Authenticated, profile complete, on auth/splash -> going to /welcome (or pharmacist/dashboard)',
+        );
+
+        // Let's redirect to dashboard instead of welcome if role is complete?
+        // Let's just print for now and redirect to welcome.
         return '/welcome';
       }
 
-      if (isLoggedIn && (isAuthFlow || isSplash || isOnboarding)) {
-        if (role == UserType.unknown) {
-          return '/setup-finalization';
-        } else if (role == UserType.patient) {
-          return '/patient/dashboard';
-        } else {
-          return '/pharmacist/dashboard';
-        }
-      }
-
+      print('Redirect: Allow normal navigation (returning null)');
       return null;
     },
 
@@ -134,7 +225,16 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/information-capture',
         builder: (context, state) {
-          final role = state.extra as UserType? ?? UserType.patient;
+          final authState = ref.read(authProvider);
+          final savedRole = authState.user?.userType;
+          
+          final role = state.extra as UserType? ?? savedRole ?? UserType.patient;
+          
+          print("Information Capture Route Builder:");
+          print(" - state.extra: ${state.extra}");
+          print(" - authState.user.userType: $savedRole");
+          print(" - Resolved Role: $role");
+          
           return InformationCapturePage(role: role);
         },
       ),
@@ -266,26 +366,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dispense-entry',
         builder: (context, state) => const DispenseEntryPage(),
-      ),
-      GoRoute(
-        path: '/pharmacist/terms-privacy',
-        builder: (context, state) => const TermsAndConditionsPage(),
-      ),
-
-      GoRoute(
-        path: '/pharmacist/terms-privacy/privacy-policy',
-        builder: (context, state) => DisplayPage(
-          title: 'Privacy Policy',
-          content: termsAndConditionsText[1],
-        ),
-      ),
-
-      GoRoute(
-        path: '/pharmacist/terms-privacy/terms-of-service',
-        builder: (context, state) => DisplayPage(
-          title: 'Terms of Service',
-          content: termsAndConditionsText[0],
-        ),
       ),
 
       // Patient Shell

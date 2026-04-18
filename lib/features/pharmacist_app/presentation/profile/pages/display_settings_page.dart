@@ -5,20 +5,16 @@ import 'package:mediconnect/core/constants/colors.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/core/providers/settings_provider.dart';
 
-class DisplaySettingsPage extends ConsumerStatefulWidget {
+class DisplaySettingsPage extends ConsumerWidget {
   const DisplaySettingsPage({super.key});
 
   @override
-  ConsumerState<DisplaySettingsPage> createState() => _DisplaySettingsPageState();
-}
-
-class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
-  String _selectedTheme = 'Light';
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = AppTheme.colors(context);
+    final settings = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
 
     return AppScaffold(
       title: const Text('Display'),
@@ -32,19 +28,26 @@ class _DisplaySettingsPageState extends ConsumerState<DisplaySettingsPage> {
               style: AppTextStyles.interP16Sm.copyWith(color: theme.neutral.secondaryText),
             ),
             SizedBox(height: context.figmaHeight(16)),
-            _buildThemeOption('System default', theme),
-            _buildThemeOption('Light', theme),
-            _buildThemeOption('Dark', theme),
+            _buildThemeOption(context, 'System default', ThemeMode.system, settings.themeMode, theme, notifier),
+            _buildThemeOption(context, 'Light', ThemeMode.light, settings.themeMode, theme, notifier),
+            _buildThemeOption(context, 'Dark', ThemeMode.dark, settings.themeMode, theme, notifier),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildThemeOption(String label, AppColorsTheme theme) {
-    final isSelected = _selectedTheme == label;
+  Widget _buildThemeOption(
+    BuildContext context,
+    String label, 
+    ThemeMode mode, 
+    ThemeMode currentMode, 
+    AppColorsTheme theme,
+    SettingsNotifier notifier,
+  ) {
+    final isSelected = mode == currentMode;
     return InkWell(
-      onTap: () => setState(() => _selectedTheme = label),
+      onTap: () => notifier.updateThemeMode(mode),
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: context.figmaHeight(12)),
         child: Row(

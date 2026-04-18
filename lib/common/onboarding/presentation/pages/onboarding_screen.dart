@@ -7,6 +7,7 @@ import 'package:mediconnect/common/onboarding/presentation/pages/widgets/page_in
 import 'package:mediconnect/common/onboarding/presentation/pages/widgets/presentation_widget.dart';
 import 'package:mediconnect/common/onboarding/presentation/providers/onboarding_provider.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
+import 'package:mediconnect/core/providers/settings_provider.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
@@ -18,9 +19,17 @@ class OnboardingScreen extends ConsumerWidget {
     final onboardingState = ref.watch(onboardingProvider);
 
     return AppScaffold(
+      removeBodyPadding: true,
       scaffoldActions: [
         TextButton(
-          onPressed: () {},
+          onPressed: () async {
+            // Mark onboarding as seen in persistent settings
+            await ref.read(settingsProvider.notifier).setHasSeenOnboarding(true);
+            
+            if (context.mounted) {
+              context.go('/login'); // Go to login after onboarding
+            }
+          },
           style: TextButton.styleFrom(
             foregroundColor: AppTheme.colors(context).support.red,
           ),
@@ -34,12 +43,12 @@ class OnboardingScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(color: Colors.white),
+        decoration: const BoxDecoration(color: Colors.white),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             SizedBox(
               height: context.figmaHeight(467),
               width: context.figmaWidth(392),
@@ -57,25 +66,23 @@ class OnboardingScreen extends ConsumerWidget {
                 },
               ),
             ),
-            // const SizedBox(height: 10),
             PageIndicator(
               currentIndex: onboardingState.currentPageIndex,
               totalPages: orientationPages.length,
             ),
-            Spacer(),
+            const Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 50),
               ),
               onPressed: onboardingState.isLoading
                   ? null
                   : () async {
-                      final onboardingNotifier = ref.read(
-                        onboardingProvider.notifier,
-                      );
-                      await onboardingNotifier.completeOnboarding();
+                      // Mark onboarding as seen in persistent settings
+                      await ref.read(settingsProvider.notifier).setHasSeenOnboarding(true);
+                      
                       if (context.mounted) {
-                        context.go('/'); // Navigate to the main app
+                        context.go('/login'); // Go to login after onboarding
                       }
                     },
               child: onboardingState.isLoading

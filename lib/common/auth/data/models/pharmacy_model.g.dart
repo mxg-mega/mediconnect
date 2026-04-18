@@ -111,9 +111,10 @@ Map<String, dynamic> _$PharmacyModelToJson(PharmacyModel instance) =>
       'logo_url': instance.logoUrl,
       'license_document_urls': instance.licenseDocumentUrls,
       'pcn_registration_number': instance.pcnRegistrationNumber,
-      'operating_hours': instance.operatingHours,
-      'location': instance.location,
-      'rating': instance.rating,
+      'operating_hours':
+          instance.operatingHours.map((e) => e.toJson()).toList(),
+      'location': instance.location.toJson(),
+      'rating': instance.rating.toJson(),
       'is_verified': instance.isVerified,
       'is_featured': instance.isFeatured,
       'employee_ids': instance.employeeIds,

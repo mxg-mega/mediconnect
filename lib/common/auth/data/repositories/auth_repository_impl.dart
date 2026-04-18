@@ -13,14 +13,12 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String firstName,
     required String lastName,
-    required String phoneNumber,
   }) async {
     return await remoteDataSource.signUp(
       email: email,
       password: password,
       firstName: firstName,
       lastName: lastName,
-      phoneNumber: phoneNumber,
     );
   }
 
@@ -43,5 +41,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserModel?> getCurrentUser() async {
     return await remoteDataSource.getCurrentUser();
+  }
+
+  @override
+  Future<UserModel> updateUser(UserModel user) async {
+    return await remoteDataSource.updateUser(user);
   }
 }

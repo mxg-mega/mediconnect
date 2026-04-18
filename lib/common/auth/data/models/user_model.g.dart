@@ -11,7 +11,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
       email: json['email'] as String,
       firstName: json['first_name'] as String,
       lastName: json['last_name'] as String,
-      phoneNumber: json['phone_number'] as String,
+      phoneNumber: json['phone_number'] as String?,
       address: json['address'] as String?,
       userType: $enumDecodeNullable(_$UserTypeEnumMap, json['user_type']) ??
           UserType.unknown,
@@ -32,6 +32,7 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
           : DateTime.parse(json['last_login_at'] as String),
       notificationsEnabled: json['notifications_enabled'] as bool? ?? true,
       themePreference: json['theme_preference'] as String? ?? 'system',
+      isProfileComplete: json['is_profile_complete'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -54,6 +55,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
       'last_login_at': instance.lastLoginAt?.toIso8601String(),
       'notifications_enabled': instance.notificationsEnabled,
       'theme_preference': instance.themePreference,
+      'is_profile_complete': instance.isProfileComplete,
     };
 
 const _$UserTypeEnumMap = {

@@ -79,7 +79,7 @@ class UserModel extends Equatable {
   final String email;
   final String firstName;
   final String lastName;
-  final String phoneNumber;
+  final String? phoneNumber;
   final String? address;
   final UserType userType;
   final String? pharmacyId; // For pharmacists
@@ -93,13 +93,14 @@ class UserModel extends Equatable {
   final DateTime? lastLoginAt;
   final bool notificationsEnabled;
   final String themePreference; // light | dark | system
+  final bool isProfileComplete;
 
   const UserModel({
     required this.id,
     required this.email,
     required this.firstName,
     required this.lastName,
-    required this.phoneNumber,
+    this.phoneNumber,
     this.address,
     this.userType = UserType.unknown,
     this.pharmacyId,
@@ -113,6 +114,7 @@ class UserModel extends Equatable {
     this.lastLoginAt,
     this.notificationsEnabled = true,
     this.themePreference = 'system',
+    this.isProfileComplete = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -146,6 +148,7 @@ class UserModel extends Equatable {
     lastLoginAt,
     notificationsEnabled,
     themePreference,
+    isProfileComplete,
   ];
 
   UserModel copyWith({
@@ -167,6 +170,7 @@ class UserModel extends Equatable {
     DateTime? lastLoginAt,
     bool? notificationsEnabled,
     String? themePreference,
+    bool? isProfileComplete,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -187,6 +191,7 @@ class UserModel extends Equatable {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       themePreference: themePreference ?? this.themePreference,
+      isProfileComplete: isProfileComplete ?? this.isProfileComplete,
     );
   }
 }

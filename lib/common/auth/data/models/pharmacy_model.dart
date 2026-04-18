@@ -4,7 +4,7 @@ import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
 
 part 'pharmacy_model.g.dart';
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
 class OperatingHoursModel extends Equatable {
   final String
   dayOfWeek; // monday | tuesday | wednesday | thursday | friday | saturday | sunday
@@ -60,7 +60,7 @@ class OperatingHoursModel extends Equatable {
   }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
 class GeoLocationModel extends Equatable {
   final double latitude;
   final double longitude;
@@ -109,7 +109,7 @@ class GeoLocationModel extends Equatable {
   }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
 class PharmacyRatingModel extends Equatable {
   final double averageRating; // 1.0 - 5.0
   final int totalReviews;
@@ -159,7 +159,7 @@ class PharmacyRatingModel extends Equatable {
   }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
 class PharmacyModel extends Equatable {
   final String id;
   final String name;

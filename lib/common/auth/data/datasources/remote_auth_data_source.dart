@@ -14,14 +14,12 @@ class RemoteAuthDataSource implements AuthDataSource {
     required String password,
     required String firstName,
     required String lastName,
-    required String phoneNumber,
   }) async {
     final response = await storageLayer.post('/auth/signup', {
       'email': email,
       'password': password,
       'firstName': firstName,
       'lastName': lastName,
-      'phoneNumber': phoneNumber,
     });
     return UserModel.fromJson(response);
   }
@@ -51,5 +49,11 @@ class RemoteAuthDataSource implements AuthDataSource {
     } catch (e) {
       return null;
     }
+  }
+
+  @override
+  Future<UserModel> updateUser(UserModel user) async {
+    final response = await storageLayer.put('/auth/user/${user.id}', user.toJson());
+    return UserModel.fromJson(response);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mediconnect/features/pharmacist_app/domain/models/dummy_medications.dart';
+import 'package:mediconnect/features/pharmacist_app/domain/entities/inventory_item.dart';
 import 'package:mediconnect/features/pharmacist_app/domain/models/medication.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/inventory/providers/inventory_provider.dart';
 
 class DispenseEntryState {
   final List<Medication> selectedMedications;
@@ -23,13 +24,32 @@ class DispenseEntryState {
 }
 
 class DispenseEntryNotifier extends StateNotifier<DispenseEntryState> {
-  DispenseEntryNotifier() : super(DispenseEntryState());
+  final Ref _ref;
+
+  DispenseEntryNotifier(this._ref) : super(DispenseEntryState());
+
+  /// Maps inventory items to the Medication model used in the dispense UI.
+  List<Medication> _inventoryToMedications(List<InventoryItem> items) {
+    return items.map((item) => Medication(
+      id: item.id,
+      name: item.medicationName,
+      brand: item.brandName,
+      manufacturer: item.supplierName ?? '',
+      stock: item.quantityInStock,
+      packSize: item.form,
+      price: item.sellingPrice,
+      imageUrl: item.imageUrl,
+    )).toList();
+  }
 
   List<Medication> get searchResults {
+    final inventoryState = _ref.read(inventoryProvider);
+    final allMeds = _inventoryToMedications(inventoryState.allItems);
+
     if (state.searchQuery.isEmpty) {
-      return dummyMedications;
+      return allMeds;
     }
-    return dummyMedications
+    return allMeds
         .where((med) =>
             med.name.toLowerCase().contains(state.searchQuery.toLowerCase()) ||
             med.brand.toLowerCase().contains(state.searchQuery.toLowerCase()))
@@ -55,4 +75,4 @@ class DispenseEntryNotifier extends StateNotifier<DispenseEntryState> {
 
 final dispenseEntryProvider =
     StateNotifierProvider<DispenseEntryNotifier, DispenseEntryState>(
-        (ref) => DispenseEntryNotifier());
+        (ref) => DispenseEntryNotifier(ref));

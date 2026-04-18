@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/auth/data/models/capture_models.dart';
@@ -7,19 +8,23 @@ import 'package:mediconnect/common/auth/presentation/pages/patient_information_c
 import 'package:mediconnect/common/auth/presentation/pages/pharmacist_infomation_capture/pharmacy_info_form.dart';
 import 'package:mediconnect/common/auth/presentation/pages/pharmacist_infomation_capture/pharmacy_verification_form.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
+import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
+import 'package:mediconnect/core/providers/dependency_providers.dart';
 
-class InformationCapturePage extends StatefulWidget {
+class InformationCapturePage extends ConsumerStatefulWidget {
   const InformationCapturePage({super.key, required this.role});
 
   final UserType role;
 
   @override
-  State<InformationCapturePage> createState() => _InformationCapturePageState();
+  ConsumerState<InformationCapturePage> createState() =>
+      _InformationCapturePageState();
 }
 
-class _InformationCapturePageState extends State<InformationCapturePage>
+class _InformationCapturePageState extends ConsumerState<InformationCapturePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final GlobalKey<FormState> _firstFormKey = GlobalKey<FormState>();
@@ -60,22 +65,77 @@ class _InformationCapturePageState extends State<InformationCapturePage>
     }
   }
 
-  void _completeRegistration() {
+  Future<void> _completeRegistration() async {
     if (_secondFormKey.currentState?.validate() != true) return;
-    final isPatient = widget.role == UserType.patient;
-    final hasPatientData =
-        patientInfoInput != null && medicalHistoryInput != null;
-    final hasPharmacyData =
-        pharmacyInfoInput != null && pharmacyVerificationInput != null;
 
-    if ((isPatient && hasPatientData) || (!isPatient && hasPharmacyData)) {
-      // TODO: hook into persistence/API with the collected inputs.
-      context.go('/welcome');
+    final currentUser = ref.read(authProvider).user;
+    if (currentUser == null) return;
+
+    UserModel updatedUser = currentUser.copyWith(
+      userType: widget.role,
+      isProfileComplete: true,
+    );
+
+    if (widget.role == UserType.patient && patientInfoInput != null) {
+      final names = patientInfoInput!.fullName.split(' ');
+      final fn = names.isNotEmpty ? names.first : null;
+      final ln = names.length > 1 ? names.sublist(1).join(' ') : null;
+
+      updatedUser = updatedUser.copyWith(
+        firstName: fn?.isNotEmpty == true ? fn : null,
+        lastName: ln?.isNotEmpty == true ? ln : null,
+        phoneNumber: patientInfoInput!.phoneNumber.isNotEmpty
+            ? patientInfoInput!.phoneNumber
+            : null,
+        address: patientInfoInput!.address.isNotEmpty
+            ? patientInfoInput!.address
+            : null,
+        gender: patientInfoInput!.gender.isNotEmpty
+            ? patientInfoInput!.gender
+            : null,
+        dateOfBirth: patientInfoInput!.dateOfBirth,
+      );
+    } else if (widget.role == UserType.pharmacist &&
+        pharmacyInfoInput != null) {
+      final usecase = ref.read(createPharmacyUseCaseProvider);
+
+      final pharmacy = Pharmacy(
+        id: '',
+        name: pharmacyInfoInput!.pharmacyName,
+        address: pharmacyInfoInput!.address,
+        phoneNumber: pharmacyInfoInput!.contactNumber,
+        email: pharmacyInfoInput!.email,
+        businessEmail: pharmacyInfoInput!.email,
+        type: pharmacyInfoInput!.type,
+        description: pharmacyInfoInput!.description,
+        operatingHours: const [], // Can implement proper parsing if needed
+        location: const GeoLocation(latitude: 0.0, longitude: 0.0, address: ''),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await usecase(pharmacy, currentUser.id, 'owner');
+    }
+
+    try {
+      await ref
+          .read(authProvider.notifier)
+          .updateProfileInfo(updatedUser: updatedUser);
+      if (mounted) {
+        context.go('/welcome');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    print(widget.role);
     return AppScaffold(
       onBack: () => context.pop(),
       scaffoldActions: [
@@ -87,8 +147,21 @@ class _InformationCapturePageState extends State<InformationCapturePage>
           ),
         ),
         TextButton(
-          onPressed: () {
-            context.go('/welcome');
+          onPressed: () async {
+            final currentUser = ref.read(authProvider).user;
+            if (currentUser != null) {
+              await ref
+                  .read(authProvider.notifier)
+                  .updateProfileInfo(
+                    updatedUser: currentUser.copyWith(
+                      userType: widget.role,
+                      isProfileComplete: true,
+                    ),
+                  );
+            }
+            if (context.mounted) {
+              context.go('/welcome');
+            }
           },
           style: TextButton.styleFrom(
             foregroundColor: AppTheme.colors(context).support.red,
@@ -141,7 +214,7 @@ class _InformationCapturePageState extends State<InformationCapturePage>
       child: Container(
         height: context.figmaHeight(4),
         decoration: BoxDecoration(
-          color: isActive ? color : color.withOpacity(0.3),
+          color: isActive ? color : color.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(context.figmaWidth(2)),
         ),
         child: Center(
@@ -161,6 +234,7 @@ class _InformationCapturePageState extends State<InformationCapturePage>
   Widget _buildFirstForm() {
     if (widget.role == UserType.patient) {
       return PatientPersonalInfoForm(
+        key: _patientFormKey,
         formKey: _firstFormKey,
         onSubmit: (input) {
           patientInfoInput = input;
@@ -169,6 +243,7 @@ class _InformationCapturePageState extends State<InformationCapturePage>
       );
     } else {
       return PharmacyInfoForm(
+        key: _pharmacyFormKey,
         formKey: _firstFormKey,
         onSubmit: (input) {
           pharmacyInfoInput = input;
@@ -196,46 +271,5 @@ class _InformationCapturePageState extends State<InformationCapturePage>
         },
       );
     }
-  }
-}
-
-// Pharmacist placeholder forms
-class PharmacistPersonalInfoForm extends StatelessWidget {
-  const PharmacistPersonalInfoForm({
-    super.key,
-    required this.formKey,
-    required this.onSubmit,
-  });
-
-  final GlobalKey<FormState> formKey;
-  final VoidCallback onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: formKey,
-      child: Column(
-        children: [
-          Text(
-            'Pharmacist Personal Information',
-            style: TextStyle(
-              fontSize: context.figmaFontSize(18),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: context.figmaHeight(32)),
-          Text(
-            'Pharmacist registration form will be implemented here.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: context.figmaFontSize(14),
-              color: Colors.grey[600],
-            ),
-          ),
-          SizedBox(height: context.figmaHeight(32)),
-          ElevatedButton(onPressed: onSubmit, child: const Text('Next')),
-        ],
-      ),
-    );
   }
 }

@@ -64,17 +64,17 @@ class _PharmacistVerificationFormState
           // form contents
           _UploadField(
             label: 'Upload Frontal Pharmacy Image',
-            required: true,
+            // required: true,
             onPick: (path) => frontalPath = path,
           ),
           _UploadField(
             label: 'Pharmacy license upload',
-            required: true,
+            // required: true,
             onPick: (path) => licensePath = path,
           ),
           _UploadField(
             label: 'Proof of Business Registration',
-            required: true,
+            // required: true,
             onPick: (path) => businessRegPath = path,
           ),
 
@@ -100,19 +100,19 @@ class _PharmacistVerificationFormState
           ),
           _UploadField(
             label: 'PCN Certificate Upload',
-            required: true,
+            // required: true,
             onPick: (path) => pcnCertPath = path,
           ),
           _UploadField(
             label: 'Proof of address (utility bill/government ID)',
-            required: true,
+            // required: true,
             onPick: (path) => addressProofPath = path,
           ),
 
           _UploadField(
             label:
                 'Additional Certifications (ISO Certifications, Vaccination Certification, Narcotics License e.t.c)',
-            required: true,
+            // required: true,
             onPick: (path) => additionalCertPath = path,
           ),
 
@@ -129,35 +129,39 @@ class _PharmacistVerificationFormState
                   });
                 },
               ),
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text:
-                          'I hereby certify that all information and documents provided are true, accurate, and belong to the stated pharmacy. I agree to the ',
-                      style: AppTextStyles.interP14R.copyWith(
-                        color: AppTheme.colors(context).neutral.secondaryText,
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.75,
+                child: RichText(
+                  softWrap: true,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text:
+                            'I hereby certify that all information and documents provided are true, accurate, and belong to the stated pharmacy. I agree to the ',
+                        style: AppTextStyles.interP14R.copyWith(
+                          color: AppTheme.colors(context).neutral.secondaryText,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: 'Term of Service',
-                      style: AppTextStyles.interP14R.copyWith(
-                        color: AppTheme.colors(context).support.red,
+                      TextSpan(
+                        text: 'Term of Service',
+                        style: AppTextStyles.interP14R.copyWith(
+                          color: AppTheme.colors(context).support.red,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: ' and ',
-                      style: AppTextStyles.interP14R.copyWith(
-                        color: AppTheme.colors(context).neutral.secondaryText,
+                      TextSpan(
+                        text: ' and ',
+                        style: AppTextStyles.interP14R.copyWith(
+                          color: AppTheme.colors(context).neutral.secondaryText,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: 'Privacy Policy.',
-                      style: AppTextStyles.interP14R.copyWith(
-                        color: AppTheme.colors(context).support.red,
+                      TextSpan(
+                        text: 'Privacy Policy.',
+                        style: AppTextStyles.interP14R.copyWith(
+                          color: AppTheme.colors(context).support.red,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -167,15 +171,18 @@ class _PharmacistVerificationFormState
             children: [
               SvgPicture.asset(
                 AppIcons.lock,
-                colorFilter: ColorFilter.mode(
-                  AppTheme.colors(context).pharmacist.bg,
-                  BlendMode.color,
-                ),
+                // colorFilter: ColorFilter.mode(
+                //   AppTheme.colors(context).pharmacist.bg,
+                //   BlendMode.color,
+                // ),
               ),
-              Text(
-                'All Information are encrypted and securely stored',
-                style: AppTextStyles.interP12R.copyWith(
-                  color: AppTheme.colors(context).neutral.secondaryText,
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Text(
+                  'All Information are encrypted and securely stored',
+                  style: AppTextStyles.interP12R.copyWith(
+                    color: AppTheme.colors(context).neutral.secondaryText,
+                  ),
                 ),
               ),
             ],
@@ -222,17 +229,17 @@ class _PharmacistVerificationFormState
   void _submit() {
     if (widget.formKey.currentState?.validate() != true) return;
     if (!hasCheckedBox) return;
-    if (!_hasFiles()) return;
+    // if (!_hasFiles()) return;
 
     final input = PharmacyVerificationInput(
-      frontalImagePath: frontalPath!,
-      licensePath: licensePath!,
-      businessRegPath: businessRegPath!,
+      frontalImagePath: frontalPath,
+      licensePath: licensePath,
+      businessRegPath: businessRegPath,
       pcnIdNumber: pcnIdController.text.trim(),
       agencySelection: agencyController.text.trim(),
-      pcnCertificatePath: pcnCertPath!,
-      addressProofPath: addressProofPath!,
-      additionalCertPath: additionalCertPath!,
+      pcnCertificatePath: pcnCertPath,
+      addressProofPath: addressProofPath,
+      additionalCertPath: additionalCertPath,
       consentAccepted: hasCheckedBox,
     );
 

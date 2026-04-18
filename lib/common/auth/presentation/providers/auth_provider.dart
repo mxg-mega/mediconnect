@@ -5,6 +5,7 @@ import 'package:mediconnect/common/auth/domain/usecases/get_pharmacy_info_usecas
 import 'package:mediconnect/common/auth/domain/usecases/sign_in_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/sign_up_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/sign_out_use_case.dart';
+import 'package:mediconnect/common/auth/domain/usecases/update_user_profile_use_case.dart';
 import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
 import 'package:mediconnect/core/providers/dependency_providers.dart';
 
@@ -55,12 +56,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SignOutUseCase signOutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final GetPharmacyInfoUseCase? getPharmacyInfoUseCase;
+  final UpdateUserProfileUseCase updateUserProfileUseCase;
 
   AuthNotifier({
     required this.signUpUseCase,
     required this.signInUseCase,
     required this.signOutUseCase,
     required this.getCurrentUserUseCase,
+    required this.updateUserProfileUseCase,
     this.getPharmacyInfoUseCase,
   }) : super(const AuthState()) {
     _checkCurrentUser();
@@ -87,8 +90,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String password,
     required String firstName,
     required String lastName,
-    required String phoneNumber,
   }) async {
+    print('AuthNotifier: signUp called for email: $email');
     try {
       state = state.copyWith(status: AuthStatus.loading);
 
@@ -97,15 +100,16 @@ class AuthNotifier extends StateNotifier<AuthState> {
         password: password,
         firstName: firstName,
         lastName: lastName,
-        phoneNumber: phoneNumber,
       );
 
+      print('AuthNotifier: signUp successful. Setting status to authenticated.');
       state = state.copyWith(
         status: AuthStatus.authenticated,
         user: user,
         errorMessage: null,
       );
     } catch (e) {
+      print('AuthNotifier: signUp failed. Error: $e');
       state = state.copyWith(
         status: AuthStatus.error,
         errorMessage: e.toString(),
@@ -115,17 +119,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> signIn({required String email, required String password}) async {
+    print('AuthNotifier: signIn called for email: $email');
     try {
       state = state.copyWith(status: AuthStatus.loading);
 
       final user = await signInUseCase(email: email, password: password);
 
+      print('AuthNotifier: signIn successful. Setting status to authenticated.');
       state = state.copyWith(
         status: AuthStatus.authenticated,
         user: user,
         errorMessage: null,
       );
     } catch (e) {
+      print('AuthNotifier: signIn failed. Error: $e');
       state = state.copyWith(
         status: AuthStatus.error,
         errorMessage: e.toString(),
@@ -174,6 +181,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
+  Future<void> updateProfileInfo({required UserModel updatedUser}) async {
+    try {
+      state = state.copyWith(status: AuthStatus.loading);
+      
+      final user = await updateUserProfileUseCase(updatedUser);
+      
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+        user: user,
+        errorMessage: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  void updateProfileStatus({required bool isComplete}) {
+    if (state.user != null) {
+      state = state.copyWith(
+        user: state.user!.copyWith(isProfileComplete: isComplete),
+      );
+    }
+  }
+
   void clearError() {
     state = state.copyWith(
       status: AuthStatus.unauthenticated,
@@ -190,12 +225,14 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final signOutUseCase = ref.watch(signOutUseCaseProvider);
   final getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
   final getPharmacyInfoUseCase = ref.watch(getPharmacyInfoUseCaseProvider);
+  final updateUserProfileUseCase = ref.watch(updateUserProfileUseCaseProvider);
 
   return AuthNotifier(
     signUpUseCase: signUpUseCase,
     signInUseCase: signInUseCase,
     signOutUseCase: signOutUseCase,
     getCurrentUserUseCase: getCurrentUserUseCase,
+    updateUserProfileUseCase: updateUserProfileUseCase,
     getPharmacyInfoUseCase: getPharmacyInfoUseCase,
   );
 });
@@ -215,4 +252,17 @@ final isAuthenticatedProvider = Provider<bool>((ref) {
 
 final authErrorProvider = Provider<String?>((ref) {
   return ref.watch(authProvider).errorMessage;
+});
+
+/// Reads the active pharmacy/business ID from Hive cache.
+/// This is the canonical source of truth for which business the user
+/// is currently operating under (multi-tenancy friendly).
+final currentPharmacyIdProvider = FutureProvider<String?>((ref) async {
+  final storageLayer = ref.watch(hiveStorageLayerProvider);
+  try {
+    final businessData = await storageLayer.get('current_business');
+    return businessData['id']?.toString();
+  } catch (_) {
+    return null;
+  }
 });

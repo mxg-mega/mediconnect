@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/router/k_navigate.dart';
@@ -8,11 +9,23 @@ import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
 class SalesActivityCard extends StatelessWidget {
-  const SalesActivityCard({super.key});
+  const SalesActivityCard({
+    super.key,
+    required this.totalSales,
+    required this.itemsSold,
+  });
+
+  final double totalSales;
+  final int itemsSold;
 
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.colors(context);
+    final currencyFormat = NumberFormat.currency(
+      symbol: '₦',
+      decimalDigits: 2,
+      locale: 'en_NG',
+    );
 
     return Container(
       padding: EdgeInsets.all(context.figmaWidth(16)),
@@ -38,14 +51,14 @@ class SalesActivityCard extends StatelessWidget {
           ),
           SizedBox(height: context.figmaHeight(8)),
           Text(
-            '₦14,700.00',
+            currencyFormat.format(totalSales),
             style: AppTextStyles.h2Sb.copyWith(
               color: theme.neutral.primaryText,
             ),
           ),
           SizedBox(height: context.figmaHeight(4)),
           Text(
-            '12 items sold',
+            '$itemsSold items sold',
             style: AppTextStyles.interP12R.copyWith(
               color: theme.neutral.secondaryText,
             ),
@@ -56,7 +69,6 @@ class SalesActivityCard extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    //Navigate to sales details page
                     pushTo(context, AppRoutes.dispenseEntry);
                   },
                   icon: SvgPicture.asset(
