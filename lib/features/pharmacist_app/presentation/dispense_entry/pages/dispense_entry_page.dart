@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
+import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/providers/dependency_providers.dart';
@@ -23,6 +24,7 @@ class DispenseEntryPage extends ConsumerWidget {
     final dispenseNotifier = ref.read(dispenseEntryProvider.notifier);
 
     return AppScaffold(
+      removeBodyPadding: true,
       title: const Text('Dispense Entry'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -94,7 +96,7 @@ class DispenseEntryPage extends ConsumerWidget {
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: KElevatedButton(
                       onPressed: () async {
                         final user = ref.read(currentUserProvider);
                         if (user == null) return;

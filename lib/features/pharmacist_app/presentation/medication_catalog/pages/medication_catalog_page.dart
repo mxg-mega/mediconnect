@@ -15,7 +15,8 @@ class MedicationCatalogPage extends ConsumerStatefulWidget {
   const MedicationCatalogPage({super.key});
 
   @override
-  ConsumerState<MedicationCatalogPage> createState() => _MedicationCatalogPageState();
+  ConsumerState<MedicationCatalogPage> createState() =>
+      _MedicationCatalogPageState();
 }
 
 class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
@@ -47,6 +48,7 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
     final notifier = ref.read(medicationCatalogProvider.notifier);
 
     return AppScaffold(
+      removeBodyPadding: true,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -74,21 +76,31 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
               children: [
                 if (state.isLoading)
                   const Center(child: CircularProgressIndicator())
-                else if (state.filteredMedications.isEmpty && state.searchQuery.isNotEmpty)
+                else if (state.filteredMedications.isEmpty &&
+                    state.searchQuery.isNotEmpty)
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off, size: 64, color: theme.neutral.tertiaryText),
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: theme.neutral.tertiaryText,
+                        ),
                         const SizedBox(height: 16),
-                        Text('No medications found', style: AppTextStyles.interP16M),
+                        Text(
+                          'No medications found',
+                          style: AppTextStyles.interP16M,
+                        ),
                       ],
                     ),
                   )
                 else
                   _buildMedicationList(state, theme, notifier),
-                
-                if (_showRecent && state.recentSearches.isNotEmpty && _searchController.text.isEmpty)
+
+                if (_showRecent &&
+                    state.recentSearches.isNotEmpty &&
+                    _searchController.text.isEmpty)
                   _buildRecentOverlay(state, theme, notifier),
               ],
             ),
@@ -127,7 +139,10 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
     );
   }
 
-  Widget _buildSearchBar(AppColorsTheme theme, MedicationCatalogNotifier notifier) {
+  Widget _buildSearchBar(
+    AppColorsTheme theme,
+    MedicationCatalogNotifier notifier,
+  ) {
     return SearchBar(
       controller: _searchController,
       focusNode: _searchFocusNode,
@@ -144,16 +159,12 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
       ),
       hintText: 'Search Medications by name, brand, category,...',
       hintStyle: WidgetStateProperty.all(
-        AppTextStyles.interP14R.copyWith(
-          color: theme.neutral.secondaryText,
-        ),
+        AppTextStyles.interP14R.copyWith(color: theme.neutral.secondaryText),
       ),
       onChanged: (value) {
         notifier.updateSearchQuery(value);
       },
-      backgroundColor: WidgetStateProperty.all(
-        theme.neutral.bgTint,
-      ),
+      backgroundColor: WidgetStateProperty.all(theme.neutral.bgTint),
       elevation: WidgetStateProperty.all(0),
       side: WidgetStateProperty.all(
         BorderSide(color: theme.neutral.border.withValues(alpha: 0.3)),
@@ -161,7 +172,11 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
     );
   }
 
-  Widget _buildFilters(AppColorsTheme theme, MedicationCatalogState state, MedicationCatalogNotifier notifier) {
+  Widget _buildFilters(
+    AppColorsTheme theme,
+    MedicationCatalogState state,
+    MedicationCatalogNotifier notifier,
+  ) {
     return Row(
       children: [
         _buildFilterChip(
@@ -206,23 +221,33 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
           vertical: context.figmaHeight(8),
         ),
         decoration: BoxDecoration(
-          color: isSelected ? theme.pharmacist.bg : theme.neutral.buttonTextWhite,
+          color: isSelected
+              ? theme.pharmacist.bg
+              : theme.neutral.buttonTextWhite,
           borderRadius: BorderRadius.circular(context.figmaWidth(8)),
           border: Border.all(
-            color: isSelected ? theme.pharmacist.bg : theme.neutral.border.withValues(alpha: 0.2),
+            color: isSelected
+                ? theme.pharmacist.bg
+                : theme.neutral.border.withValues(alpha: 0.2),
           ),
         ),
         child: Text(
           label,
           style: AppTextStyles.interP14M.copyWith(
-            color: isSelected ? theme.neutral.buttonTextWhite : theme.neutral.secondaryText,
+            color: isSelected
+                ? theme.neutral.buttonTextWhite
+                : theme.neutral.secondaryText,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildMedicationList(MedicationCatalogState state, AppColorsTheme theme, MedicationCatalogNotifier notifier) {
+  Widget _buildMedicationList(
+    MedicationCatalogState state,
+    AppColorsTheme theme,
+    MedicationCatalogNotifier notifier,
+  ) {
     return ListView.builder(
       padding: EdgeInsets.all(context.figmaWidth(16)),
       itemCount: state.filteredMedications.length,
@@ -233,7 +258,11 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
     );
   }
 
-  Widget _buildMedicationCard(med, AppColorsTheme theme, MedicationCatalogNotifier notifier) {
+  Widget _buildMedicationCard(
+    med,
+    AppColorsTheme theme,
+    MedicationCatalogNotifier notifier,
+  ) {
     return GestureDetector(
       onTap: () {
         notifier.addToRecent(med);
@@ -261,7 +290,9 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
                   ),
                 ),
                 Text(
-                  med.dosageForms.isNotEmpty ? med.dosageForms.join(', ') : 'Label',
+                  med.dosageForms.isNotEmpty
+                      ? med.dosageForms.join(', ')
+                      : 'Label',
                   style: AppTextStyles.interP12R.copyWith(
                     color: theme.neutral.primaryText,
                   ),
@@ -274,7 +305,9 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
               children: [
                 Expanded(
                   child: Text(
-                    med.brandNames.isNotEmpty ? med.brandNames.first : 'Generic',
+                    med.brandNames.isNotEmpty
+                        ? med.brandNames.first
+                        : 'Generic',
                     style: AppTextStyles.interP12R.copyWith(
                       color: theme.neutral.tertiaryText,
                     ),
@@ -294,7 +327,11 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
     );
   }
 
-  Widget _buildRecentOverlay(MedicationCatalogState state, AppColorsTheme theme, MedicationCatalogNotifier notifier) {
+  Widget _buildRecentOverlay(
+    MedicationCatalogState state,
+    AppColorsTheme theme,
+    MedicationCatalogNotifier notifier,
+  ) {
     return Positioned(
       top: 0,
       left: context.figmaWidth(16),
@@ -336,18 +373,29 @@ class _MedicationCatalogPageState extends ConsumerState<MedicationCatalogPage> {
                 ),
               ],
             ),
-            ...state.recentSearches.map((med) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: med.imageUrls.isNotEmpty 
-                    ? Image.network(med.imageUrls.first, width: 40, height: 40, errorBuilder: (_, __, ___) => const Icon(Icons.medication))
+            ...state.recentSearches.map(
+              (med) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: med.imageUrls.isNotEmpty
+                    ? Image.network(
+                        med.imageUrls.first,
+                        width: 40,
+                        height: 40,
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.medication),
+                      )
                     : const Icon(Icons.medication, size: 40),
-                  title: Text(med.name, style: AppTextStyles.interP14M),
-                  subtitle: Text(med.brandNames.join(', '), style: AppTextStyles.interP12R),
-                  onTap: () {
-                    notifier.addToRecent(med);
-                    context.push(AppRoutes.pharmacistAddMedication, extra: med);
-                  },
-                )),
+                title: Text(med.name, style: AppTextStyles.interP14M),
+                subtitle: Text(
+                  med.brandNames.join(', '),
+                  style: AppTextStyles.interP12R,
+                ),
+                onTap: () {
+                  notifier.addToRecent(med);
+                  context.push(AppRoutes.pharmacistAddMedication, extra: med);
+                },
+              ),
+            ),
           ],
         ),
       ),

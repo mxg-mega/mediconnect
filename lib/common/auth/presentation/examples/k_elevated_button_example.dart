@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/providers/k_button_provider.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
@@ -19,22 +20,22 @@ class KElevatedButtonExample extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('KElevatedButton Examples'),
         actions: [
-          PopupMenuButton<UserRole>(
+          PopupMenuButton<UserType>(
             icon: const Icon(Icons.person),
-            onSelected: (UserRole role) {
+            onSelected: (UserType role) {
               scaffoldNotifier.updateRole(role);
             },
             itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<UserRole>(
-                value: UserRole.none,
+              const PopupMenuItem<UserType>(
+                value: UserType.unknown,
                 child: Text('None'),
               ),
-              const PopupMenuItem<UserRole>(
-                value: UserRole.patient,
+              const PopupMenuItem<UserType>(
+                value: UserType.patient,
                 child: Text('Patient'),
               ),
-              const PopupMenuItem<UserRole>(
-                value: UserRole.pharmacist,
+              const PopupMenuItem<UserType>(
+                value: UserType.pharmacist,
                 child: Text('Pharmacist'),
               ),
             ],
@@ -158,7 +159,7 @@ class KElevatedButtonExample extends ConsumerWidget {
             KElevatedButton(
               useProvider: true,
               buttonId: 'role_override',
-              role: UserRole.patient,
+              role: UserType.patient,
               onPressed: () {},
               child: const Text('Force Patient Role'),
             ),

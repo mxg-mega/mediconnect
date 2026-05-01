@@ -13,29 +13,37 @@ class PharmacyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colors(context);
-    final textStyles = AppTheme.textTheme(context);
 
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shadowColor: Colors.black.withOpacity(0.08),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: colors.neutral.border.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
       child: SizedBox(
-        width: 250,
+        width: 280,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (pharmacy.frontalImageUrl != null)
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
                 child: Image.network(
                   pharmacy.frontalImageUrl!,
-                  height: 120,
+                  height: 140,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      height: 120,
+                      height: 140,
                       width: double.infinity,
                       color: colors.neutral.bg,
                       child: const Center(child: CircularProgressIndicator()),
@@ -44,7 +52,7 @@ class PharmacyCard extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      height: 120,
+                      height: 140,
                       width: double.infinity,
                       color: colors.neutral.bg,
                       child: const Icon(Icons.error),
@@ -55,11 +63,13 @@ class PharmacyCard extends StatelessWidget {
             else
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                height: 120,
+                height: 140,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: colors.neutral.bg,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                 ),
                 child: const Center(
                   child: Icon(Icons.business_outlined, size: 40),
@@ -72,15 +82,26 @@ class PharmacyCard extends StatelessWidget {
                 children: [
                   Text(
                     pharmacy.name,
-                    style: textStyles.titleSmall,
+                    style: AppTextStyles.h4Sb.copyWith(fontSize: 16),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  // TODO: Calculate distance and time properly
-                  Text(
-                    '10 min away • Closes 7pm',
-                    style: AppTextStyles.interP12R.copyWith(color: colors.neutral.secondaryText),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '10 min away • Closes 7pm',
+                        style: AppTextStyles.interP12R.copyWith(
+                          color: colors.neutral.tertiaryText,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -89,12 +110,15 @@ class PharmacyCard extends StatelessWidget {
                         AppIcons.star,
                         width: 16,
                         height: 16,
-                        colorFilter: ColorFilter.mode(colors.support.yellow, BlendMode.srcIn),
+                        colorFilter: ColorFilter.mode(
+                          colors.support.yellow,
+                          BlendMode.srcIn,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${pharmacy.rating.averageRating.toStringAsFixed(1)} (${pharmacy.rating.totalReviews} Reviews)',
-                        style: AppTextStyles.interP12R,
+                        '${pharmacy.rating.averageRating.toStringAsFixed(1)} (${pharmacy.rating.totalReviews})',
+                        style: AppTextStyles.interP12M,
                       ),
                     ],
                   ),

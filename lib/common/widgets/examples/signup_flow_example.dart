@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/constants/colors.dart';
@@ -36,10 +37,10 @@ class SignupFlowExample extends ConsumerWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      scaffoldNotifier.setPreviewRole(UserRole.patient);
+                      scaffoldNotifier.setPreviewRole(UserType.patient);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: previewRole == UserRole.patient
+                      backgroundColor: previewRole == UserType.patient
                           ? AppColors.lightTheme.patient.bg
                           : null,
                     ),
@@ -50,10 +51,10 @@ class SignupFlowExample extends ConsumerWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      scaffoldNotifier.setPreviewRole(UserRole.pharmacist);
+                      scaffoldNotifier.setPreviewRole(UserType.pharmacist);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: previewRole == UserRole.pharmacist
+                      backgroundColor: previewRole == UserType.pharmacist
                           ? AppColors.lightTheme.pharmacist.bg
                           : null,
                     ),

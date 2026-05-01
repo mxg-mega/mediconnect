@@ -78,7 +78,7 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
                       _selectedAccountType = patientRole;
                     });
                     // Update the role in AppScaffold provider
-                    appScaffoldNotifier.setPreviewRole(UserRole.patient);
+                    appScaffoldNotifier.setPreviewRole(UserType.patient);
                   },
                 ),
               ),
@@ -110,7 +110,7 @@ class _SetupFinalizationPageState extends ConsumerState<SetupFinalizationPage> {
                       _selectedAccountType = pharmacistRole;
                     });
                     // Update the role in AppScaffold provider
-                    appScaffoldNotifier.setPreviewRole(UserRole.pharmacist);
+                    appScaffoldNotifier.setPreviewRole(UserType.pharmacist);
                   },
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 
@@ -14,22 +15,22 @@ class RoleBasedExample extends ConsumerWidget {
     return AppScaffold(
       title: Text('Role: ${currentRole.name}'),
       scaffoldActions: [
-        PopupMenuButton<UserRole>(
+        PopupMenuButton<UserType>(
           icon: const Icon(Icons.person),
-          onSelected: (UserRole role) {
+          onSelected: (UserType role) {
             scaffoldNotifier.updateRole(role);
           },
           itemBuilder: (BuildContext context) => [
-            const PopupMenuItem<UserRole>(
-              value: UserRole.none,
+            const PopupMenuItem<UserType>(
+              value: UserType.unknown,
               child: Text('Default'),
             ),
-            const PopupMenuItem<UserRole>(
-              value: UserRole.patient,
+            const PopupMenuItem<UserType>(
+              value: UserType.patient,
               child: Text('Patient'),
             ),
-            const PopupMenuItem<UserRole>(
-              value: UserRole.pharmacist,
+            const PopupMenuItem<UserType>(
+              value: UserType.pharmacist,
               child: Text('Pharmacist'),
             ),
           ],

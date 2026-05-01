@@ -1,11 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 
 enum ButtonState { idle, loading, disabled, success }
 
 class KButtonState {
   final ButtonState state;
-  final UserRole? explicitRole;
+  final UserType? explicitRole;
   final bool useRoleBasedStyling;
   final String? errorMessage;
 
@@ -18,7 +19,7 @@ class KButtonState {
 
   KButtonState copyWith({
     ButtonState? state,
-    UserRole? explicitRole,
+    UserType? explicitRole,
     bool? useRoleBasedStyling,
     String? errorMessage,
   }) {
@@ -70,7 +71,7 @@ class KButtonNotifier extends StateNotifier<KButtonState> {
     state = state.copyWith(errorMessage: null);
   }
 
-  void setExplicitRole(UserRole role) {
+  void setExplicitRole(UserType role) {
     state = state.copyWith(explicitRole: role);
   }
 
@@ -117,7 +118,7 @@ final kButtonFamilyProvider =
     });
 
 // Convenience provider to get effective role for buttons
-final kButtonRoleProvider = Provider<UserRole>((ref) {
+final kButtonRoleProvider = Provider<UserType>((ref) {
   final buttonState = ref.watch(kButtonProvider);
   final appScaffoldNotifier = ref.read(appScaffoldProvider.notifier);
 

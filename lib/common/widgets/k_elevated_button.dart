@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
@@ -26,7 +27,7 @@ class KElevatedButton extends ConsumerWidget {
   final Color? borderColor;
   final bool useProvider;
   final String? buttonId;
-  final UserRole? role;
+  final UserType? role;
   final bool useRoleBasedStyling;
 
   @override
@@ -58,12 +59,11 @@ class KElevatedButton extends ConsumerWidget {
       if (!useRoleBasedStyling) return AppTheme.colors(context).neutral.bg00;
 
       switch (effectiveRole) {
-        case UserRole.patient:
+        case UserType.patient:
           return AppTheme.colors(context).patient.bg;
-        case UserRole.pharmacist:
+        case UserType.pharmacist:
           return AppTheme.colors(context).pharmacist.bg;
-        case UserRole.none:
-        default:
+        case UserType.unknown:
           return AppTheme.colors(context).neutral.bg00;
       }
     }
@@ -117,7 +117,7 @@ class _KElevatedButtonWithProvider extends ConsumerWidget {
   final Color? textColor;
   final Color? borderColor;
   final String? buttonId;
-  final UserRole? role;
+  final UserType? role;
   final bool useRoleBasedStyling;
 
   @override
@@ -135,11 +135,11 @@ class _KElevatedButtonWithProvider extends ConsumerWidget {
       if (!useRoleBasedStyling) return AppTheme.colors(context).neutral.bg;
 
       switch (effectiveRole) {
-        case UserRole.patient:
+        case UserType.patient:
           return AppTheme.colors(context).patient.bg;
-        case UserRole.pharmacist:
+        case UserType.pharmacist:
           return AppTheme.colors(context).pharmacist.bg;
-        case UserRole.none:
+        case UserType.unknown:
         default:
           return AppTheme.colors(context).neutral.bg;
       }

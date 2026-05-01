@@ -1,28 +1,28 @@
 import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/common/auth/data/models/user_model.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/core/constants/colors.dart';
-
-enum UserRole { patient, pharmacist, none }
 
 enum AppFlow { onboarding, signup, authenticated }
 
 class AppScaffoldState {
-  final UserRole currentRole;
-  final UserRole previewRole; // For signup flow preview
+  final UserType currentRole;
+  final UserType previewRole; // For signup flow preview
   final AppFlow currentFlow;
   final bool isLoading;
 
   const AppScaffoldState({
-    this.currentRole = UserRole.none,
-    this.previewRole = UserRole.none,
+    this.currentRole = UserType.unknown,
+    this.previewRole = UserType.unknown,
     this.currentFlow = AppFlow.onboarding,
     this.isLoading = false,
   });
 
   AppScaffoldState copyWith({
-    UserRole? currentRole,
-    UserRole? previewRole,
+    UserType? currentRole,
+    UserType? previewRole,
     AppFlow? currentFlow,
     bool? isLoading,
   }) {
@@ -36,9 +36,29 @@ class AppScaffoldState {
 }
 
 class AppScaffoldNotifier extends StateNotifier<AppScaffoldState> {
-  AppScaffoldNotifier() : super(const AppScaffoldState());
+  final Ref _ref;
 
-  void updateRole(UserRole role) {
+  AppScaffoldNotifier(this._ref) : super(AppScaffoldState()) {
+    _init();
+  }
+
+  void _init() {
+    // Listen to auth changes and update scaffold state accordingly
+    _ref.listen(authProvider, (previous, next) {
+      if (next.status == AuthStatus.authenticated && next.user != null) {
+        updateRole(next.user!.userType);
+        setFlow(AppFlow.authenticated);
+      } else if (next.status == AuthStatus.unauthenticated) {
+        updateRole(UserType.unknown);
+        // Only reset to onboarding if we were previously authenticated
+        if (previous?.status == AuthStatus.authenticated) {
+          setFlow(AppFlow.onboarding);
+        }
+      }
+    }, fireImmediately: true);
+  }
+
+  void updateRole(UserType role) {
     state = state.copyWith(currentRole: role);
   }
 
@@ -46,7 +66,7 @@ class AppScaffoldNotifier extends StateNotifier<AppScaffoldState> {
     state = state.copyWith(currentFlow: flow);
   }
 
-  void setPreviewRole(UserRole role) {
+  void setPreviewRole(UserType role) {
     state = state.copyWith(previewRole: role);
   }
 
@@ -55,27 +75,26 @@ class AppScaffoldNotifier extends StateNotifier<AppScaffoldState> {
   }
 
   // Get the effective role based on flow
-  UserRole getEffectiveRole() {
+  UserType getEffectiveRole() {
     switch (state.currentFlow) {
       case AppFlow.signup:
         return state.previewRole;
       case AppFlow.authenticated:
         return state.currentRole;
       case AppFlow.onboarding:
-      default:
-        return UserRole.none;
+        return UserType.unknown;
     }
+    
   }
 
   Color getBackgroundColor() {
     final effectiveRole = getEffectiveRole();
     switch (effectiveRole) {
-      case UserRole.patient:
+      case UserType.patient:
         return AppColors.lightTheme.patient.bg;
-      case UserRole.pharmacist:
+      case UserType.pharmacist:
         return AppColors.lightTheme.pharmacist.bg;
-      case UserRole.none:
-      default:
+      case UserType.unknown:
         return AppColors.lightTheme.neutral.bg00;
     }
   }
@@ -83,12 +102,11 @@ class AppScaffoldNotifier extends StateNotifier<AppScaffoldState> {
   Color getScaffoldColor() {
     final effectiveRole = getEffectiveRole();
     switch (effectiveRole) {
-      case UserRole.patient:
+      case UserType.patient:
         return AppColors.lightTheme.neutral.bgTint;
-      case UserRole.pharmacist:
+      case UserType.pharmacist:
         return AppColors.lightTheme.neutral.bgTint;
-      case UserRole.none:
-      default:
+      case UserType.unknown:
         return AppColors.lightTheme.neutral.bgTint;
     }
   }
@@ -97,7 +115,7 @@ class AppScaffoldNotifier extends StateNotifier<AppScaffoldState> {
 // Provider instances
 final appScaffoldProvider =
     StateNotifierProvider<AppScaffoldNotifier, AppScaffoldState>((ref) {
-      return AppScaffoldNotifier();
+      return AppScaffoldNotifier(ref);
     });
 
 // Convenience providers for specific values
@@ -111,7 +129,7 @@ final appScaffoldScaffoldColorProvider = Provider<Color>((ref) {
   return ref.read(appScaffoldProvider.notifier).getScaffoldColor();
 });
 
-final appScaffoldRoleProvider = Provider<UserRole>((ref) {
+final appScaffoldRoleProvider = Provider<UserType>((ref) {
   return ref.watch(appScaffoldProvider).currentRole;
 });
 final appScaffoldFlowProvider = Provider<AppFlow>((ref) {

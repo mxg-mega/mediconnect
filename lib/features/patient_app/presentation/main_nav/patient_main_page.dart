@@ -8,10 +8,7 @@ import 'package:mediconnect/core/theme/app_theme.dart';
 class PatientMainPage extends StatelessWidget {
   final Widget child;
 
-  const PatientMainPage({
-    required this.child,
-    super.key,
-  });
+  const PatientMainPage({required this.child, super.key});
 
   int _calculateIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
@@ -30,34 +27,58 @@ class PatientMainPage extends StatelessWidget {
     final currentIndex = _calculateIndex(context);
 
     return AppScaffold(
+      removeBodyPadding: true,
       body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: colors.patient.bg,
-        unselectedItemColor: colors.neutral.secondaryText,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              context.go('/patient/dashboard');
-              break;
-            case 1:
-              context.go('/patient/search');
-              break;
-            case 2:
-              context.go('/patient/activity');
-              break;
-            case 3:
-              context.go('/patient/profile');
-              break;
-          }
-        },
-        items: [
-          _navItem(AppIcons.store, 'Home', currentIndex == 0, colors),
-          _navItem(AppIcons.search, 'Search', currentIndex == 1, colors),
-          _navItem(AppIcons.history, 'Activity', currentIndex == 2, colors),
-          _navItem(AppIcons.profile, 'Profile', currentIndex == 3, colors),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: currentIndex,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          iconSize: 24,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w400,
+            fontSize: 12,
+          ),
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                context.go('/patient/dashboard');
+                break;
+              case 1:
+                context.go('/patient/search');
+                break;
+              case 2:
+                context.go('/patient/activity');
+                break;
+              case 3:
+                context.go('/patient/profile');
+                break;
+            }
+          },
+          items: [
+            _navItem(AppIcons.store, 'Home', currentIndex == 0, colors),
+            _navItem(AppIcons.search, 'Search', currentIndex == 1, colors),
+            _navItem(AppIcons.history, 'Activity', currentIndex == 2, colors),
+            _navItem(AppIcons.profile, 'Profile', currentIndex == 3, colors),
+          ],
+        ),
       ),
     );
   }
@@ -69,15 +90,32 @@ class PatientMainPage extends StatelessWidget {
     dynamic colors,
   ) {
     return BottomNavigationBarItem(
-      icon: SvgPicture.asset(
-        icon,
-        colorFilter: ColorFilter.mode(
-          isSelected
-              ? colors.patient.bg
-              : colors.neutral.secondaryText,
-          BlendMode.srcIn,
-        ),
-      ),
+      icon: isSelected
+          ? Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colors.patient.bg.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: SvgPicture.asset(
+                icon,
+                colorFilter: ColorFilter.mode(
+                  colors.patient.bg,
+                  BlendMode.srcIn,
+                ),
+                width: 24,
+                height: 24,
+              ),
+            )
+          : SvgPicture.asset(
+              icon,
+              colorFilter: ColorFilter.mode(
+                colors.neutral.secondaryText,
+                BlendMode.srcIn,
+              ),
+              width: 24,
+              height: 24,
+            ),
       label: label,
     );
   }

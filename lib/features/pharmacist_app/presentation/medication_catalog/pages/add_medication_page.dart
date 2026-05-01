@@ -85,6 +85,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
     final theme = AppTheme.colors(context);
 
     return AppScaffold(
+      removeBodyPadding: true,
       body: SingleChildScrollView(
         child: Column(
           children: [
