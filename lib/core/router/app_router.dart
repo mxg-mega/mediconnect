@@ -14,6 +14,7 @@ import 'package:mediconnect/common/onboarding/presentation/pages/onboarding_scre
 import 'package:mediconnect/features/patient_app/presentation/activity/activity_page.dart';
 import 'package:mediconnect/features/patient_app/presentation/dashboard/dashboard_page.dart';
 import 'package:mediconnect/features/patient_app/presentation/main_nav/patient_main_page.dart';
+import 'package:mediconnect/features/patient_app/presentation/profile/profile_page.dart';
 import 'package:mediconnect/features/patient_app/presentation/search/search_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/pages/dispense_entry_page.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/profile/profile_page.dart';
@@ -386,7 +387,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/patient/profile',
-            builder: (context, state) => const ProfilePage(),
+            builder: (context, state) => const PatientProfilePage(),
           ),
         ],
       ),

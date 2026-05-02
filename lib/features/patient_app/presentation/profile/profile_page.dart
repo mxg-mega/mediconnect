@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/constants/assets.dart';
+import 'package:mediconnect/features/patient_app/presentation/profile/domain/patient_profile.dart';
+import 'package:mediconnect/features/patient_app/presentation/profile/providers/profile_provider.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class PatientProfilePage extends ConsumerWidget {
+  const PatientProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colors(context);
+    final profile = ref.watch(patientProfileProvider);
     
     return Scaffold(
       backgroundColor: colors.patient.bg,
@@ -22,36 +28,54 @@ class ProfilePage extends StatelessWidget {
               width: double.infinity,
               child: Column(
                 children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.white24,
-                    child: Icon(Icons.person, size: 60, color: Colors.white),
-                  ),
+                  if (profile.avatarUrl.isNotEmpty)
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(profile.avatarUrl),
+                      backgroundColor: Colors.white24,
+                    )
+                  else
+                    const CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.white24,
+                      child: Icon(Icons.person, size: 60, color: Colors.white),
+                    ),
                   const SizedBox(height: 16),
                   Text(
-                    'Muneer Sani',
+                    profile.name,
                     style: AppTextStyles.interP24R.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Verified',
-                        style: AppTextStyles.interP14M.copyWith(color: Colors.white),
-                      ),
-                      const SizedBox(width: 4),
-                      SvgPicture.asset(
-                        AppIcons.approved_badge,
-                        width: 16,
-                        height: 16,
-                        colorFilter: const ColorFilter.mode(Colors.greenAccent, BlendMode.srcIn),
-                      ),
-                    ],
-                  ),
+                  if (profile.isVerified)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Verified',
+                          style: AppTextStyles.interP14M.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(width: 4),
+                        SvgPicture.asset(
+                          AppIcons.approved_badge,
+                          width: 16,
+                          height: 16,
+                          colorFilter: const ColorFilter.mode(Colors.greenAccent, BlendMode.srcIn),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Unverified Account',
+                          style: AppTextStyles.interP14M.copyWith(color: Colors.white70),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -68,68 +92,19 @@ class ProfilePage extends StatelessWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSection(context, 'Account', [
-                    _buildProfileItem(
-                      context,
-                      icon: AppIcons.profile,
-                      title: 'Personal Details',
-                      subtitle: 'View or edit your name & contact info',
-                    ),
-                    _buildProfileItem(
-                      context,
-                      icon: AppIcons.file,
-                      title: 'Medical History',
-                      subtitle: 'Track conditions, medications & allergies',
-                    ),
-                  ]),
-                  
-                  _buildSection(context, 'General', [
-                    _buildProfileItem(
-                      context,
-                      icon: AppIcons.filter, // Using as placeholder for Preferences
-                      title: 'Preferences',
-                      subtitle: 'Customize notifications & theme',
-                    ),
-                    _buildProfileItem(
-                      context,
-                      icon: AppIcons.lock,
-                      title: 'Security',
-                      subtitle: 'Manage your passwords and verifications',
-                    ),
-                  ]),
-                  
-                  _buildSection(context, 'Support', [
-                    _buildProfileItem(
-                      context,
-                      icon: AppIcons.info,
-                      title: 'Help centre',
-                      subtitle: 'Find answers or contact support',
-                    ),
-                    _buildProfileItem(
-                      context,
-                      icon: AppIcons.receipt,
-                      title: 'Term and policy',
-                      subtitle: 'Read our legal agreements & privacy info',
-                    ),
-                  ]),
-                  
-                  _buildSection(context, 'Login', [
-                    _buildProfileItem(
-                      context,
-                      icon: AppIcons.export,
-                      title: 'Switch account',
-                      subtitle: 'Switch between accounts',
-                    ),
-                    _buildProfileItem(
-                      context,
-                      icon: AppIcons.export, // Using as logout
-                      title: 'Logout',
-                      subtitle: 'Log out your account',
-                      isLogout: true,
-                    ),
-                  ]),
-                ],
+                children: profile.sections.map((section) {
+                  return _buildSection(
+                    context, 
+                    section.title, 
+                    section.items.map((item) {
+                      return _buildProfileItem(
+                        context,
+                        ref,
+                        item: item,
+                      );
+                    }).toList(),
+                  );
+                }).toList(),
               ),
             ),
           ],
@@ -155,63 +130,78 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildProfileItem(
-    BuildContext context, {
-    required String icon,
-    required String title,
-    required String subtitle,
-    bool isLogout = false,
+    BuildContext context, 
+    WidgetRef ref, {
+    required ProfileItem item,
   }) {
     final colors = AppTheme.colors(context);
     
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: colors.patient.bgTint,
-              borderRadius: BorderRadius.circular(8),
+    return InkWell(
+      onTap: () {
+        if (item.isLogout) {
+          ref.read(authProvider.notifier).signOut();
+        } else if (item.route.isNotEmpty) {
+          // TODO: Ensure GoRouter has these routes defined
+          context.push(item.route);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: SvgPicture.asset(
-              icon,
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(colors.patient.bg, BlendMode.srcIn),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colors.patient.bgTint,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SvgPicture.asset(
+                item.icon,
+                width: 24,
+                height: 24,
+                colorFilter: ColorFilter.mode(
+                  item.isLogout ? colors.support.red : colors.patient.bg, 
+                  BlendMode.srcIn
+                ),
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.interP16M.copyWith(
-                    color: isLogout ? colors.support.red : colors.neutral.primaryText,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: AppTextStyles.interP16M.copyWith(
+                      color: item.isLogout ? colors.support.red : colors.neutral.primaryText,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: AppTextStyles.interP12R.copyWith(color: colors.neutral.tertiaryText),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    item.subtitle,
+                    style: AppTextStyles.interP12R.copyWith(color: colors.neutral.tertiaryText),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Icon(
+              Icons.chevron_right,
+              color: colors.neutral.tertiaryText,
+            ),
+          ],
+        ),
       ),
     );
   }

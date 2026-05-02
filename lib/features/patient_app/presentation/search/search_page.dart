@@ -1,4 +1,4 @@
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -8,8 +8,7 @@ import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/medication_card.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/pharmacy_card.dart';
-import 'package:mediconnect/features/patient_app/providers/medication_provider.dart';
-import 'package:mediconnect/features/patient_app/providers/pharmacy_provider.dart';
+import 'package:mediconnect/features/patient_app/presentation/search/providers/search_provider.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -22,6 +21,7 @@ class _SearchPageState extends ConsumerState<SearchPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -33,7 +33,15 @@ class _SearchPageState extends ConsumerState<SearchPage>
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      ref.read(patientSearchQueryProvider.notifier).state = query;
+    });
   }
 
   @override
@@ -65,6 +73,7 @@ class _SearchPageState extends ConsumerState<SearchPage>
                 ),
                 child: TextField(
                   controller: _searchController,
+                  onChanged: _onSearchChanged,
                   decoration: InputDecoration(
                     hintText: _tabController.index == 0
                         ? 'Search Medications'
@@ -113,66 +122,86 @@ class _SearchPageState extends ConsumerState<SearchPage>
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                   ),
-                  onSubmitted: (value) {
-                    // Handle search
-                  },
                 ),
               ),
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(50),
-                child: Container(
-                  color: Colors.white,
-                  child: TabBar(
-                    controller: _tabController,
-                    labelColor: colors.patient.bg,
-                    unselectedLabelColor: colors.neutral.secondaryText,
-                    indicatorColor: colors.patient.bg,
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelStyle: AppTextStyles.interP16M,
-                    unselectedLabelStyle: AppTextStyles.interP16R,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    tabs: [
-                      Tab(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SvgPicture.asset(
-                              AppIcons.pill,
-                              width: 18,
-                              height: 18,
-                              colorFilter: ColorFilter.mode(
-                                _tabController.index == 0
-                                    ? colors.patient.bg
-                                    : colors.neutral.secondaryText,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text('Medications'),
-                          ],
+                preferredSize: const Size.fromHeight(70),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Container(
+                    height: 50,
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
+                      ],
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: colors.patient.bg,
+                      unselectedLabelColor: colors.neutral.secondaryText,
+                      indicatorColor: colors.patient.bg,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelStyle: AppTextStyles.interP16M,
+                      unselectedLabelStyle: AppTextStyles.interP16R,
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      indicator: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: colors.patient.bg.withOpacity(0.1),
                       ),
-                      Tab(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SvgPicture.asset(
-                              AppIcons.location,
-                              width: 18,
-                              height: 18,
-                              colorFilter: ColorFilter.mode(
-                                _tabController.index == 1
-                                    ? colors.patient.bg
-                                    : colors.neutral.secondaryText,
-                                BlendMode.srcIn,
+                      dividerColor: Colors.transparent,
+                      onTap: (index) {
+                        setState(() {});
+                      },
+                      tabs: [
+                        Tab(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SvgPicture.asset(
+                                AppIcons.pill,
+                                width: 18,
+                                height: 18,
+                                colorFilter: ColorFilter.mode(
+                                  _tabController.index == 0
+                                      ? colors.patient.bg
+                                      : colors.neutral.secondaryText,
+                                  BlendMode.srcIn,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text('Pharmacies'),
-                          ],
+                              const SizedBox(width: 8),
+                              const Text('Medications'),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        Tab(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SvgPicture.asset(
+                                AppIcons.location,
+                                width: 18,
+                                height: 18,
+                                colorFilter: ColorFilter.mode(
+                                  _tabController.index == 1
+                                      ? colors.patient.bg
+                                      : colors.neutral.secondaryText,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text('Pharmacies'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -191,53 +220,54 @@ class _SearchPageState extends ConsumerState<SearchPage>
   }
 
   Widget _buildMedicationsTab(BuildContext context) {
-    final medications = ref.watch(medicationListProvider);
+    final searchAsync = ref.watch(medicationSearchResultsProvider);
     final colors = AppTheme.colors(context);
 
     return Container(
       color: colors.neutral.bgTint,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionTitle(context, 'Recommended For You'),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 280,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: medications.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 16),
-                itemBuilder: (context, index) {
-                  return MedicationCard(medication: medications[index]);
-                },
-              ),
+      child: searchAsync.when(
+        data: (medications) {
+          if (medications.isEmpty) {
+            return const Center(child: Text('No medications found'));
+          }
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle(context, 'Search Results'),
+                const SizedBox(height: 16),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.7,
+                  ),
+                  itemCount: medications.length,
+                  itemBuilder: (context, index) {
+                    // For MVP, we need a MedicationCard that accepts raw map data or we map it to Medication entity
+                    return Container(
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                      child: Center(child: Text(medications[index]['name'] ?? 'Medication')),
+                    );
+                  },
+                ),
+                const SizedBox(height: 100),
+              ],
             ),
-            const SizedBox(height: 24),
-            _buildSectionTitle(context, 'Product on Sale'),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 280,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: medications.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 16),
-                itemBuilder: (context, index) {
-                  return MedicationCard(
-                      medication: medications.reversed.toList()[index]);
-                },
-              ),
-            ),
-            const SizedBox(height: 100),
-          ],
-        ),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text('Error: $e')),
       ),
     );
   }
 
   Widget _buildPharmacyTab(BuildContext context) {
-    final pharmacies = ref.watch(pharmacyListProvider);
+    final searchAsync = ref.watch(combinedPharmacySearchResultsProvider);
     final colors = AppTheme.colors(context);
 
     return Container(
@@ -246,12 +276,12 @@ class _SearchPageState extends ConsumerState<SearchPage>
         children: [
           // Map Section
           SizedBox(
-            height: 300,
+            height: 250,
             child: Stack(
               children: [
                 GoogleMap(
                   initialCameraPosition: const CameraPosition(
-                    target: LatLng(9.0765, 7.3986), // Abuja
+                    target: LatLng(9.0765, 7.3986), // Abuja (default fallback)
                     zoom: 12,
                   ),
                   zoomGesturesEnabled: true,
@@ -286,30 +316,59 @@ class _SearchPageState extends ConsumerState<SearchPage>
               ],
             ),
           ),
-          // Pharmacy List Section
+          // Pharmacy Lists Section
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionTitle(context, 'Nearby Pharmacies'),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 240,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: pharmacies.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 16),
-                      itemBuilder: (context, index) {
-                        return PharmacyCard(pharmacy: pharmacies[index]);
-                      },
-                    ),
+            child: searchAsync.when(
+              data: (pharmacies) {
+                if (pharmacies.isEmpty) {
+                  return const Center(child: Text('No pharmacies found'));
+                }
+                
+                // For demonstration, splitting list. Real app might sort by rating for "Top".
+                final nearby = pharmacies;
+                final top = pharmacies.reversed.toList();
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle(context, 'Nearby Pharmacies'),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 240,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: nearby.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 16),
+                          itemBuilder: (context, index) {
+                            return PharmacyCard(pharmacy: nearby[index]);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle(context, 'Top Pharmacies'),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 240,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: top.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 16),
+                          itemBuilder: (context, index) {
+                            return PharmacyCard(pharmacy: top[index]);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 100),
+                    ],
                   ),
-                  const SizedBox(height: 100),
-                ],
-              ),
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, st) => Center(child: Text('Error: $e')),
             ),
           ),
         ],
@@ -327,13 +386,6 @@ class _SearchPageState extends ConsumerState<SearchPage>
           style: AppTextStyles.h3Sb.copyWith(
             color: colors.neutral.primaryText,
             fontSize: 18,
-          ),
-        ),
-        Text(
-          'View All',
-          style: AppTextStyles.interP14M.copyWith(
-            color: colors.patient.bg,
-            fontWeight: FontWeight.w600,
           ),
         ),
       ],

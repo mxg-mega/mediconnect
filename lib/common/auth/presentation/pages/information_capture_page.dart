@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/auth/data/models/capture_models.dart';
 import 'package:mediconnect/common/auth/presentation/pages/patient_information_capture/medical_history_form.dart';
@@ -99,6 +100,30 @@ class _InformationCapturePageState extends ConsumerState<InformationCapturePage>
         pharmacyInfoInput != null) {
       final usecase = ref.read(createPharmacyUseCaseProvider);
 
+      double lat = 0.0;
+      double lng = 0.0;
+
+      try {
+        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (serviceEnabled) {
+          LocationPermission permission = await Geolocator.checkPermission();
+          if (permission == LocationPermission.denied) {
+            permission = await Geolocator.requestPermission();
+          }
+          
+          if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+            Position position = await Geolocator.getCurrentPosition(
+              locationSettings: const LocationSettings(accuracy: LocationAccuracy.high)
+            );
+            lat = position.latitude;
+            lng = position.longitude;
+          }
+        }
+      } catch (e) {
+        // Fallback to 0.0 if location cannot be determined
+        debugPrint('Location error: $e');
+      }
+
       final pharmacy = Pharmacy(
         id: '',
         name: pharmacyInfoInput!.pharmacyName,
@@ -109,7 +134,7 @@ class _InformationCapturePageState extends ConsumerState<InformationCapturePage>
         type: pharmacyInfoInput!.type,
         description: pharmacyInfoInput!.description,
         operatingHours: const [], // Can implement proper parsing if needed
-        location: const GeoLocation(latitude: 0.0, longitude: 0.0, address: ''),
+        location: GeoLocation(latitude: lat, longitude: lng, address: pharmacyInfoInput!.address),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );

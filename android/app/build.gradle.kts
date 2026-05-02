@@ -11,12 +11,17 @@ plugins {
 
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
-
 if (localPropertiesFile.exists()) {
     localProperties.load(localPropertiesFile.inputStream())
 }
 
-val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+val envFile = rootProject.file("../.env")
+val envProperties = Properties()
+if (envFile.exists()) {
+    envProperties.load(envFile.inputStream())
+}
+
+val mapsApiKey: String = envProperties.getProperty("GOOGLE_MAPS_API_KEY")?.replace("\"", "")?.replace("'", "") ?: localProperties.getProperty("MAPS_API_KEY") ?: ""
 
 android {
     namespace = "com.example.mediconnect"

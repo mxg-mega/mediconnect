@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
+import 'package:mediconnect/features/patient_app/domain/entities/patient_activity_item.dart';
+import 'package:mediconnect/features/patient_app/presentation/activity/providers/activity_provider.dart';
 
-class ActivityPage extends StatefulWidget {
+class ActivityPage extends ConsumerStatefulWidget {
   const ActivityPage({super.key});
 
   @override
-  State<ActivityPage> createState() => _ActivityPageState();
+  ConsumerState<ActivityPage> createState() => _ActivityPageState();
 }
 
-class _ActivityPageState extends State<ActivityPage>
+class _ActivityPageState extends ConsumerState<ActivityPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -102,143 +105,132 @@ class _ActivityPageState extends State<ActivityPage>
   }
 
   Widget _buildRecentActivityTab(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        _buildSectionHeader(context, 'Recent Searches', onClearAll: () {}),
-        const SizedBox(height: 16),
-        Dismissible(
-          key: Key('temp_item_1'),
-          direction: DismissDirection.horizontal,
-          onDismissed: (direction) => {
-            // TODO: dismissed item dhould be removed from the list
-          },
-          background: Container(
-            color: Colors.red,
-            alignment: Alignment.centerLeft,
-            padding: EdgeInsets.only(left: 10),
-            child: Icon(Icons.delete, color: Colors.white),
-          ),
-          secondaryBackground: Container(
-            color: Colors.red,
-            alignment: Alignment.centerRight,
-            padding: EdgeInsets.only(right: 10),
-            child: Icon(Icons.delete, color: Colors.white),
-          ),
-          child: _buildSearchItem(
-            context,
-            'Amoxicillin 500 mg',
-            'July 18, 2025 • 14:35',
-          ),
-        ),
-        _buildSearchItem(context, 'Ibuprofen', 'July 17, 2025 • 09:12'),
-        _buildSearchItem(
-          context,
-          'Pharmacy near me',
-          'July 16, 2025 • 18:47',
-          isDeletable: true,
-        ),
-        _buildViewMoreButton(context, () {}),
+    final recentActivityAsync = ref.watch(recentActivityProvider);
 
-        const SizedBox(height: 24),
-        _buildSectionHeader(context, 'Viewed Medications', onClearAll: () {}),
-        const SizedBox(height: 16),
-        _buildMedicationItem(
-          context,
-          'Amoxicillin 500 mg Capsule',
-          'Viewed July 18, 2025 • 14:37',
-          'assets/images/amoxicillin_gsk.png',
-          isFavorited: false,
-        ),
-        _buildMedicationItem(
-          context,
-          'Paracetamol 500 mg Tablet',
-          'Viewed July 15, 2025 • 09:15',
-          'assets/images/ibuprofen_pfizer.png', // Placeholder image
-          isFavorited: false,
-        ),
-        _buildViewMoreButton(context, () {}),
+    return recentActivityAsync.when(
+      data: (items) {
+        final searches = items.where((e) => e.type == ActivityItemType.search).toList();
+        final medications = items.where((e) => e.type == ActivityItemType.medication).toList();
+        final pharmacies = items.where((e) => e.type == ActivityItemType.pharmacy).toList();
 
-        const SizedBox(height: 24),
-        _buildSectionHeader(context, 'Viewed Pharmacies', onClearAll: () {}),
-        const SizedBox(height: 16),
-        _buildPharmacyItem(
-          context,
-          'New-Health Pharmacy Ltd',
-          '10 min away • Closes 7pm',
-          'Viewed July 18, 2025 • 14:40',
-          null, // Placeholder
-          isBookmarked: false,
-        ),
-        _buildPharmacyItem(
-          context,
-          'Apogee Pharmacy & Stores',
-          '16 min away • Open Now',
-          'Viewed July 15, 2025 • 09:15',
-          null, // Placeholder
-          isBookmarked: false,
-        ),
-        _buildViewMoreButton(context, () {}),
-      ],
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            if (searches.isNotEmpty) ...[
+              _buildSectionHeader(context, 'Recent Searches', onClearAll: () {
+                for (var s in searches) {
+                  ref.read(activityNotifierProvider.notifier).removeRecentActivity(s.id);
+                }
+              }),
+              const SizedBox(height: 16),
+              ...searches.map((item) => _buildDismissibleItem(
+                    item: item,
+                    child: _buildSearchItem(context, item),
+                  )),
+              const SizedBox(height: 24),
+            ],
+
+            if (medications.isNotEmpty) ...[
+              _buildSectionHeader(context, 'Viewed Medications', onClearAll: () {
+                for (var m in medications) {
+                  ref.read(activityNotifierProvider.notifier).removeRecentActivity(m.id);
+                }
+              }),
+              const SizedBox(height: 16),
+              ...medications.map((item) => _buildDismissibleItem(
+                    item: item,
+                    child: _buildMedicationItem(context, item),
+                  )),
+              const SizedBox(height: 24),
+            ],
+
+            if (pharmacies.isNotEmpty) ...[
+              _buildSectionHeader(context, 'Viewed Pharmacies', onClearAll: () {
+                for (var p in pharmacies) {
+                  ref.read(activityNotifierProvider.notifier).removeRecentActivity(p.id);
+                }
+              }),
+              const SizedBox(height: 16),
+              ...pharmacies.map((item) => _buildDismissibleItem(
+                    item: item,
+                    child: _buildPharmacyItem(context, item),
+                  )),
+              const SizedBox(height: 24),
+            ],
+
+            if (items.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Text('No recent activity'),
+                ),
+              ),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, st) => Center(child: Text('Error loading activity: $e')),
     );
   }
 
   Widget _buildFavoritesTab(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        _buildSectionHeader(context, 'Favorite Medications', onClearAll: () {}),
-        const SizedBox(height: 16),
-        _buildMedicationItem(
-          context,
-          'Amoxicillin 500 mg Capsule',
-          'Favorited July 18, 2025 • 14:37',
-          'assets/images/amoxicillin_gsk.png',
-          isFavorited: true,
-        ),
-        _buildMedicationItem(
-          context,
-          'Paracetamol 500 mg Tablet',
-          'Favorited July 15, 2025 • 09:15',
-          'assets/images/ibuprofen_pfizer.png',
-          isFavorited: true,
-        ),
-        _buildMedicationItem(
-          context,
-          'Ibuprofen 200 mg Tablet',
-          'Favorited July 12, 2025 • 017:27',
-          'assets/images/ibuprofen_pfizer.png',
-          isFavorited: true,
-        ),
-        _buildViewMoreButton(context, () {}),
+    final favoritesAsync = ref.watch(favoritesActivityProvider);
 
-        const SizedBox(height: 24),
-        _buildSectionHeader(
-          context,
-          'Bookmarked Pharmacies',
-          onClearAll: () {},
+    return favoritesAsync.when(
+      data: (items) {
+        final medications = items.where((e) => e.type == ActivityItemType.medication).toList();
+        final pharmacies = items.where((e) => e.type == ActivityItemType.pharmacy).toList();
+
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            if (medications.isNotEmpty) ...[
+              _buildSectionHeader(context, 'Favorite Medications', onClearAll: () {}),
+              const SizedBox(height: 16),
+              ...medications.map((item) => _buildMedicationItem(context, item)),
+              const SizedBox(height: 24),
+            ],
+
+            if (pharmacies.isNotEmpty) ...[
+              _buildSectionHeader(context, 'Bookmarked Pharmacies', onClearAll: () {}),
+              const SizedBox(height: 16),
+              ...pharmacies.map((item) => _buildPharmacyItem(context, item, showDistance: false)),
+              const SizedBox(height: 24),
+            ],
+
+            if (items.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.0),
+                  child: Text('No favorites yet'),
+                ),
+              ),
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, st) => Center(child: Text('Error loading favorites: $e')),
+    );
+  }
+
+  Widget _buildDismissibleItem({required PatientActivityItem item, required Widget child}) {
+    return Dismissible(
+      key: Key(item.id),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) {
+        ref.read(activityNotifierProvider.notifier).removeRecentActivity(item.id);
+      },
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(12),
         ),
-        const SizedBox(height: 16),
-        _buildPharmacyItem(
-          context,
-          'New-Health Pharmacy Ltd',
-          'Favorited July 18, 2025 • 14:40',
-          null, // Date subtitle
-          null, // image
-          isBookmarked: true,
-          showDistance: false,
-        ),
-        _buildPharmacyItem(
-          context,
-          'Apogee Pharmacy & Stores',
-          'Favorited July 15, 2025 • 09:15',
-          null, // Date subtitle
-          null, // image
-          isBookmarked: true,
-          showDistance: false,
-        ),
-        _buildViewMoreButton(context, () {}),
-      ],
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: child,
     );
   }
 
@@ -268,12 +260,7 @@ class _ActivityPageState extends State<ActivityPage>
     );
   }
 
-  Widget _buildSearchItem(
-    BuildContext context,
-    String query,
-    String date, {
-    bool isDeletable = false,
-  }) {
+  Widget _buildSearchItem(BuildContext context, PatientActivityItem item) {
     final colors = AppTheme.colors(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -282,7 +269,7 @@ class _ActivityPageState extends State<ActivityPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -299,14 +286,14 @@ class _ActivityPageState extends State<ActivityPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      query,
+                      item.title,
                       style: AppTextStyles.interP18M.copyWith(
                         color: colors.neutral.primaryText,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      date,
+                      '${item.timestamp.day}/${item.timestamp.month}/${item.timestamp.year}',
                       style: AppTextStyles.interP14R.copyWith(
                         color: colors.neutral.tertiaryText,
                       ),
@@ -315,26 +302,13 @@ class _ActivityPageState extends State<ActivityPage>
                 ),
               ),
             ),
-            if (isDeletable)
-              Container(
-                width: 60,
-                height: 80,
-                color: colors.support.red,
-                child: const Icon(Icons.delete_outline, color: Colors.white),
-              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMedicationItem(
-    BuildContext context,
-    String title,
-    String subtitle,
-    String imagePath, {
-    required bool isFavorited,
-  }) {
+  Widget _buildMedicationItem(BuildContext context, PatientActivityItem item) {
     final colors = AppTheme.colors(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -344,7 +318,7 @@ class _ActivityPageState extends State<ActivityPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -360,12 +334,11 @@ class _ActivityPageState extends State<ActivityPage>
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(8),
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.medication),
-            ),
+            child: (item.imagePath != null && item.imagePath!.isNotEmpty) 
+                ? (item.imagePath!.startsWith('http') 
+                    ? Image.network(item.imagePath!) 
+                    : Image.asset(item.imagePath!))
+                : const Icon(Icons.medication),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -373,14 +346,14 @@ class _ActivityPageState extends State<ActivityPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  item.title,
                   style: AppTextStyles.interP18M.copyWith(
                     color: colors.neutral.primaryText,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  subtitle,
+                  item.subtitle ?? '',
                   style: AppTextStyles.interP14R.copyWith(
                     color: colors.neutral.tertiaryText,
                   ),
@@ -388,26 +361,21 @@ class _ActivityPageState extends State<ActivityPage>
               ],
             ),
           ),
-          Icon(
-            isFavorited ? Icons.favorite : Icons.favorite_border,
-            color: isFavorited
-                ? colors.support.red
-                : colors.neutral.secondaryText,
+          IconButton(
+            icon: Icon(
+              item.isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: item.isFavorite ? colors.support.red : colors.neutral.secondaryText,
+            ),
+            onPressed: () {
+              ref.read(activityNotifierProvider.notifier).toggleFavorite(item);
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPharmacyItem(
-    BuildContext context,
-    String name,
-    String info,
-    String? viewedDate,
-    String? imagePath, {
-    required bool isBookmarked,
-    bool showDistance = true,
-  }) {
+  Widget _buildPharmacyItem(BuildContext context, PatientActivityItem item, {bool showDistance = true}) {
     final colors = AppTheme.colors(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -417,7 +385,7 @@ class _ActivityPageState extends State<ActivityPage>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -431,14 +399,14 @@ class _ActivityPageState extends State<ActivityPage>
             decoration: BoxDecoration(
               color: colors.neutral.bgTint,
               borderRadius: BorderRadius.circular(8),
-              image: imagePath != null
+              image: (item.imagePath != null && item.imagePath!.isNotEmpty)
                   ? DecorationImage(
-                      image: AssetImage(imagePath),
+                      image: item.imagePath!.startsWith('http') ? NetworkImage(item.imagePath!) as ImageProvider : AssetImage(item.imagePath!),
                       fit: BoxFit.cover,
                     )
                   : null,
             ),
-            child: imagePath == null
+            child: (item.imagePath == null || item.imagePath!.isEmpty)
                 ? const Icon(Icons.local_pharmacy_outlined)
                 : null,
           ),
@@ -448,13 +416,13 @@ class _ActivityPageState extends State<ActivityPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  item.title,
                   style: AppTextStyles.interP18M.copyWith(
                     color: colors.neutral.primaryText,
                   ),
                 ),
                 const SizedBox(height: 4),
-                if (showDistance)
+                if (showDistance && item.subtitle != null)
                   Row(
                     children: [
                       Icon(
@@ -464,54 +432,40 @@ class _ActivityPageState extends State<ActivityPage>
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        info,
+                        item.subtitle!,
                         style: AppTextStyles.interP14R.copyWith(
                           color: colors.neutral.secondaryText,
                         ),
                       ),
                     ],
                   )
-                else
+                else if (item.subtitle != null)
                   Text(
-                    info,
+                    item.subtitle!,
                     style: AppTextStyles.interP14R.copyWith(
                       color: colors.neutral.tertiaryText,
                     ),
                   ),
-                if (viewedDate != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    viewedDate,
-                    style: AppTextStyles.interP14R.copyWith(
-                      color: colors.neutral.tertiaryText,
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  '${item.timestamp.day}/${item.timestamp.month}/${item.timestamp.year}',
+                  style: AppTextStyles.interP14R.copyWith(
+                    color: colors.neutral.tertiaryText,
                   ),
-                ],
+                ),
               ],
             ),
           ),
-          Icon(
-            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-            color: isBookmarked
-                ? colors.patient.bg
-                : colors.neutral.secondaryText,
+          IconButton(
+            icon: Icon(
+              item.isFavorite ? Icons.bookmark : Icons.bookmark_border,
+              color: item.isFavorite ? colors.patient.bg : colors.neutral.secondaryText,
+            ),
+            onPressed: () {
+              ref.read(activityNotifierProvider.notifier).toggleFavorite(item);
+            },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildViewMoreButton(BuildContext context, VoidCallback onPressed) {
-    final colors = AppTheme.colors(context);
-    return Center(
-      child: TextButton.icon(
-        onPressed: onPressed,
-        label: const Text('View more'),
-        icon: const Icon(Icons.keyboard_arrow_down),
-        style: TextButton.styleFrom(
-          foregroundColor: colors.patient.bg,
-          textStyle: AppTextStyles.interP16M,
-        ),
       ),
     );
   }

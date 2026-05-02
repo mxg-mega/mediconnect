@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mediconnect/common/auth/data/datasources/pharmacy_data_source.dart';
 import 'package:mediconnect/common/auth/data/models/pharmacy_model.dart';
 import 'package:mediconnect/common/auth/data/datasources/storage_layer.dart';
+import 'package:geoflutterfire_plus/geoflutterfire_plus.dart';
 
 class FirebasePharmacyDataSource implements PharmacyDataSource {
   final FirebaseFirestore _firestore;
@@ -36,7 +37,11 @@ class FirebasePharmacyDataSource implements PharmacyDataSource {
 
   @override
   Future<void> updatePharmacyInfo(PharmacyModel pharmacy) async {
-    await _firestore.collection('businesses').doc(pharmacy.id).update(pharmacy.toJson());
+    final data = pharmacy.toJson();
+    final geoFirePoint = GeoFirePoint(GeoPoint(pharmacy.location.latitude, pharmacy.location.longitude));
+    data['geo'] = geoFirePoint.data;
+
+    await _firestore.collection('businesses').doc(pharmacy.id).update(data);
     try {
       await storageLayer.put('current_business', pharmacy.toJson());
     } catch (_) {}
@@ -54,7 +59,12 @@ class FirebasePharmacyDataSource implements PharmacyDataSource {
       updatedAt: DateTime.now(),
       employeeIds: [ownerUid], // Adding the creator implicitly to employeeIds
     );
-    batch.set(businessRef, newPharmacy.toJson());
+    
+    final data = newPharmacy.toJson();
+    final geoFirePoint = GeoFirePoint(GeoPoint(newPharmacy.location.latitude, newPharmacy.location.longitude));
+    data['geo'] = geoFirePoint.data;
+
+    batch.set(businessRef, data);
 
     // Create membership
     final membershipRef = _firestore

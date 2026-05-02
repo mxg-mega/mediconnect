@@ -6,7 +6,7 @@ import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/category_card.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/pharmacy_card.dart';
-import 'package:mediconnect/features/patient_app/providers/pharmacy_provider.dart';
+import 'package:mediconnect/features/patient_app/presentation/dashboard/providers/dashboard_provider.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -14,7 +14,9 @@ class DashboardPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colors(context);
-    final pharmacies = ref.watch(pharmacyListProvider);
+    final dashboardState = ref.watch(dashboardProvider);
+    final pharmacies = dashboardState.nearbyPharmacies;
+    final user = dashboardState.user;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -49,19 +51,24 @@ class DashboardPage extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundImage: NetworkImage(
-                              'https://picsum.photos/seed/pfp/200/200',
+                          if (user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty)
+                            CircleAvatar(
+                              radius: 24,
+                              backgroundImage: NetworkImage(user.profileImageUrl!),
+                            )
+                          else
+                            const CircleAvatar(
+                              radius: 24,
+                              backgroundColor: Colors.white24,
+                              child: Icon(Icons.person, color: Colors.white),
                             ),
-                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Hi, Muneer',
+                                  'Hi, ${user?.firstName ?? user?.fullName ?? 'Patient'}',
                                   style: AppTextStyles.interP16M.copyWith(
                                     color: Colors.white,
                                     fontSize: 18,
