@@ -362,7 +362,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: 'export',
-            builder: (context, state) => const ExportReceiptPage(),
+            builder: (context, state) {
+              final record = state.extra as DispenseRecord?;
+              return ExportReceiptPage(record: record);
+            },
           ),
         ],
       ),

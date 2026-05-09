@@ -8,23 +8,18 @@ import 'package:mediconnect/features/pharmacist_app/domain/models/medication.dar
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/providers/dispense_entry_provider.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/widgets/quantity_stepper.dart';
 
-class SelectedMedicationCard extends ConsumerStatefulWidget {
+class SelectedMedicationCard extends ConsumerWidget {
   const SelectedMedicationCard({
     super.key,
     required this.medication,
+    required this.quantity,
   });
 
   final Medication medication;
+  final int quantity;
 
   @override
-  ConsumerState<SelectedMedicationCard> createState() => _SelectedMedicationCardState();
-}
-
-class _SelectedMedicationCardState extends ConsumerState<SelectedMedicationCard> {
-  int quantity = 1;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = AppTheme.colors(context);
 
     return Card(
@@ -35,20 +30,20 @@ class _SelectedMedicationCardState extends ConsumerState<SelectedMedicationCard>
           children: [
             Row(
               children: [
-                Image.asset(widget.medication.imageUrl ?? 'assets/images/amoxicillin_gsk.png', width: 50, height: 50),
+                Image.asset(medication.imageUrl ?? 'assets/images/amoxicillin_gsk.png', width: 50, height: 50),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.medication.name,
+                        medication.name,
                         style: AppTextStyles.interP16M.copyWith(
                           color: theme.neutral.primaryText,
                         ),
                       ),
                       Text(
-                        '${widget.medication.manufacturer} • ${widget.medication.brand}',
+                        '${medication.manufacturer} • ${medication.brand}',
                         style: AppTextStyles.interP14R.copyWith(
                           color: theme.neutral.secondaryText,
                         ),
@@ -59,7 +54,7 @@ class _SelectedMedicationCardState extends ConsumerState<SelectedMedicationCard>
                 IconButton(
                   icon: SvgPicture.asset(AppIcons.delete, colorFilter: ColorFilter.mode(theme.support.red, BlendMode.srcIn)),
                   onPressed: () {
-                    ref.read(dispenseEntryProvider.notifier).removeMedication(widget.medication);
+                    ref.read(dispenseEntryProvider.notifier).removeMedication(medication);
                   },
                 ),
               ],
@@ -72,21 +67,21 @@ class _SelectedMedicationCardState extends ConsumerState<SelectedMedicationCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Stock:', style: AppTextStyles.interP12R.copyWith(color: theme.neutral.secondaryText)),
-                    Text('${widget.medication.stock} units', style: AppTextStyles.interP14M.copyWith(color: theme.neutral.primaryText)),
+                    Text('${medication.stock} units', style: AppTextStyles.interP14M.copyWith(color: theme.neutral.primaryText)),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Pack Size:', style: AppTextStyles.interP12R.copyWith(color: theme.neutral.secondaryText)),
-                    Text(widget.medication.packSize, style: AppTextStyles.interP14M.copyWith(color: theme.neutral.primaryText)),
+                    Text(medication.packSize, style: AppTextStyles.interP14M.copyWith(color: theme.neutral.primaryText)),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Price / unit', style: AppTextStyles.interP12R.copyWith(color: theme.neutral.secondaryText)),
-                    Text('₦${widget.medication.price}', style: AppTextStyles.interP14M.copyWith(color: theme.neutral.primaryText)),
+                    Text('₦${medication.price}', style: AppTextStyles.interP14M.copyWith(color: theme.neutral.primaryText)),
                   ],
                 ),
               ],
@@ -98,21 +93,25 @@ class _SelectedMedicationCardState extends ConsumerState<SelectedMedicationCard>
                 QuantityStepper(
                   quantity: quantity,
                   onIncrement: () {
-                    setState(() {
-                      quantity++;
-                    });
+                    if (quantity < medication.stock) {
+                      ref.read(dispenseEntryProvider.notifier).updateQuantity(medication, quantity + 1);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Cannot exceed available stock.')),
+                      );
+                    }
                   },
                   onDecrement: () {
-                    setState(() {
-                      if (quantity > 1) quantity--;
-                    });
+                    if (quantity > 1) {
+                      ref.read(dispenseEntryProvider.notifier).updateQuantity(medication, quantity - 1);
+                    }
                   },
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text('Total', style: AppTextStyles.interP12R.copyWith(color: theme.neutral.secondaryText)),
-                    Text('₦${(quantity * widget.medication.price)}', style: AppTextStyles.interP14M.copyWith(color: theme.pharmacist.bg)),
+                    Text('₦${(quantity * medication.price)}', style: AppTextStyles.interP14M.copyWith(color: theme.pharmacist.bg)),
                   ],
                 ),
               ],

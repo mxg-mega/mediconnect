@@ -43,6 +43,7 @@ class DispensedItem extends Equatable {
 @JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
 class DispenseRecord extends Equatable {
   final String id;
+  final String pharmacyId;
   final String saleId;
   final String recordedByRole;
   final String recordedByName;
@@ -52,6 +53,7 @@ class DispenseRecord extends Equatable {
 
   const DispenseRecord({
     required this.id,
+    required this.pharmacyId,
     required this.saleId,
     required this.recordedByRole,
     required this.recordedByName,
@@ -68,6 +70,7 @@ class DispenseRecord extends Equatable {
   @override
   List<Object?> get props => [
         id,
+        pharmacyId,
         saleId,
         recordedByRole,
         recordedByName,

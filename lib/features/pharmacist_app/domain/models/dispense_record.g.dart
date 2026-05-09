@@ -31,6 +31,7 @@ Map<String, dynamic> _$DispensedItemToJson(DispensedItem instance) =>
 DispenseRecord _$DispenseRecordFromJson(Map<String, dynamic> json) =>
     DispenseRecord(
       id: json['id'] as String,
+      pharmacyId: json['pharmacy_id'] as String,
       saleId: json['sale_id'] as String,
       recordedByRole: json['recorded_by_role'] as String,
       recordedByName: json['recorded_by_name'] as String,
@@ -44,6 +45,7 @@ DispenseRecord _$DispenseRecordFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$DispenseRecordToJson(DispenseRecord instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'pharmacy_id': instance.pharmacyId,
       'sale_id': instance.saleId,
       'recorded_by_role': instance.recordedByRole,
       'recorded_by_name': instance.recordedByName,

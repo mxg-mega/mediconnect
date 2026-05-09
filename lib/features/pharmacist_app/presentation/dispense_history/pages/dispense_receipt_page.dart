@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
@@ -17,9 +18,14 @@ class DispenseReceiptPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = AppTheme.colors(context);
 
-    // In a real app, we might fetch the record if it's null using an ID from the route.
-    // For this prototype, we'll use dummy data if null.
-    final data = record ?? _getDummyRecord();
+    // Ensure we have a record to display
+    if (record == null) {
+      return const AppScaffold(
+        body: Center(child: Text('Error: No dispense record provided')),
+      );
+    }
+
+    final data = record!;
 
     return AppScaffold(
       removeBodyPadding: true,
@@ -27,7 +33,7 @@ class DispenseReceiptPage extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
@@ -39,7 +45,9 @@ class DispenseReceiptPage extends StatelessWidget {
                 BlendMode.srcIn,
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              context.push('/pharmacist/dispense-history/export', extra: data);
+            },
           ),
         ],
         centerTitle: true,
@@ -260,45 +268,45 @@ class DispenseReceiptPage extends StatelessWidget {
     return '${DateFormat('MMM').format(dt)} $day$suffix, ${dt.year} • ${DateFormat('HH:mm:ss').format(dt)}';
   }
 
-  DispenseRecord _getDummyRecord() {
-    return DispenseRecord(
-      id: '1',
-      saleId: '-S-20260106-0001',
-      recordedByRole: 'Staff',
-      recordedByName: 'Yusuf A.',
-      recordedAt: DateTime(2026, 1, 6, 20, 47, 10),
-      totalAmount: 33500,
-      items: [
-        DispensedItem(
-          medicationName: 'Amoxicillin 500mg',
-          brandName: 'Amoxil',
-          manufacturer: 'GSK',
-          isBrand: true,
-          quantity: 2,
-          unitPrice: 2500,
-          totalPrice: 5000,
-        ),
-        DispensedItem(
-          medicationName: 'Ibuprofen 200mg',
-          brandName: 'Advil',
-          manufacturer: 'Pfizer',
-          isBrand: true,
-          quantity: 1,
-          unitPrice: 22500,
-          totalPrice: 22500,
-        ),
-        DispensedItem(
-          medicationName: 'Metformin 500mg',
-          brandName: 'Prinivil',
-          manufacturer: 'Merck',
-          isBrand: true,
-          quantity: 1,
-          unitPrice: 22500,
-          totalPrice: 22500,
-        ),
-      ],
-    );
-  }
+  // DispenseRecord _getDummyRecord() {
+  //   return DispenseRecord(
+  //     id: '1',
+  //     saleId: '-S-20260106-0001',
+  //     recordedByRole: 'Staff',
+  //     recordedByName: 'Yusuf A.',
+  //     recordedAt: DateTime(2026, 1, 6, 20, 47, 10),
+  //     totalAmount: 33500,
+  //     items: [
+  //       DispensedItem(
+  //         medicationName: 'Amoxicillin 500mg',
+  //         brandName: 'Amoxil',
+  //         manufacturer: 'GSK',
+  //         isBrand: true,
+  //         quantity: 2,
+  //         unitPrice: 2500,
+  //         totalPrice: 5000,
+  //       ),
+  //       DispensedItem(
+  //         medicationName: 'Ibuprofen 200mg',
+  //         brandName: 'Advil',
+  //         manufacturer: 'Pfizer',
+  //         isBrand: true,
+  //         quantity: 1,
+  //         unitPrice: 22500,
+  //         totalPrice: 22500,
+  //       ),
+  //       DispensedItem(
+  //         medicationName: 'Metformin 500mg',
+  //         brandName: 'Prinivil',
+  //         manufacturer: 'Merck',
+  //         isBrand: true,
+  //         quantity: 1,
+  //         unitPrice: 22500,
+  //         totalPrice: 22500,
+  //       ),
+  //     ],
+  //   );
+  // }
 }
 
 class _InfoColumn extends StatelessWidget {

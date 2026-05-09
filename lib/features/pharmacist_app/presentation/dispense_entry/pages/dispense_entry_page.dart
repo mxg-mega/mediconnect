@@ -58,7 +58,7 @@ class DispenseEntryPage extends ConsumerWidget {
                   );
                 },
               )
-            else if (dispenseState.selectedMedications.isNotEmpty)
+            else if (dispenseState.selectedItems.isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -72,7 +72,7 @@ class DispenseEntryPage extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        '${dispenseState.selectedMedications.length} Item${dispenseState.selectedMedications.length > 1 ? 's' : ''}',
+                        '${dispenseState.selectedItems.length} Item${dispenseState.selectedItems.length > 1 ? 's' : ''}',
                         style: AppTextStyles.interP14M.copyWith(
                           color: theme.pharmacist.bg,
                         ),
@@ -83,11 +83,13 @@ class DispenseEntryPage extends ConsumerWidget {
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: dispenseState.selectedMedications.length,
+                    itemCount: dispenseState.selectedItems.length,
                     itemBuilder: (context, index) {
-                      final medication =
-                          dispenseState.selectedMedications[index];
-                      return SelectedMedicationCard(medication: medication);
+                      final item = dispenseState.selectedItems[index];
+                      return SelectedMedicationCard(
+                        medication: item.medication,
+                        quantity: item.quantity,
+                      );
                     },
                   ),
                   const SizedBox(height: 24),
@@ -96,7 +98,7 @@ class DispenseEntryPage extends ConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: KElevatedButton(
-                      onPressed: dispenseState.selectedMedications.isEmpty
+                      onPressed: dispenseState.selectedItems.isEmpty
                           ? null
                           : () async {
                               final user = ref.read(currentUserProvider);

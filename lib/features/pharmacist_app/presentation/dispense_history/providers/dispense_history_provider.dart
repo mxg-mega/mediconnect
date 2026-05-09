@@ -45,30 +45,36 @@ class DispenseHistoryNotifier extends StateNotifier<DispenseHistoryState> {
   }
 
   Future<void> _init() async {
-    final pharmacyIdAsync = _ref.read(currentPharmacyIdProvider);
-    final pharmacyId = pharmacyIdAsync.valueOrNull;
+    try {
+      final pharmacyId = await _ref.read(currentPharmacyIdProvider.future);
 
-    if (pharmacyId == null || pharmacyId.isEmpty) {
-      state = state.copyWith(isLoading: false);
-      return;
+      if (pharmacyId == null || pharmacyId.isEmpty) {
+        state = state.copyWith(isLoading: false);
+        return;
+      }
+
+      final dispenseRepo = _ref.read(dispenseRepositoryProvider);
+      _subscription = dispenseRepo.getDispenseHistory(pharmacyId).listen(
+        (records) {
+          state = state.copyWith(
+            allRecords: records,
+            isLoading: false,
+          );
+          _applySearch();
+        },
+        onError: (e) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: e.toString(),
+          );
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
     }
-
-    final dispenseRepo = _ref.read(dispenseRepositoryProvider);
-    _subscription = dispenseRepo.getDispenseHistory(pharmacyId).listen(
-      (records) {
-        state = state.copyWith(
-          allRecords: records,
-          isLoading: false,
-        );
-        _applySearch();
-      },
-      onError: (e) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: e.toString(),
-        );
-      },
-    );
   }
 
   void updateSearch(String query) {

@@ -6,32 +6,42 @@ class DispenseRepositoryImpl implements DispenseRepository {
   final FirebaseFirestore _firestore;
 
   DispenseRepositoryImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<void> recordDispense(DispenseRecord record) async {
-    // In a real app, you would use a transaction here to update inventory stock
-    // and record the dispense record simultaneously.
-    // For now, we record the dispense.
-    await _firestore.collection('dispense_records').doc(record.id).set(record.toJson());
+    await _firestore
+        .collection('businesses')
+        .doc(record.pharmacyId)
+        .collection('dispense_records')
+        .doc(record.id)
+        .set(record.toJson());
   }
 
   @override
   Stream<List<DispenseRecord>> getDispenseHistory(String pharmacyId) {
     return _firestore
+        .collection('businesses')
+        .doc(pharmacyId)
         .collection('dispense_records')
-        .where('pharmacy_id', isEqualTo: pharmacyId) // Assuming pharmacy_id is added to model or stored in metadata
         .orderBy('recorded_at', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => DispenseRecord.fromJson(doc.data())).toList();
-    });
+          return snapshot.docs
+              .map((doc) => DispenseRecord.fromJson(doc.data()))
+              .toList();
+        });
   }
 
   @override
   Future<DispenseRecord?> getDispenseById(String id) async {
-    final doc = await _firestore.collection('dispense_records').doc(id).get();
-    if (!doc.exists) return null;
-    return DispenseRecord.fromJson(doc.data()!);
+    final querySnapshot = await _firestore
+        .collectionGroup('dispense_records')
+        .where('id', isEqualTo: id)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isEmpty) return null;
+    return DispenseRecord.fromJson(querySnapshot.docs.first.data());
   }
 }

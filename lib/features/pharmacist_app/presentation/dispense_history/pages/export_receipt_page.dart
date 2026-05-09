@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mediconnect/features/pharmacist_app/domain/models/dispense_record.dart';
 
-class ExportReceiptPage extends StatelessWidget {
-  const ExportReceiptPage({super.key});
+class ExportReceiptPage extends ConsumerWidget {
+  final DispenseRecord? record;
+
+  const ExportReceiptPage({super.key, this.record});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = AppTheme.colors(context);
+    final user = ref.watch(currentUserProvider);
+
+    final saleId = record?.saleId ?? 'All Sales';
+    final dateText = record != null 
+        ? DateFormat('dd MMM, yyyy').format(record!.recordedAt) 
+        : DateFormat('dd MMM, yyyy').format(DateTime.now());
+    final userEmail = user?.email ?? 'm*@gmail.com';
 
     return AppScaffold(
       hasAppBar: true,
@@ -38,17 +51,17 @@ class ExportReceiptPage extends StatelessWidget {
           children: [
             _buildFieldLabel(context, 'Sale ID', hasInfo: true),
             SizedBox(height: context.figmaHeight(8)),
-            _buildTextField(context, '-S-20260106-0001'),
+            _buildTextField(context, saleId),
             SizedBox(height: context.figmaHeight(24)),
 
             _buildFieldLabel(context, 'End Date'),
             SizedBox(height: context.figmaHeight(8)),
-            _buildTextField(context, '04 Jan,2026'),
+            _buildTextField(context, dateText),
             SizedBox(height: context.figmaHeight(24)),
 
             _buildFieldLabel(context, 'Email', subtitle: 'Your sales Log will be sent to this email'),
             SizedBox(height: context.figmaHeight(8)),
-            _buildEmailField(context, 'm*@gmail.com'),
+            _buildEmailField(context, userEmail),
             SizedBox(height: context.figmaHeight(24)),
 
             _buildFieldLabel(context, 'File Type', subtitle: 'select the format in which you would like to receive your sales log'),
