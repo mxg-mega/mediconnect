@@ -40,7 +40,7 @@ class DispensedItem extends Equatable {
       ];
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable(fieldRename: FieldRename.snake, explicitToJson: true)
 class DispenseRecord extends Equatable {
   final String id;
   final String saleId;

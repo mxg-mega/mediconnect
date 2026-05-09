@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -6,9 +5,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-import 'package:mediconnect/features/patient_app/presentation/widgets/medication_card.dart';
 import 'package:mediconnect/features/patient_app/presentation/widgets/pharmacy_card.dart';
 import 'package:mediconnect/features/patient_app/presentation/search/providers/search_provider.dart';
+import 'package:mediconnect/core/router/routes_names.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -21,7 +21,6 @@ class _SearchPageState extends ConsumerState<SearchPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
-  Timer? _debounce;
 
   @override
   void initState() {
@@ -33,15 +32,7 @@ class _SearchPageState extends ConsumerState<SearchPage>
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
-    _debounce?.cancel();
     super.dispose();
-  }
-
-  void _onSearchChanged(String query) {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      ref.read(patientSearchQueryProvider.notifier).state = query;
-    });
   }
 
   @override
@@ -73,7 +64,12 @@ class _SearchPageState extends ConsumerState<SearchPage>
                 ),
                 child: TextField(
                   controller: _searchController,
-                  onChanged: _onSearchChanged,
+                  readOnly: true,
+                  onTap: () {
+                    if (_tabController.index == 0) {
+                      context.push(AppRoutes.medicationSearch);
+                    }
+                  },
                   decoration: InputDecoration(
                     hintText: _tabController.index == 0
                         ? 'Search Medications'
@@ -248,10 +244,45 @@ class _SearchPageState extends ConsumerState<SearchPage>
                   ),
                   itemCount: medications.length,
                   itemBuilder: (context, index) {
-                    // For MVP, we need a MedicationCard that accepts raw map data or we map it to Medication entity
+                    final listing = medications[index];
                     return Container(
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                      child: Center(child: Text(medications[index]['name'] ?? 'Medication')),
+                      decoration: BoxDecoration(
+                        color: Colors.white, 
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: colors.neutral.bgTint, width: 1),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Center(
+                              child: listing.medicationImageUrl != null
+                                  ? Image.network(listing.medicationImageUrl!)
+                                  : Icon(Icons.medication, size: 48, color: colors.patient.bg),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            listing.medicationName,
+                            style: AppTextStyles.interP14M,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'from ${listing.currency} ${listing.price.toStringAsFixed(0)}',
+                            style: AppTextStyles.interP12M.copyWith(color: colors.patient.bg),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            listing.pharmacyName,
+                            style: AppTextStyles.interP12R.copyWith(color: colors.neutral.secondaryText),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -392,4 +423,3 @@ class _SearchPageState extends ConsumerState<SearchPage>
     );
   }
 }
-

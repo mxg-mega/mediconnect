@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:mediconnect/common/auth/data/datasources/google_places_data_source.dart';
 import 'package:mediconnect/common/auth/data/models/pharmacy_model.dart';
 import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
+import 'package:mediconnect/common/medication/domain/entities/pharmacy_listing.dart';
 // Note: We need a Medication model but since it's an MVP, we'll map Algolia hits.
 
 // 1. Search Query State
@@ -17,7 +18,7 @@ final medicationsSearchClientProvider = Provider<HitsSearcher>((ref) {
   return HitsSearcher(
     applicationID: algoliaAppId,
     apiKey: algoliaSearchKey,
-    indexName: 'medications_index',
+    indexName: 'medication_listings_index',
   );
 });
 
@@ -34,14 +35,14 @@ final googlePlacesDataSourceProvider = Provider<GooglePlacesDataSource>((ref) {
 });
 
 // 3. Search Results Providers
-final medicationSearchResultsProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
+final medicationSearchResultsProvider = StreamProvider<List<PharmacyListing>>((ref) {
   final query = ref.watch(patientSearchQueryProvider);
   final searcher = ref.watch(medicationsSearchClientProvider);
   
   searcher.query(query);
   
   return searcher.responses.map((response) {
-    return response.hits.map((hit) => hit).toList();
+    return response.hits.map((hit) => PharmacyListing.fromAlgolia(hit)).toList();
   }).handleError((error) {
     print('Algolia Medication Search Error: $error');
   });

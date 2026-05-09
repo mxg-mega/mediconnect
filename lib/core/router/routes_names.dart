@@ -9,8 +9,10 @@ class AppRoutes {
   static const patient = '/patient';
   static const patientDashboard = '/patient/dashboard';
   static const patientSearch = '/patient/search';
+  static const medicationSearch = '/patient/medication-search';
   static const patientActivity = '/patient/activity';
   static const patientProfile = '/patient/profile';
+  static const medicationDetails = '/patient/medication-details';
   
   static const pharmacist = '/pharmacist';
   static const pharmacistDashboard = '/pharmacist/dashboard';

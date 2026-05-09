@@ -48,6 +48,6 @@ Map<String, dynamic> _$DispenseRecordToJson(DispenseRecord instance) =>
       'recorded_by_role': instance.recordedByRole,
       'recorded_by_name': instance.recordedByName,
       'recorded_at': instance.recordedAt.toIso8601String(),
-      'items': instance.items,
+      'items': instance.items.map((e) => e.toJson()).toList(),
       'total_amount': instance.totalAmount,
     };

@@ -21,6 +21,8 @@ class InventoryPage extends ConsumerWidget {
     final state = ref.watch(inventoryProvider);
     final theme = AppTheme.colors(context);
 
+    print('DEBUG: InventoryPage - Building with ${state.filteredItems.length} items. isLoading: ${state.isLoading}');
+
     return AppScaffold(
       removeBodyPadding: true,
       hasAppBar: false,
@@ -31,13 +33,21 @@ class InventoryPage extends ConsumerWidget {
           const InventoryFilterChips(),
           const InventorySummaryCards(),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(bottom: context.figmaHeight(80)),
-              itemCount: state.filteredItems.length,
-              itemBuilder: (context, index) {
-                final item = state.filteredItems[index];
-                return InventoryListItem(item: item);
+            child: RefreshIndicator(
+              onRefresh: () async {
+                // In a stream-based approach, re-triggering the listen can act as a refresh
+                ref.invalidate(inventoryProvider);
               },
+              child: state.isLoading 
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    padding: EdgeInsets.only(bottom: context.figmaHeight(80)),
+                    itemCount: state.filteredItems.length,
+                    itemBuilder: (context, index) {
+                      final item = state.filteredItems[index];
+                      return InventoryListItem(item: item);
+                    },
+                  ),
             ),
           ),
         ],

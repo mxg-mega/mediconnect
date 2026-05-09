@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/auth/domain/usecases/get_current_user_use_case.dart';
@@ -259,10 +260,55 @@ final authErrorProvider = Provider<String?>((ref) {
 /// is currently operating under (multi-tenancy friendly).
 final currentPharmacyIdProvider = FutureProvider<String?>((ref) async {
   final storageLayer = ref.watch(hiveStorageLayerProvider);
+  final user = ref.watch(currentUserProvider);
+  
+  // 1. Try Hive Cache first
   try {
     final businessData = await storageLayer.get('current_business');
-    return businessData['id']?.toString();
+    final id = businessData['id']?.toString();
+    if (id != null && id.isNotEmpty) {
+      print('DEBUG: currentPharmacyIdProvider - Found in Hive: $id');
+      return id;
+    }
   } catch (_) {
-    return null;
+    print('DEBUG: currentPharmacyIdProvider - Not found in Hive cache');
   }
+
+  // 2. If user is authenticated and is a pharmacist, try Firestore memberships
+  if (user != null && user.userType == UserType.pharmacist) {
+    print('DEBUG: currentPharmacyIdProvider - Hive empty. Falling back to Firestore for user: ${user.id}');
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final memberships = await firestore
+          .collection('users')
+          .doc(user.id)
+          .collection('memberships')
+          .limit(1)
+          .get();
+
+      if (memberships.docs.isNotEmpty) {
+        final pharmacyId = memberships.docs.first.id;
+        print('DEBUG: currentPharmacyIdProvider - Found in Firestore memberships: $pharmacyId');
+        
+        // Fetch full pharmacy info to populate Hive cache for next time
+        // This ensures subsequent calls are fast
+        try {
+          final pharmacyDoc = await firestore.collection('businesses').doc(pharmacyId).get();
+          if (pharmacyDoc.exists) {
+            await storageLayer.put('current_business', pharmacyDoc.data()!);
+            print('DEBUG: currentPharmacyIdProvider - Populated Hive cache with $pharmacyId');
+          }
+        } catch (e) {
+          print('DEBUG: currentPharmacyIdProvider - Error populating Hive: $e');
+        }
+        
+        return pharmacyId;
+      }
+    } catch (e) {
+      print('DEBUG: currentPharmacyIdProvider - Firestore fallback failed: $e');
+    }
+  }
+
+  print('DEBUG: currentPharmacyIdProvider - No pharmacy ID found anywhere.');
+  return null;
 });

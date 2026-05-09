@@ -1,29 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
+import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/providers/dispense_entry_provider.dart';
 
-class RecordedBySection extends StatefulWidget {
+class RecordedBySection extends ConsumerWidget {
   const RecordedBySection({super.key});
 
   @override
-  State<RecordedBySection> createState() => _RecordedBySectionState();
-}
-
-class _RecordedBySectionState extends State<RecordedBySection> {
-  String? selectedRole;
-  final TextEditingController _nameController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = AppTheme.colors(context);
+    final state = ref.watch(dispenseEntryProvider);
+    final notifier = ref.read(dispenseEntryProvider.notifier);
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -41,20 +32,20 @@ class _RecordedBySectionState extends State<RecordedBySection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Recorded by',
+            'Recorded by (Optional)',
             style: AppTextStyles.interP18M.copyWith(
               color: theme.neutral.primaryText,
             ),
           ),
           Text(
-            'Recorded time will be set on save (server time)',
+            'If empty, current logged-in user will be used.',
             style: AppTextStyles.interP14R.copyWith(
               color: theme.neutral.secondaryText,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            'Title / Role *',
+            'Title / Role',
             style: AppTextStyles.interP14R.copyWith(
               color: theme.neutral.primaryText,
             ),
@@ -84,7 +75,7 @@ class _RecordedBySectionState extends State<RecordedBySection> {
               hintStyle: AppTextStyles.interP14R.copyWith(color: theme.neutral.secondaryText),
               contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
             ),
-            initialValue: selectedRole,
+            value: state.recordedByRole.isEmpty ? 'Pharmacist' : state.recordedByRole,
             items: <String>['Pharmacist', 'Staff', 'Admin']
                 .map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
@@ -93,23 +84,26 @@ class _RecordedBySectionState extends State<RecordedBySection> {
               );
             }).toList(),
             onChanged: (String? newValue) {
-              setState(() {
-                selectedRole = newValue;
-              });
+              if (newValue != null) {
+                notifier.updateRecordedBy(state.recordedByName, newValue);
+              }
             },
             style: AppTextStyles.interP14R.copyWith(color: theme.neutral.primaryText),
             icon: Icon(Icons.keyboard_arrow_down, color: theme.neutral.secondaryText),
           ),
           const SizedBox(height: 16),
           Text(
-            'Name *',
+            'Name',
             style: AppTextStyles.interP14R.copyWith(
               color: theme.neutral.primaryText,
             ),
           ),
           const SizedBox(height: 8),
           TextFormField(
-            controller: _nameController,
+            initialValue: state.recordedByName,
+            onChanged: (value) {
+              notifier.updateRecordedBy(value, state.recordedByRole);
+            },
             decoration: InputDecoration(
               prefixIcon: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -117,7 +111,7 @@ class _RecordedBySectionState extends State<RecordedBySection> {
                     colorFilter:
                         ColorFilter.mode(theme.neutral.secondaryText, BlendMode.srcIn)),
               ),
-              hintText: 'Yusuf A.',
+              hintText: 'Leave empty for current user',
               hintStyle: AppTextStyles.interP14R.copyWith(color: theme.neutral.secondaryText),
               contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
             ),

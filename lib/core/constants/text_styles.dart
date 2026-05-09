@@ -85,4 +85,7 @@ class AppTextStyles {
 
   static TextStyle get interP12R =>
       GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w400);
+
+  static TextStyle get interP10R =>
+      GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w400);
 }

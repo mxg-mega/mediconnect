@@ -5,13 +5,10 @@ import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dar
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
-import 'package:mediconnect/core/providers/dependency_providers.dart';
-import 'package:mediconnect/features/pharmacist_app/domain/models/dispense_record.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/providers/dispense_entry_provider.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/widgets/medication_search_result_tile.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/widgets/recorded_by_section.dart';
 import 'package:mediconnect/features/pharmacist_app/presentation/dispense_entry/widgets/selected_medication_card.dart';
-import 'package:uuid/uuid.dart';
 import 'package:go_router/go_router.dart';
 
 class DispenseEntryPage extends ConsumerWidget {
@@ -45,7 +42,8 @@ class DispenseEntryPage extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 24),
-            if (dispenseState.searchQuery.isNotEmpty && dispenseNotifier.searchResults.isNotEmpty)
+            if (dispenseState.searchQuery.isNotEmpty &&
+                dispenseNotifier.searchResults.isNotEmpty)
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -87,7 +85,8 @@ class DispenseEntryPage extends ConsumerWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: dispenseState.selectedMedications.length,
                     itemBuilder: (context, index) {
-                      final medication = dispenseState.selectedMedications[index];
+                      final medication =
+                          dispenseState.selectedMedications[index];
                       return SelectedMedicationCard(medication: medication);
                     },
                   ),
@@ -97,44 +96,56 @@ class DispenseEntryPage extends ConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: KElevatedButton(
-                      onPressed: () async {
-                        final user = ref.read(currentUserProvider);
-                        if (user == null) return;
+                      onPressed: dispenseState.selectedMedications.isEmpty
+                          ? null
+                          : () async {
+                              final user = ref.read(currentUserProvider);
+                              if (user == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Error: User not authenticated',
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
 
-                        final record = DispenseRecord(
-                          id: const Uuid().v4(),
-                          saleId: 'SALE-${DateTime.now().millisecondsSinceEpoch}',
-                          recordedByRole: user.userType.displayName,
-                          recordedByName: user.fullName,
-                          recordedAt: DateTime.now(),
-                          items: dispenseState.selectedMedications.map((m) => DispensedItem(
-                            medicationName: m.name,
-                            brandName: m.brand,
-                            manufacturer: m.manufacturer,
-                            isBrand: true, // Placeholder
-                            quantity: 1, // Placeholder
-                            unitPrice: m.price,
-                            totalPrice: m.price,
-                          )).toList(),
-                          totalAmount: dispenseState.selectedMedications.fold(0, (sum, m) => sum + m.price),
-                        );
+                              try {
+                                await dispenseNotifier.submitDispense(
+                                  pharmacistName: user.fullName,
+                                  pharmacistRole: user.userType.displayName,
+                                );
 
-                        await ref.read(dispenseRepositoryProvider).recordDispense(record);
-                        
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Dispense Saved Successfully!'))
-                          );
-                          context.pop();
-                        }
-                      },
-                      child: const Text('Save Dispense'),
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Dispense Saved Successfully!',
+                                      ),
+                                    ),
+                                  );
+                                  context.pop();
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: ${e.toString()}'),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                      child: dispenseState.isSubmitting
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text('Save Dispense'),
                     ),
                   ),
                 ],
               )
             else
-              const SizedBox.shrink(), 
+              const SizedBox.shrink(),
           ],
         ),
       ),

@@ -97,13 +97,16 @@ class InventoryNotifier extends StateNotifier<InventoryState> {
 
   void _listenToInventory() {
     _subscription?.cancel();
+    print('DEBUG: InventoryNotifier - Listening to inventory for pharmacyId: $_pharmacyId');
     _subscription = _repository.getInventory(_pharmacyId!).listen((items) {
+      print('DEBUG: InventoryNotifier - Received ${items.length} items from repository');
       state = state.copyWith(allItems: items, isLoading: false);
       _applyFilters();
     });
   }
 
   void updateSearch(String query) {
+    print('DEBUG: InventoryNotifier - Updating search query: $query');
     state = state.copyWith(searchQuery: query);
     _applyFilters();
   }
@@ -125,6 +128,7 @@ class InventoryNotifier extends StateNotifier<InventoryState> {
 
   void _applyFilters() {
     List<InventoryItem> results = List.from(state.allItems);
+    print('DEBUG: InventoryNotifier - Applying filters. total items: ${results.length}');
 
     // 1. Search Query
     if (state.searchQuery.isNotEmpty) {
@@ -132,11 +136,13 @@ class InventoryNotifier extends StateNotifier<InventoryState> {
       results = results.where((item) =>
           item.medicationName.toLowerCase().contains(query) ||
           item.brandName.toLowerCase().contains(query)).toList();
+      print('DEBUG: InventoryNotifier - Filtered by search. remaining: ${results.length}');
     }
 
     // 2. Quick Status Filter
     if (state.quickFilterStatus != null) {
       results = results.where((item) => item.stockStatus == state.quickFilterStatus).toList();
+      print('DEBUG: InventoryNotifier - Filtered by status. remaining: ${results.length}');
     }
 
     // 3. Sorting

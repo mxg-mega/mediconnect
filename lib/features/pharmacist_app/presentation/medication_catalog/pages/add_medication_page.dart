@@ -117,7 +117,26 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
                     _buildSectionHeader('Inventory', theme),
                     _buildTextField('Current Stock Units', _stockController, theme, hint: 'Total stock available'),
                     _buildTextField('Reorder Point', _reorderController, theme, hint: 'e.g. \"Reorder when ≤ 10 units'),
-                    _buildTextField('Expiration Date', _expiryController, theme, hint: 'e.g. 2027-08-31'),
+                    _buildTextField(
+                      'Expiration Date', 
+                      _expiryController, 
+                      theme, 
+                      hint: 'Select expiry date',
+                      readOnly: true,
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now().add(const Duration(days: 365)),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(const Duration(days: 3650)),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            _expiryController.text = picked.toIso8601String().split('T')[0];
+                          });
+                        }
+                      },
+                    ),
                     SizedBox(height: context.figmaHeight(24)),
                     _buildSectionHeader('Medication Price', theme),
                     _buildTextField('Price(₦)', _priceController, theme, hint: 'e.g. 1000, 2000'),
@@ -260,7 +279,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, AppColorsTheme theme, {bool isDropdown = false, int maxLines = 1, String? hint}) {
+  Widget _buildTextField(String label, TextEditingController controller, AppColorsTheme theme, {bool isDropdown = false, int maxLines = 1, String? hint, bool readOnly = false, VoidCallback? onTap}) {
     return Padding(
       padding: EdgeInsets.only(bottom: context.figmaHeight(16)),
       child: Column(
@@ -271,6 +290,8 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
           TextFormField(
             controller: controller,
             maxLines: maxLines,
+            readOnly: readOnly,
+            onTap: onTap,
             decoration: InputDecoration(
               hintText: hint,
               suffixIcon: isDropdown ? const Icon(Icons.keyboard_arrow_down) : null,
@@ -323,8 +344,7 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
 
   void _onSave() async {
     if (_formKey.currentState!.validate()) {
-      final pharmacyIdAsync = ref.read(currentPharmacyIdProvider);
-      final pharmacyId = pharmacyIdAsync.valueOrNull;
+      final pharmacyId = await ref.read(currentPharmacyIdProvider.future);
       
       if (pharmacyId == null || pharmacyId.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -333,6 +353,8 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
         return;
       }
 
+      print('DEBUG: AddMedicationPage - Attempting to save item. pharmacyId: $pharmacyId');
+      
       final newItem = InventoryItem(
         id: const Uuid().v4(),
         pharmacyId: pharmacyId, 
@@ -350,6 +372,8 @@ class _AddMedicationPageState extends ConsumerState<AddMedicationPage> {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
+
+      print('DEBUG: AddMedicationPage - Saving item: ${newItem.medicationName} (${newItem.id}) to Firestore');
 
       await ref.read(inventoryProvider.notifier).addItem(newItem);
       
