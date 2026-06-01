@@ -7,9 +7,6 @@ class GetPharmacyInfoUseCase {
   GetPharmacyInfoUseCase({required this.pharmacyRepository});
 
   Future<Pharmacy> call(String pharmacyId) async {
-    // TODO: Implement pharmacy info retrieval
-    // This will involve making HTTP request to /pharmacy/info endpoint
-    // using the HttpStorageLayer for CRUD operations
-    throw UnimplementedError('Pharmacy info retrieval not yet implemented');
+    return pharmacyRepository.getPharmacyInfo(pharmacyId);
   }
 }

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/core/providers/dependency_providers.dart';
 import 'package:mediconnect/features/pharmacist_app/domain/entities/inventory_item.dart';
 import 'package:mediconnect/features/pharmacist_app/domain/models/dispense_record.dart';
@@ -59,71 +62,57 @@ class DashboardState {
 
 class DashboardNotifier extends StateNotifier<DashboardState> {
   final Ref _ref;
+  StreamSubscription<List<InventoryItem>>? _inventorySub;
+  StreamSubscription<List<DispenseRecord>>? _dispenseSub;
 
-  DashboardNotifier(this._ref) : super(const DashboardState()) {
-    _init();
+  DashboardNotifier(this._ref, {String? pharmacyId})
+      : super(const DashboardState()) {
+    _bind(pharmacyId);
   }
 
-  Future<void> _init() async {
-    await loadDashboardData();
-  }
+  void _bind(String? pharmacyId) {
+    _inventorySub?.cancel();
+    _dispenseSub?.cancel();
+    _inventorySub = null;
+    _dispenseSub = null;
 
-  Future<void> loadDashboardData() async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    if (pharmacyId == null || pharmacyId.isEmpty) {
+      state = const DashboardState(isLoading: false);
+      return;
+    }
+
+    state = const DashboardState(isLoading: true);
     try {
-      // Read pharmacyId from Hive cache.
-      final storageLayer = _ref.read(hiveStorageLayerProvider);
-      String? pharmacyId;
-      try {
-        final businessData = await storageLayer.get('current_business');
-        pharmacyId = businessData['id']?.toString();
-      } catch (_) {
-        // No cached business yet
-      }
-
-      if (pharmacyId == null || pharmacyId.isEmpty) {
-        state = state.copyWith(
-          isLoading: false,
-          todaySalesTotal: 0,
-          todayItemsSold: 0,
-          totalSkus: 0,
-          lowStockCount: 0,
-          expiringCount: 0,
-          averageRating: 0,
-          recentDispenses: [],
-        );
-        return;
-      }
-
-      // Listen to inventory stream for stats
       final inventoryRepo = _ref.read(inventoryRepositoryProvider);
       final dispenseRepo = _ref.read(dispenseRepositoryProvider);
 
-      // Get inventory snapshot
-      final inventoryStream = inventoryRepo.getInventory(pharmacyId);
-      inventoryStream.listen((items) {
-        _processInventoryStats(items);
-      });
-
-      // Get dispense stream
-      final dispenseStream = dispenseRepo.getDispenseHistory(pharmacyId);
-      dispenseStream.listen((records) {
-        _processDispenseData(records);
-      });
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString(),
+      _inventorySub = inventoryRepo.getInventory(pharmacyId).listen(
+        _processInventoryStats,
+        onError: (e) {
+          state = state.copyWith(isLoading: false, errorMessage: e.toString());
+        },
       );
+
+      _dispenseSub = dispenseRepo.getDispenseHistory(pharmacyId).listen(
+        _processDispenseData,
+        onError: (e) {
+          state = state.copyWith(isLoading: false, errorMessage: e.toString());
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
   void _processInventoryStats(List<InventoryItem> items) {
     final totalSkus = items.length;
-    final lowStockCount = items.where((i) =>
-      i.stockStatus == StockStatus.lowStock ||
-      i.stockStatus == StockStatus.outOfStock
-    ).length;
+    final lowStockCount = items
+        .where(
+          (i) =>
+              i.stockStatus == StockStatus.lowStock ||
+              i.stockStatus == StockStatus.outOfStock,
+        )
+        .length;
     final expiringCount = items.where((i) => i.isExpiringSoon).length;
 
     state = state.copyWith(
@@ -138,9 +127,9 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
 
-    final todayRecords = records.where(
-      (r) => r.recordedAt.isAfter(todayStart),
-    ).toList();
+    final todayRecords = records
+        .where((r) => r.recordedAt.isAfter(todayStart))
+        .toList();
 
     final todaySalesTotal = todayRecords.fold<double>(
       0.0,
@@ -151,7 +140,6 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       (sum, r) => sum + r.items.length,
     );
 
-    // Take latest 3 as recent
     final recentDispenses = records.take(3).toList();
 
     state = state.copyWith(
@@ -161,9 +149,17 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       recentDispenses: recentDispenses,
     );
   }
+
+  @override
+  void dispose() {
+    _inventorySub?.cancel();
+    _dispenseSub?.cancel();
+    super.dispose();
+  }
 }
 
 final dashboardProvider =
     StateNotifierProvider<DashboardNotifier, DashboardState>((ref) {
-  return DashboardNotifier(ref);
+  final pharmacyId = ref.watch(currentPharmacyIdProvider).valueOrNull;
+  return DashboardNotifier(ref, pharmacyId: pharmacyId);
 });

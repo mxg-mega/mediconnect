@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
+import 'package:mediconnect/common/auth/domain/entities/pharmacy_verification_document.dart';
+import 'package:mediconnect/common/auth/domain/utils/pharmacy_verification_docs.dart';
 
 part 'pharmacy_model.g.dart';
 
@@ -175,10 +177,13 @@ class PharmacyModel extends Equatable {
   final String? logoUrl; // Pharmacy logo
   final List<String> licenseDocumentUrls; // License verification docs
   final String? pcnRegistrationNumber;
+  final String? pcnAgency;
+  final Map<String, PharmacyVerificationDocument> verificationDocuments;
   final List<OperatingHoursModel> operatingHours;
   final GeoLocationModel location; // lat/lng coordinates
   final PharmacyRatingModel rating; // Average rating and count
   final bool isVerified; // Admin verified
+  final bool? isRegistrationComplete; // null = legacy/complete; false = skipped placeholder
   final bool isFeatured; // Featured pharmacy
   final List<String> employeeIds; // Pharmacist IDs
   final DateTime createdAt;
@@ -199,20 +204,43 @@ class PharmacyModel extends Equatable {
     this.logoUrl,
     this.licenseDocumentUrls = const [],
     this.pcnRegistrationNumber,
+    this.pcnAgency,
+    this.verificationDocuments = const {},
     this.operatingHours = const [],
     required this.location,
     this.rating = const PharmacyRatingModel(),
     this.isVerified = false,
+    this.isRegistrationComplete,
     this.isFeatured = false,
     this.employeeIds = const [],
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory PharmacyModel.fromJson(Map<String, dynamic> json) =>
-      _$PharmacyModelFromJson(json);
+  /// Existing businesses without this field are treated as fully registered.
+  bool get hasCompletedRegistration => isRegistrationComplete ?? true;
 
-  Map<String, dynamic> toJson() => _$PharmacyModelToJson(this);
+  factory PharmacyModel.fromJson(Map<String, dynamic> json) {
+    final model = _$PharmacyModelFromJson(json);
+    return model.copyWith(
+      pcnAgency: json['pcn_agency'] as String? ?? model.pcnAgency,
+      verificationDocuments: parseVerificationDocumentsMap(
+        json['verification_documents'],
+      ),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    final data = _$PharmacyModelToJson(this);
+    if (pcnAgency != null && pcnAgency!.isNotEmpty) {
+      data['pcn_agency'] = pcnAgency;
+    }
+    if (verificationDocuments.isNotEmpty) {
+      data['verification_documents'] =
+          verificationDocumentsToJson(verificationDocuments);
+    }
+    return data;
+  }
 
   factory PharmacyModel.fromEntity(Pharmacy entity) {
     return PharmacyModel(
@@ -230,12 +258,15 @@ class PharmacyModel extends Equatable {
       logoUrl: entity.logoUrl,
       licenseDocumentUrls: entity.licenseDocumentUrls,
       pcnRegistrationNumber: entity.pcnRegistrationNumber,
+      pcnAgency: entity.pcnAgency,
+      verificationDocuments: entity.verificationDocuments,
       operatingHours: entity.operatingHours
           .map((e) => OperatingHoursModel.fromEntity(e))
           .toList(),
       location: GeoLocationModel.fromEntity(entity.location),
       rating: PharmacyRatingModel.fromEntity(entity.rating),
       isVerified: entity.isVerified,
+      isRegistrationComplete: entity.isRegistrationComplete,
       isFeatured: entity.isFeatured,
       employeeIds: entity.employeeIds,
       createdAt: entity.createdAt,
@@ -259,10 +290,13 @@ class PharmacyModel extends Equatable {
       logoUrl: logoUrl,
       licenseDocumentUrls: licenseDocumentUrls,
       pcnRegistrationNumber: pcnRegistrationNumber,
+      pcnAgency: pcnAgency,
+      verificationDocuments: verificationDocuments,
       operatingHours: operatingHours.map((e) => e.toEntity()).toList(),
       location: location.toEntity(),
       rating: rating.toEntity(),
       isVerified: isVerified,
+      isRegistrationComplete: isRegistrationComplete,
       isFeatured: isFeatured,
       employeeIds: employeeIds,
       createdAt: createdAt,
@@ -286,10 +320,13 @@ class PharmacyModel extends Equatable {
     logoUrl,
     licenseDocumentUrls,
     pcnRegistrationNumber,
+    pcnAgency,
+    verificationDocuments,
     operatingHours,
     location,
     rating,
     isVerified,
+    isRegistrationComplete,
     isFeatured,
     employeeIds,
     createdAt,
@@ -311,10 +348,13 @@ class PharmacyModel extends Equatable {
     String? logoUrl,
     List<String>? licenseDocumentUrls,
     String? pcnRegistrationNumber,
+    String? pcnAgency,
+    Map<String, PharmacyVerificationDocument>? verificationDocuments,
     List<OperatingHoursModel>? operatingHours,
     GeoLocationModel? location,
     PharmacyRatingModel? rating,
     bool? isVerified,
+    bool? isRegistrationComplete,
     bool? isFeatured,
     List<String>? employeeIds,
     DateTime? createdAt,
@@ -336,10 +376,15 @@ class PharmacyModel extends Equatable {
       licenseDocumentUrls: licenseDocumentUrls ?? this.licenseDocumentUrls,
       pcnRegistrationNumber:
           pcnRegistrationNumber ?? this.pcnRegistrationNumber,
+      pcnAgency: pcnAgency ?? this.pcnAgency,
+      verificationDocuments:
+          verificationDocuments ?? this.verificationDocuments,
       operatingHours: operatingHours ?? this.operatingHours,
       location: location ?? this.location,
       rating: rating ?? this.rating,
       isVerified: isVerified ?? this.isVerified,
+      isRegistrationComplete:
+          isRegistrationComplete ?? this.isRegistrationComplete,
       isFeatured: isFeatured ?? this.isFeatured,
       employeeIds: employeeIds ?? this.employeeIds,
       createdAt: createdAt ?? this.createdAt,

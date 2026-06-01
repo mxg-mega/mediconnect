@@ -38,27 +38,35 @@ class DispenseHistoryState {
 
 class DispenseHistoryNotifier extends StateNotifier<DispenseHistoryState> {
   final Ref _ref;
-  StreamSubscription? _subscription;
+  StreamSubscription<List<DispenseRecord>>? _subscription;
 
-  DispenseHistoryNotifier(this._ref) : super(const DispenseHistoryState()) {
-    _init();
+  DispenseHistoryNotifier(this._ref, {String? pharmacyId})
+      : super(const DispenseHistoryState()) {
+    _bind(pharmacyId);
   }
 
-  Future<void> _init() async {
+  void _bind(String? pharmacyId) {
+    _subscription?.cancel();
+    _subscription = null;
+
+    if (pharmacyId == null || pharmacyId.isEmpty) {
+      state = const DispenseHistoryState(
+        isLoading: false,
+        allRecords: [],
+        filteredRecords: [],
+      );
+      return;
+    }
+
+    state = const DispenseHistoryState(isLoading: true);
     try {
-      final pharmacyId = await _ref.read(currentPharmacyIdProvider.future);
-
-      if (pharmacyId == null || pharmacyId.isEmpty) {
-        state = state.copyWith(isLoading: false);
-        return;
-      }
-
       final dispenseRepo = _ref.read(dispenseRepositoryProvider);
       _subscription = dispenseRepo.getDispenseHistory(pharmacyId).listen(
         (records) {
           state = state.copyWith(
             allRecords: records,
             isLoading: false,
+            errorMessage: null,
           );
           _applySearch();
         },
@@ -92,9 +100,11 @@ class DispenseHistoryNotifier extends StateNotifier<DispenseHistoryState> {
     final filtered = state.allRecords.where((record) {
       return record.saleId.toLowerCase().contains(query) ||
           record.recordedByName.toLowerCase().contains(query) ||
-          record.items.any((item) =>
-              item.medicationName.toLowerCase().contains(query) ||
-              item.brandName.toLowerCase().contains(query));
+          record.items.any(
+            (item) =>
+                item.medicationName.toLowerCase().contains(query) ||
+                item.brandName.toLowerCase().contains(query),
+          );
     }).toList();
 
     state = state.copyWith(filteredRecords: filtered);
@@ -109,5 +119,6 @@ class DispenseHistoryNotifier extends StateNotifier<DispenseHistoryState> {
 
 final dispenseHistoryProvider =
     StateNotifierProvider<DispenseHistoryNotifier, DispenseHistoryState>((ref) {
-  return DispenseHistoryNotifier(ref);
+  final pharmacyId = ref.watch(currentPharmacyIdProvider).valueOrNull;
+  return DispenseHistoryNotifier(ref, pharmacyId: pharmacyId);
 });

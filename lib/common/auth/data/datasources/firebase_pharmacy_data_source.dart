@@ -20,9 +20,6 @@ class FirebasePharmacyDataSource implements PharmacyDataSource {
       throw Exception('Pharmacy not found');
     }
     final model = PharmacyModel.fromJson(doc.data()!);
-    try {
-      await storageLayer.put('current_business', model.toJson());
-    } catch (_) {}
     return model;
   }
 
@@ -43,7 +40,12 @@ class FirebasePharmacyDataSource implements PharmacyDataSource {
 
     await _firestore.collection('businesses').doc(pharmacy.id).update(data);
     try {
-      await storageLayer.put('current_business', pharmacy.toJson());
+      final ownerUid = pharmacy.employeeIds.isNotEmpty
+          ? pharmacy.employeeIds.first
+          : '';
+      if (ownerUid.isNotEmpty) {
+        await _putBusinessCache(pharmacy.toJson(), ownerUid);
+      }
     } catch (_) {}
   }
 
@@ -82,10 +84,75 @@ class FirebasePharmacyDataSource implements PharmacyDataSource {
 
     await batch.commit();
     try {
-      await storageLayer.put('current_business', newPharmacy.toJson());
+      await _putBusinessCache(newPharmacy.toJson(), ownerUid);
       await storageLayer.put('current_memberships', {'data': [membershipData]});
     } catch (_) {}
     
     return newPharmacy;
+  }
+
+  @override
+  Future<void> clearPharmacyCache() async {
+    try {
+      await storageLayer.delete('current_business');
+      await storageLayer.delete('current_memberships');
+    } catch (_) {}
+  }
+
+  Future<void> _putBusinessCache(Map<String, dynamic> data, String ownerUid) async {
+    final cache = Map<String, dynamic>.from(data);
+    cache['owner_uid'] = ownerUid;
+    await storageLayer.put('current_business', cache);
+  }
+
+  PharmacyModel _modelFromCache(Map<String, dynamic> data) {
+    final copy = Map<String, dynamic>.from(data);
+    copy.remove('owner_uid');
+    copy.remove('geo');
+    return PharmacyModel.fromJson(copy);
+  }
+
+  bool _cachedBusinessBelongsToUser(Map<String, dynamic> businessData, String uid) {
+    final ownerUid = businessData['owner_uid']?.toString();
+    if (ownerUid != null && ownerUid.isNotEmpty) {
+      return ownerUid == uid;
+    }
+    final employeeIds = (businessData['employee_ids'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
+    return employeeIds.contains(uid);
+  }
+
+  @override
+  Future<PharmacyModel?> syncLinkedPharmacyForUser(String uid) async {
+    try {
+      final businessData = await storageLayer.get('current_business');
+      if (_cachedBusinessBelongsToUser(businessData, uid)) {
+        return _modelFromCache(businessData);
+      }
+      await clearPharmacyCache();
+    } catch (_) {
+      await clearPharmacyCache();
+    }
+
+    final memberships = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('memberships')
+        .limit(1)
+        .get();
+
+    if (memberships.docs.isEmpty) return null;
+
+    final pharmacyId = memberships.docs.first.id;
+    final doc = await _firestore.collection('businesses').doc(pharmacyId).get();
+    if (!doc.exists) return null;
+
+    final model = PharmacyModel.fromJson(doc.data()!);
+    try {
+      await _putBusinessCache(model.toJson(), uid);
+    } catch (_) {}
+    return model;
   }
 }

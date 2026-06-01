@@ -5,4 +5,6 @@ abstract class PharmacyDataSource {
   Future<List<String>> getEmployeeIds(String pharmacyId);
   Future<void> updatePharmacyInfo(PharmacyModel pharmacy);
   Future<PharmacyModel> createPharmacy(PharmacyModel pharmacy, String ownerUid, String role);
+  Future<PharmacyModel?> syncLinkedPharmacyForUser(String uid);
+  Future<void> clearPharmacyCache();
 }

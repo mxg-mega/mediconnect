@@ -30,4 +30,15 @@ class PharmacyRepositoryImpl implements PharmacyRepository {
     final created = await remoteDataSource.createPharmacy(model, ownerUid, role);
     return created.toEntity();
   }
+
+  @override
+  Future<Pharmacy?> syncLinkedPharmacyForUser(String uid) async {
+    final model = await remoteDataSource.syncLinkedPharmacyForUser(uid);
+    return model?.toEntity();
+  }
+
+  @override
+  Future<void> clearPharmacyCache() async {
+    await remoteDataSource.clearPharmacyCache();
+  }
 }

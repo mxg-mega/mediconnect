@@ -1,12 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/auth/domain/usecases/get_current_user_use_case.dart';
-import 'package:mediconnect/common/auth/domain/usecases/get_pharmacy_info_usecase.dart';
+import 'package:mediconnect/common/auth/domain/usecases/sync_linked_pharmacy_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/sign_in_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/sign_up_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/sign_out_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/update_user_profile_use_case.dart';
+import 'package:mediconnect/common/auth/domain/usecases/send_email_verification_use_case.dart';
+import 'package:mediconnect/common/auth/domain/usecases/verify_email_otp_use_case.dart';
 import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
 import 'package:mediconnect/core/providers/dependency_providers.dart';
 
@@ -46,7 +47,8 @@ class AuthState {
   }
 
   bool get isAuthenticated =>
-      status == AuthStatus.authenticated && user != null;
+      (status == AuthStatus.authenticated || status == AuthStatus.loading) &&
+      user != null;
   bool get isLoading => status == AuthStatus.loading;
   bool get hasError => status == AuthStatus.error;
 }
@@ -56,8 +58,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SignInUseCase signInUseCase;
   final SignOutUseCase signOutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
-  final GetPharmacyInfoUseCase? getPharmacyInfoUseCase;
+  final SyncLinkedPharmacyUseCase? syncLinkedPharmacyUseCase;
   final UpdateUserProfileUseCase updateUserProfileUseCase;
+  final SendEmailVerificationUseCase sendEmailVerificationUseCase;
+  final VerifyEmailOtpUseCase verifyEmailOtpUseCase;
 
   AuthNotifier({
     required this.signUpUseCase,
@@ -65,15 +69,29 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required this.signOutUseCase,
     required this.getCurrentUserUseCase,
     required this.updateUserProfileUseCase,
-    this.getPharmacyInfoUseCase,
+    required this.sendEmailVerificationUseCase,
+    required this.verifyEmailOtpUseCase,
+    this.syncLinkedPharmacyUseCase,
   }) : super(const AuthState()) {
     _checkCurrentUser();
+  }
+
+  Future<void> _syncPharmacyIfNeeded(UserModel? user) async {
+    if (user == null || user.userType != UserType.pharmacist) return;
+    final sync = syncLinkedPharmacyUseCase;
+    if (sync == null) return;
+    try {
+      await sync(user.id);
+    } catch (e) {
+      print('AuthNotifier: pharmacy sync failed: $e');
+    }
   }
 
   Future<void> _checkCurrentUser() async {
     try {
       final user = await getCurrentUserUseCase();
       if (user != null) {
+        await _syncPharmacyIfNeeded(user);
         state = state.copyWith(status: AuthStatus.authenticated, user: user);
       } else {
         state = state.copyWith(status: AuthStatus.unauthenticated);
@@ -127,6 +145,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final user = await signInUseCase(email: email, password: password);
 
       print('AuthNotifier: signIn successful. Setting status to authenticated.');
+      await _syncPharmacyIfNeeded(user);
       state = state.copyWith(
         status: AuthStatus.authenticated,
         user: user,
@@ -134,6 +153,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
     } catch (e) {
       print('AuthNotifier: signIn failed. Error: $e');
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> sendEmailVerification(String email) async {
+    try {
+      state = state.copyWith(status: AuthStatus.loading);
+      await sendEmailVerificationUseCase(email);
+      state = state.copyWith(status: AuthStatus.authenticated, errorMessage: null);
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString(),
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> verifyEmailOtp(String code) async {
+    try {
+      state = state.copyWith(status: AuthStatus.loading);
+      await verifyEmailOtpUseCase(code);
+      
+      // Update local user state to reflect verification
+      if (state.user != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: state.user!.copyWith(verificationStatus: VerificationStatus.verified),
+          errorMessage: null,
+        );
+      }
+    } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
         errorMessage: e.toString(),
@@ -187,7 +242,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(status: AuthStatus.loading);
       
       final user = await updateUserProfileUseCase(updatedUser);
-      
+
+      await _syncPharmacyIfNeeded(user);
       state = state.copyWith(
         status: AuthStatus.authenticated,
         user: user,
@@ -225,8 +281,10 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final signInUseCase = ref.watch(signInUseCaseProvider);
   final signOutUseCase = ref.watch(signOutUseCaseProvider);
   final getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
-  final getPharmacyInfoUseCase = ref.watch(getPharmacyInfoUseCaseProvider);
+  final syncLinkedPharmacyUseCase = ref.watch(syncLinkedPharmacyUseCaseProvider);
   final updateUserProfileUseCase = ref.watch(updateUserProfileUseCaseProvider);
+  final sendEmailVerificationUseCase = ref.watch(sendEmailVerificationUseCaseProvider);
+  final verifyEmailOtpUseCase = ref.watch(verifyEmailOtpUseCaseProvider);
 
   return AuthNotifier(
     signUpUseCase: signUpUseCase,
@@ -234,7 +292,9 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     signOutUseCase: signOutUseCase,
     getCurrentUserUseCase: getCurrentUserUseCase,
     updateUserProfileUseCase: updateUserProfileUseCase,
-    getPharmacyInfoUseCase: getPharmacyInfoUseCase,
+    sendEmailVerificationUseCase: sendEmailVerificationUseCase,
+    verifyEmailOtpUseCase: verifyEmailOtpUseCase,
+    syncLinkedPharmacyUseCase: syncLinkedPharmacyUseCase,
   );
 });
 
@@ -261,54 +321,45 @@ final authErrorProvider = Provider<String?>((ref) {
 final currentPharmacyIdProvider = FutureProvider<String?>((ref) async {
   final storageLayer = ref.watch(hiveStorageLayerProvider);
   final user = ref.watch(currentUserProvider);
-  
-  // 1. Try Hive Cache first
+
+  bool cacheBelongsToUser(Map<String, dynamic> businessData) {
+    if (user == null) return false;
+    final ownerUid = businessData['owner_uid']?.toString();
+    if (ownerUid != null && ownerUid.isNotEmpty) {
+      return ownerUid == user.id;
+    }
+    final employeeIds = (businessData['employee_ids'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        [];
+    return employeeIds.contains(user.id);
+  }
+
+  // 1. Try Hive cache first (must belong to current user)
   try {
     final businessData = await storageLayer.get('current_business');
-    final id = businessData['id']?.toString();
-    if (id != null && id.isNotEmpty) {
-      print('DEBUG: currentPharmacyIdProvider - Found in Hive: $id');
-      return id;
+    if (cacheBelongsToUser(businessData)) {
+      final id = businessData['id']?.toString();
+      if (id != null && id.isNotEmpty) {
+        return id;
+      }
+    } else {
+      await storageLayer.delete('current_business');
     }
-  } catch (_) {
-    print('DEBUG: currentPharmacyIdProvider - Not found in Hive cache');
-  }
+  } catch (_) {}
 
-  // 2. If user is authenticated and is a pharmacist, try Firestore memberships
+  // 2. If user is authenticated pharmacist, sync from Firestore memberships
   if (user != null && user.userType == UserType.pharmacist) {
-    print('DEBUG: currentPharmacyIdProvider - Hive empty. Falling back to Firestore for user: ${user.id}');
     try {
-      final firestore = FirebaseFirestore.instance;
-      final memberships = await firestore
-          .collection('users')
-          .doc(user.id)
-          .collection('memberships')
-          .limit(1)
-          .get();
-
-      if (memberships.docs.isNotEmpty) {
-        final pharmacyId = memberships.docs.first.id;
-        print('DEBUG: currentPharmacyIdProvider - Found in Firestore memberships: $pharmacyId');
-        
-        // Fetch full pharmacy info to populate Hive cache for next time
-        // This ensures subsequent calls are fast
-        try {
-          final pharmacyDoc = await firestore.collection('businesses').doc(pharmacyId).get();
-          if (pharmacyDoc.exists) {
-            await storageLayer.put('current_business', pharmacyDoc.data()!);
-            print('DEBUG: currentPharmacyIdProvider - Populated Hive cache with $pharmacyId');
-          }
-        } catch (e) {
-          print('DEBUG: currentPharmacyIdProvider - Error populating Hive: $e');
-        }
-        
-        return pharmacyId;
+      final sync = ref.read(syncLinkedPharmacyUseCaseProvider);
+      final pharmacy = await sync(user.id);
+      if (pharmacy != null && pharmacy.id.isNotEmpty) {
+        return pharmacy.id;
       }
     } catch (e) {
-      print('DEBUG: currentPharmacyIdProvider - Firestore fallback failed: $e');
+      print('DEBUG: currentPharmacyIdProvider - Firestore sync failed: $e');
     }
   }
 
-  print('DEBUG: currentPharmacyIdProvider - No pharmacy ID found anywhere.');
   return null;
 });

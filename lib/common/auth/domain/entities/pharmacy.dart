@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:mediconnect/common/auth/domain/entities/pharmacy_verification_document.dart';
 
 enum PharmacyType {
   retail,
@@ -132,10 +133,13 @@ class Pharmacy extends Equatable {
   final String? logoUrl; // Pharmacy logo
   final List<String> licenseDocumentUrls; // License verification docs
   final String? pcnRegistrationNumber;
+  final String? pcnAgency;
+  final Map<String, PharmacyVerificationDocument> verificationDocuments;
   final List<OperatingHours> operatingHours;
   final GeoLocation location; // lat/lng coordinates
   final PharmacyRating rating; // Average rating and count
   final bool isVerified; // Admin verified
+  final bool? isRegistrationComplete; // null = legacy/complete; false = skipped placeholder
   final bool isFeatured; // Featured pharmacy
   final List<String> employeeIds; // Pharmacist IDs
   final DateTime createdAt;
@@ -156,15 +160,21 @@ class Pharmacy extends Equatable {
     this.logoUrl,
     this.licenseDocumentUrls = const [],
     this.pcnRegistrationNumber,
+    this.pcnAgency,
+    this.verificationDocuments = const {},
     this.operatingHours = const [],
     required this.location,
     this.rating = const PharmacyRating(),
     this.isVerified = false,
+    this.isRegistrationComplete,
     this.isFeatured = false,
     this.employeeIds = const [],
     required this.createdAt,
     required this.updatedAt,
   });
+
+  /// Existing businesses without this field are treated as fully registered.
+  bool get hasCompletedRegistration => isRegistrationComplete ?? true;
 
   @override
   List<Object?> get props => [
@@ -182,10 +192,13 @@ class Pharmacy extends Equatable {
     logoUrl,
     licenseDocumentUrls,
     pcnRegistrationNumber,
+    pcnAgency,
+    verificationDocuments,
     operatingHours,
     location,
     rating,
     isVerified,
+    isRegistrationComplete,
     isFeatured,
     employeeIds,
     createdAt,
@@ -207,10 +220,13 @@ class Pharmacy extends Equatable {
     String? logoUrl,
     List<String>? licenseDocumentUrls,
     String? pcnRegistrationNumber,
+    String? pcnAgency,
+    Map<String, PharmacyVerificationDocument>? verificationDocuments,
     List<OperatingHours>? operatingHours,
     GeoLocation? location,
     PharmacyRating? rating,
     bool? isVerified,
+    bool? isRegistrationComplete,
     bool? isFeatured,
     List<String>? employeeIds,
     DateTime? createdAt,
@@ -232,10 +248,15 @@ class Pharmacy extends Equatable {
       licenseDocumentUrls: licenseDocumentUrls ?? this.licenseDocumentUrls,
       pcnRegistrationNumber:
           pcnRegistrationNumber ?? this.pcnRegistrationNumber,
+      pcnAgency: pcnAgency ?? this.pcnAgency,
+      verificationDocuments:
+          verificationDocuments ?? this.verificationDocuments,
       operatingHours: operatingHours ?? this.operatingHours,
       location: location ?? this.location,
       rating: rating ?? this.rating,
       isVerified: isVerified ?? this.isVerified,
+      isRegistrationComplete:
+          isRegistrationComplete ?? this.isRegistrationComplete,
       isFeatured: isFeatured ?? this.isFeatured,
       employeeIds: employeeIds ?? this.employeeIds,
       createdAt: createdAt ?? this.createdAt,

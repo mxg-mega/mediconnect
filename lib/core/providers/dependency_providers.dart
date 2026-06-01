@@ -13,6 +13,11 @@ import 'package:mediconnect/common/auth/domain/usecases/sign_up_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/sign_out_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/update_user_profile_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/create_pharmacy_use_case.dart';
+import 'package:mediconnect/common/auth/domain/usecases/update_pharmacy_info_use_case.dart';
+import 'package:mediconnect/common/auth/domain/usecases/sync_linked_pharmacy_use_case.dart';
+import 'package:mediconnect/core/services/document_upload_service.dart';
+import 'package:mediconnect/common/auth/domain/usecases/send_email_verification_use_case.dart';
+import 'package:mediconnect/common/auth/domain/usecases/verify_email_otp_use_case.dart';
 import 'package:mediconnect/common/auth/data/datasources/pharmacy_data_source.dart';
 import 'package:mediconnect/common/auth/data/datasources/firebase_pharmacy_data_source.dart';
 import 'package:mediconnect/common/auth/domain/repositories/pharmacy_repository.dart';
@@ -136,7 +141,31 @@ final createPharmacyUseCaseProvider = Provider<CreatePharmacyUseCase>((ref) {
   return CreatePharmacyUseCase(repository);
 });
 
-final getPharmacyInfoUseCaseProvider = Provider<GetPharmacyInfoUseCase?>((ref) {
-  // This can be implemented later when pharmacy functionality is added
-  return null;
+final getPharmacyInfoUseCaseProvider = Provider<GetPharmacyInfoUseCase>((ref) {
+  final repository = ref.watch(pharmacyRepositoryProvider);
+  return GetPharmacyInfoUseCase(pharmacyRepository: repository);
+});
+
+final syncLinkedPharmacyUseCaseProvider = Provider<SyncLinkedPharmacyUseCase>((ref) {
+  final repository = ref.watch(pharmacyRepositoryProvider);
+  return SyncLinkedPharmacyUseCase(pharmacyRepository: repository);
+});
+
+final updatePharmacyInfoUseCaseProvider = Provider<UpdatePharmacyInfoUseCase>((ref) {
+  final repository = ref.watch(pharmacyRepositoryProvider);
+  return UpdatePharmacyInfoUseCase(repository);
+});
+
+final sendEmailVerificationUseCaseProvider = Provider<SendEmailVerificationUseCase>((ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return SendEmailVerificationUseCase(authRepository);
+});
+
+final verifyEmailOtpUseCaseProvider = Provider<VerifyEmailOtpUseCase>((ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return VerifyEmailOtpUseCase(authRepository);
+});
+
+final documentUploadServiceProvider = Provider<DocumentUploadService>((ref) {
+  return DocumentUploadService();
 });

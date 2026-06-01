@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mediconnect/common/widgets/auth_loading_overlay.dart';
 import 'package:mediconnect/core/router/app_router.dart';
 import 'package:mediconnect/core/providers/dependency_providers.dart';
+import 'package:mediconnect/common/auth/presentation/providers/pharmacy_auth_sync_provider.dart';
 import 'package:mediconnect/core/theme/theme_provider.dart';
 import 'package:mediconnect/firebase_options.dart';
 
@@ -37,6 +40,7 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(pharmacyAuthSyncProvider);
     final themeMode = ref.watch(themeDataProvider);
     final router = ref.watch(goRouterProvider);
 
@@ -45,6 +49,16 @@ class MyApp extends ConsumerWidget {
       theme: themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      // The builder wraps every routed page so the overlay sits above
+      // the entire navigation stack without interfering with routes.
+      builder: (context, child) {
+        final GoRouter router = ref.read(goRouterProvider);
+        final String location = router.routerDelegate?.currentConfiguration?.fullPath ?? '';
+        return AuthLoadingOverlay(
+          currentLocation: location,
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

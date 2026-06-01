@@ -74,6 +74,8 @@ PharmacyModel _$PharmacyModelFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       pcnRegistrationNumber: json['pcn_registration_number'] as String?,
+      pcnAgency: json['pcn_agency'] as String?,
+      verificationDocuments: const {},
       operatingHours: (json['operating_hours'] as List<dynamic>?)
               ?.map((e) =>
                   OperatingHoursModel.fromJson(e as Map<String, dynamic>))
@@ -86,6 +88,8 @@ PharmacyModel _$PharmacyModelFromJson(Map<String, dynamic> json) =>
           : PharmacyRatingModel.fromJson(
               json['rating'] as Map<String, dynamic>),
       isVerified: json['is_verified'] as bool? ?? false,
+      isRegistrationComplete:
+          json['is_registration_complete'] as bool?,
       isFeatured: json['is_featured'] as bool? ?? false,
       employeeIds: (json['employee_ids'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -111,11 +115,14 @@ Map<String, dynamic> _$PharmacyModelToJson(PharmacyModel instance) =>
       'logo_url': instance.logoUrl,
       'license_document_urls': instance.licenseDocumentUrls,
       'pcn_registration_number': instance.pcnRegistrationNumber,
+      if (instance.pcnAgency case final value?) 'pcn_agency': value,
       'operating_hours':
           instance.operatingHours.map((e) => e.toJson()).toList(),
       'location': instance.location.toJson(),
       'rating': instance.rating.toJson(),
       'is_verified': instance.isVerified,
+      if (instance.isRegistrationComplete case final value?)
+        'is_registration_complete': value,
       'is_featured': instance.isFeatured,
       'employee_ids': instance.employeeIds,
       'created_at': instance.createdAt.toIso8601String(),

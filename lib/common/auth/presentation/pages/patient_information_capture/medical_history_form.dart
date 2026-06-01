@@ -1,10 +1,13 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mediconnect/common/auth/data/models/medical_history_model.dart';
 import 'package:mediconnect/common/auth/data/models/capture_models.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/k_form_field.dart';
 import 'package:mediconnect/common/widgets/k_input_field.dart';
+import 'package:mediconnect/common/widgets/document_pick_preview_field.dart';
 import 'package:mediconnect/common/widgets/labeled_input.dart';
 import 'package:mediconnect/common/auth/presentation/pages/patient_information_capture/widgets/form_section.dart';
 import 'package:mediconnect/common/auth/presentation/pages/patient_information_capture/models/medication_item.dart';
@@ -13,22 +16,28 @@ import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/features/patient_app/domain/entities/medical_history.dart' hide AllergySeverity;
 
-class MedicalHistoryForm extends StatefulWidget {
+typedef MedicalHistorySubmit = void Function(
+  MedicalHistoryInput input, {
+  required Map<String, PlatformFile?> files,
+});
+
+class MedicalHistoryForm extends ConsumerStatefulWidget {
   const MedicalHistoryForm({
     super.key,
     required this.formKey,
+    this.isLoading = false,
     required this.onSubmit,
   });
 
   final GlobalKey<FormState> formKey;
-
-  final void Function(MedicalHistoryInput input) onSubmit;
+  final bool isLoading;
+  final MedicalHistorySubmit onSubmit;
 
   @override
-  State<MedicalHistoryForm> createState() => _MedicalHistoryFormState();
+  ConsumerState<MedicalHistoryForm> createState() => _MedicalHistoryFormState();
 }
 
-class _MedicalHistoryFormState extends State<MedicalHistoryForm> {
+class _MedicalHistoryFormState extends ConsumerState<MedicalHistoryForm> {
   final conditionNameController = TextEditingController();
   final locationController = TextEditingController();
   final diagnosisDetailsController = TextEditingController();
@@ -57,6 +66,9 @@ class _MedicalHistoryFormState extends State<MedicalHistoryForm> {
   List<MedicationItem> pastMedications = [];
 
   bool hasCheckedBox = false;
+
+  PlatformFile? medicalRecordFile;
+  PlatformFile? insuranceCardFile;
 
   String? _requiredValidator(String? value) {
     if (value == null || value.trim().isEmpty) return 'This field is required';
@@ -197,6 +209,26 @@ class _MedicalHistoryFormState extends State<MedicalHistoryForm> {
               controller: diagnosisDetailsController,
               validator: _requiredValidator,
             ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'Supporting documents (optional)',
+            style: AppTextStyles.interP16M.copyWith(
+              color: AppTheme.colors(context).neutral.secondaryText,
+            ),
+          ),
+          const SizedBox(height: 16),
+          DocumentPickPreviewField(
+            label: 'Medical records (optional)',
+            file: medicalRecordFile,
+            onPick: (file) => setState(() => medicalRecordFile = file),
+            onRemove: () => setState(() => medicalRecordFile = null),
+          ),
+          DocumentPickPreviewField(
+            label: 'Insurance card (optional)',
+            file: insuranceCardFile,
+            onPick: (file) => setState(() => insuranceCardFile = file),
+            onRemove: () => setState(() => insuranceCardFile = null),
           ),
           const SizedBox(height: 32),
 
@@ -352,7 +384,19 @@ class _MedicalHistoryFormState extends State<MedicalHistoryForm> {
             ],
           ),
 
-          KElevatedButton(onPressed: _submit, child: const Text('Next')),
+          KElevatedButton(
+            onPressed: widget.isLoading ? null : _submit,
+            child: widget.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text('Next'),
+          ),
           const SizedBox(height: 16),
 
           Text(
@@ -712,6 +756,12 @@ class _MedicalHistoryFormState extends State<MedicalHistoryForm> {
       consentAccepted: hasCheckedBox,
     );
 
-    widget.onSubmit(input);
+    widget.onSubmit(
+      input,
+      files: {
+        'medical_record': medicalRecordFile,
+        'insurance_card': insuranceCardFile,
+      },
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:mediconnect/common/auth/data/datasources/auth_data_source.dart';
 import 'package:mediconnect/common/auth/data/datasources/storage_layer.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
@@ -108,6 +109,7 @@ class FirebaseAuthDataSource implements AuthDataSource {
     try {
       await storageLayer.delete('current_user');
       await storageLayer.delete('current_business');
+      await storageLayer.delete('current_memberships');
     } catch (_) {}
   }
 
@@ -138,5 +140,25 @@ class FirebaseAuthDataSource implements AuthDataSource {
     }
   }
   
+  @override
+  Future<void> sendEmailVerification(String email) async {
+    try {
+      final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('generateOTP');
+      await callable.call({'email': email});
+    } catch (e) {
+      throw Exception('Failed to send verification email: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> verifyEmailOtp(String code) async {
+    try {
+      final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('verifyOTP');
+      await callable.call({'code': code});
+    } catch (e) {
+      throw Exception('Failed to verify OTP: ${e.toString()}');
+    }
+  }
+
   // social login logic would be added here...
 }

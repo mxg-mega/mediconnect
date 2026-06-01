@@ -1,42 +1,51 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mediconnect/common/auth/data/models/capture_models.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
 import 'package:mediconnect/common/widgets/k_form_field.dart';
+import 'package:mediconnect/common/widgets/document_pick_preview_field.dart';
 import 'package:mediconnect/common/widgets/labeled_input.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 import 'package:mediconnect/core/utils/figma_scale_utils.dart';
 
-class PharmacistVerificationForm extends StatefulWidget {
+typedef PharmacyVerificationSubmit = void Function(
+  PharmacyVerificationInput input, {
+  required Map<String, PlatformFile?> files,
+});
+
+class PharmacistVerificationForm extends ConsumerStatefulWidget {
   const PharmacistVerificationForm({
     super.key,
     required this.formKey,
+    this.isLoading = false,
     required this.onSubmit,
   });
 
   final GlobalKey<FormState> formKey;
-  final void Function(PharmacyVerificationInput input) onSubmit;
+  final bool isLoading;
+  final PharmacyVerificationSubmit onSubmit;
 
   @override
-  State<PharmacistVerificationForm> createState() =>
+  ConsumerState<PharmacistVerificationForm> createState() =>
       _PharmacistVerificationFormState();
 }
 
 class _PharmacistVerificationFormState
-    extends State<PharmacistVerificationForm> {
+    extends ConsumerState<PharmacistVerificationForm> {
   final TextEditingController pcnIdController = TextEditingController();
   final TextEditingController agencyController = TextEditingController();
   bool hasCheckedBox = false;
 
-  // In lieu of file picker integration, capture placeholder paths/ids
-  String? frontalPath;
-  String? licensePath;
-  String? businessRegPath;
-  String? pcnCertPath;
-  String? addressProofPath;
-  String? additionalCertPath;
+  PlatformFile? frontalFile;
+  PlatformFile? licenseFile;
+  PlatformFile? businessRegFile;
+  PlatformFile? pcnCertFile;
+  PlatformFile? addressProofFile;
+  PlatformFile? additionalCertFile;
 
   @override
   void dispose() {
@@ -60,26 +69,25 @@ class _PharmacistVerificationFormState
             ),
           ),
           SizedBox(height: context.figmaHeight(32)),
-
-          // form contents
-          _UploadField(
+          DocumentPickPreviewField(
             label: 'Upload Frontal Pharmacy Image',
-            // required: true,
-            onPick: (path) => frontalPath = path,
+            file: frontalFile,
+            onPick: (file) => setState(() => frontalFile = file),
+            onRemove: () => setState(() => frontalFile = null),
           ),
-          _UploadField(
+          DocumentPickPreviewField(
             label: 'Pharmacy license upload',
-            // required: true,
-            onPick: (path) => licensePath = path,
+            file: licenseFile,
+            onPick: (file) => setState(() => licenseFile = file),
+            onRemove: () => setState(() => licenseFile = null),
           ),
-          _UploadField(
+          DocumentPickPreviewField(
             label: 'Proof of Business Registration',
-            // required: true,
-            onPick: (path) => businessRegPath = path,
+            file: businessRegFile,
+            onPick: (file) => setState(() => businessRegFile = file),
+            onRemove: () => setState(() => businessRegFile = null),
           ),
-
           Text('PCN Registration:'),
-
           LabeledInput(
             label: 'PCN ID Number Input',
             required: true,
@@ -98,24 +106,25 @@ class _PharmacistVerificationFormState
               validator: _required,
             ),
           ),
-          _UploadField(
+          DocumentPickPreviewField(
             label: 'PCN Certificate Upload',
-            // required: true,
-            onPick: (path) => pcnCertPath = path,
+            file: pcnCertFile,
+            onPick: (file) => setState(() => pcnCertFile = file),
+            onRemove: () => setState(() => pcnCertFile = null),
           ),
-          _UploadField(
+          DocumentPickPreviewField(
             label: 'Proof of address (utility bill/government ID)',
-            // required: true,
-            onPick: (path) => addressProofPath = path,
+            file: addressProofFile,
+            onPick: (file) => setState(() => addressProofFile = file),
+            onRemove: () => setState(() => addressProofFile = null),
           ),
-
-          _UploadField(
+          DocumentPickPreviewField(
             label:
                 'Additional Certifications (ISO Certifications, Vaccination Certification, Narcotics License e.t.c)',
-            // required: true,
-            onPick: (path) => additionalCertPath = path,
+            file: additionalCertFile,
+            onPick: (file) => setState(() => additionalCertFile = file),
+            onRemove: () => setState(() => additionalCertFile = null),
           ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -166,16 +175,9 @@ class _PharmacistVerificationFormState
               ),
             ],
           ),
-
           Row(
             children: [
-              SvgPicture.asset(
-                AppIcons.lock,
-                // colorFilter: ColorFilter.mode(
-                //   AppTheme.colors(context).pharmacist.bg,
-                //   BlendMode.color,
-                // ),
-              ),
+              SvgPicture.asset(AppIcons.lock),
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: Text(
@@ -187,9 +189,19 @@ class _PharmacistVerificationFormState
               ),
             ],
           ),
-
-          KElevatedButton(onPressed: _submit, child: const Text('Next')),
-
+          KElevatedButton(
+            onPressed: widget.isLoading ? null : _submit,
+            child: widget.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text('Next'),
+          ),
           Container(
             width: double.infinity,
             height: context.figmaHeight(54),
@@ -197,7 +209,7 @@ class _PharmacistVerificationFormState
               color: AppTheme.colors(context).pharmacist.bgTint,
             ),
             child: DropdownButton(
-              items: [],
+              items: const [],
               onChanged: (value) {},
               hint: Text(
                 'Need help with verification?',
@@ -217,59 +229,31 @@ class _PharmacistVerificationFormState
     return null;
   }
 
-  bool _hasFiles() {
-    return frontalPath != null &&
-        licensePath != null &&
-        businessRegPath != null &&
-        pcnCertPath != null &&
-        addressProofPath != null &&
-        additionalCertPath != null;
-  }
-
   void _submit() {
     if (widget.formKey.currentState?.validate() != true) return;
     if (!hasCheckedBox) return;
-    // if (!_hasFiles()) return;
+
+    final files = <String, PlatformFile?>{
+      'frontal': frontalFile,
+      'license': licenseFile,
+      'business_reg': businessRegFile,
+      'pcn_cert': pcnCertFile,
+      'address_proof': addressProofFile,
+      'additional_cert': additionalCertFile,
+    };
 
     final input = PharmacyVerificationInput(
-      frontalImagePath: frontalPath,
-      licensePath: licensePath,
-      businessRegPath: businessRegPath,
+      frontalImagePath: frontalFile?.name,
+      licensePath: licenseFile?.name,
+      businessRegPath: businessRegFile?.name,
       pcnIdNumber: pcnIdController.text.trim(),
       agencySelection: agencyController.text.trim(),
-      pcnCertificatePath: pcnCertPath,
-      addressProofPath: addressProofPath,
-      additionalCertPath: additionalCertPath,
+      pcnCertificatePath: pcnCertFile?.name,
+      addressProofPath: addressProofFile?.name,
+      additionalCertPath: additionalCertFile?.name,
       consentAccepted: hasCheckedBox,
     );
 
-    widget.onSubmit(input);
-  }
-}
-
-class _UploadField extends StatelessWidget {
-  const _UploadField({
-    required this.label,
-    required this.onPick,
-    this.required = false,
-  });
-
-  final String label;
-  final void Function(String path) onPick;
-  final bool required;
-
-  @override
-  Widget build(BuildContext context) {
-    return LabeledInput(
-      label: label,
-      required: required,
-      child: OutlinedButton(
-        onPressed: () {
-          // Placeholder path; integrate file picker later
-          onPick('placeholder_path');
-        },
-        child: const Text('Upload'),
-      ),
-    );
+    widget.onSubmit(input, files: files);
   }
 }
