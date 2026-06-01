@@ -1,4 +1,5 @@
 import 'package:algolia_helper_flutter/algolia_helper_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mediconnect/common/auth/data/datasources/google_places_data_source.dart';
@@ -35,17 +36,64 @@ final googlePlacesDataSourceProvider = Provider<GooglePlacesDataSource>((ref) {
 });
 
 // 3. Search Results Providers
-final medicationSearchResultsProvider = StreamProvider<List<PharmacyListing>>((ref) {
-  final query = ref.watch(patientSearchQueryProvider);
-  final searcher = ref.watch(medicationsSearchClientProvider);
+final medicationSearchResultsProvider = FutureProvider<List<PharmacyListing>>((ref) async {
+  final query = ref.watch(patientSearchQueryProvider).toLowerCase();
+  final firestore = FirebaseFirestore.instance;
   
-  searcher.query(query);
-  
-  return searcher.responses.map((response) {
-    return response.hits.map((hit) => PharmacyListing.fromAlgolia(hit)).toList();
-  }).handleError((error) {
-    print('Algolia Medication Search Error: $error');
-  });
+  try {
+    // 1. Fetch all inventory items (in MVP, fetching all and filtering in-memory is acceptable)
+    // In production, we'd use Algolia synced via Cloud Functions
+    final snapshot = await firestore.collectionGroup('inventory').get();
+    final List<PharmacyListing> listings = [];
+    
+    // We will cache pharmacy names to avoid repeated Firestore reads
+    final Map<String, String> pharmacyNamesCache = {};
+
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+      final medName = (data['medicationName'] as String?) ?? '';
+      final brandName = (data['brandName'] as String?) ?? '';
+      
+      if (query.isEmpty || medName.toLowerCase().contains(query) || brandName.toLowerCase().contains(query)) {
+        
+        final pharmacyId = data['pharmacyId'] as String? ?? '';
+        String pharmacyName = 'Unknown Pharmacy';
+        
+        // Fetch Pharmacy Name if we have the ID
+        if (pharmacyId.isNotEmpty) {
+          if (pharmacyNamesCache.containsKey(pharmacyId)) {
+            pharmacyName = pharmacyNamesCache[pharmacyId]!;
+          } else {
+            final pharmacyDoc = await firestore.collection('businesses').doc(pharmacyId).get();
+            if (pharmacyDoc.exists) {
+              pharmacyName = pharmacyDoc.data()?['name'] ?? 'Unknown Pharmacy';
+              pharmacyNamesCache[pharmacyId] = pharmacyName;
+            }
+          }
+        }
+
+        final quantityInStock = (data['quantityInStock'] as num?)?.toInt() ?? 0;
+
+        listings.add(PharmacyListing(
+          id: doc.id,
+          medicationId: doc.id,
+          medicationName: medName,
+          medicationImageUrl: data['imageUrl'],
+          pharmacyId: pharmacyId,
+          pharmacyName: pharmacyName,
+          price: (data['sellingPrice'] as num?)?.toDouble() ?? 0.0,
+          stockQuantity: quantityInStock,
+          stockStatus: quantityInStock > 0 ? StockStatus.inStock : StockStatus.outOfStock,
+          latitude: 0.0, // Location handling could be added here
+          longitude: 0.0,
+        ));
+      }
+    }
+    return listings;
+  } catch (e) {
+    print('Firestore Medication Search Error: $e');
+    return [];
+  }
 });
 
 final pharmacySearchResultsProvider = StreamProvider<List<Pharmacy>>((ref) {

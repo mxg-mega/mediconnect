@@ -139,11 +139,27 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final user = authState.user;
       final role = user?.userType ?? UserType.unknown;
       final isProfileComplete = user?.isProfileComplete ?? false;
+      final verificationStatus = user?.verificationStatus ?? VerificationStatus.pending;
 
       print('Role: $role');
       print('Is Profile Complete: $isProfileComplete');
+      print('Verification Status: $verificationStatus');
 
-      // a. Role selection
+      // a. Email verification
+      if (verificationStatus != VerificationStatus.verified) {
+        if (isVerification) {
+          print(
+            'Redirect: Authenticated, unverified, on code-verification (returning null)',
+          );
+          return null;
+        }
+        print(
+          'Redirect: Authenticated, unverified -> going to /code-verification',
+        );
+        return '/code-verification';
+      }
+
+      // b. Role selection
       if (role == UserType.unknown) {
         if (isFinalization) {
           print(
@@ -212,13 +228,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/code-verification',
         name: 'code-verification',
         builder: (context, state) {
-          final nextPage = state.extra as Widget?;
-          if (nextPage == null) {
-            return const Scaffold(
-              body: Center(child: Text('No page to navigate to')),
-            );
-          }
-          return CodeVerificationPage(nextPage: nextPage);
+          final extra = state.extra as Map<String, dynamic>?;
+          final nextPage = extra?['nextPage'] as Widget? ?? const SetupFinalizationPage();
+          final email = extra?['email'] as String? ?? ref.read(authProvider).user?.email ?? '';
+
+          return CodeVerificationPage(nextPage: nextPage, email: email);
         },
       ),
       GoRoute(

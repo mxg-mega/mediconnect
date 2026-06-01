@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/widgets/app_scaffold.dart';
 import 'package:mediconnect/core/constants/assets.dart';
+import 'package:mediconnect/core/router/app_router.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 
-class PatientMainPage extends StatelessWidget {
+class PatientMainPage extends ConsumerWidget {
   final Widget child;
 
   const PatientMainPage({required this.child, super.key});
 
-  int _calculateIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
+  int _calculateIndex(BuildContext context, WidgetRef ref) {
+    final GoRouter router = ref.read(goRouterProvider);
+    final String location = router.routerDelegate.currentConfiguration.fullPath;
 
     if (location.contains('dashboard')) return 0;
     if (location.contains('search')) return 1;
@@ -22,9 +25,9 @@ class PatientMainPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colors(context);
-    final currentIndex = _calculateIndex(context);
+    final currentIndex = _calculateIndex(context, ref);
 
     return AppScaffold(
       removeBodyPadding: true,

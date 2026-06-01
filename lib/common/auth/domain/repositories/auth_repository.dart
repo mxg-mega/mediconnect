@@ -18,4 +18,8 @@ abstract class AuthRepository {
   Future<UserModel?> getCurrentUser();
 
   Future<UserModel> updateUser(UserModel user);
+
+  Future<void> sendEmailVerification(String email);
+
+  Future<void> verifyEmailOtp(String code);
 }

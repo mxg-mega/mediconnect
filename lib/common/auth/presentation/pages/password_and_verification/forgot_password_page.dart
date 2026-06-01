@@ -41,7 +41,7 @@ class ForgotPasswordPage extends StatelessWidget {
             onPressed: () {
               navigateToPage(
                 context,
-                CodeVerificationPage(nextPage: NewPasswordPage()),
+                CodeVerificationPage(nextPage: NewPasswordPage(), email: emailController.text),
               );
             },
             style: ElevatedButton.styleFrom(

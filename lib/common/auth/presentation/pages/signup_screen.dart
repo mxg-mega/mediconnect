@@ -46,14 +46,27 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         final authNotifier = ref.read(authProvider.notifier);
+
+        // 1. Create the account
         await authNotifier.signUp(
           email: _emailController.text,
           password: _passwordController.text,
           firstName: _firstNameController.text,
           lastName: _lastNameController.text,
         );
+
+        // 2. Send OTP to the registered email
+        await authNotifier.sendEmailVerification(_emailController.text);
+
         if (mounted) {
-          context.go('/code-verification', extra: const SetupFinalizationPage());
+          // Pass the email so the verification page can resend if needed
+          context.push(
+            '/code-verification',
+            extra: {
+              'nextPage': const SetupFinalizationPage(),
+              'email': _emailController.text,
+            },
+          );
         }
       } catch (e) {
         if (mounted) {

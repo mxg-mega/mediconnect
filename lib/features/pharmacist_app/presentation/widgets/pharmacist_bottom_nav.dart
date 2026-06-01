@@ -3,13 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mediconnect/core/constants/assets.dart';
+import 'package:mediconnect/core/router/app_router.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
 
 class PharmacistBottomNav extends ConsumerWidget {
   const PharmacistBottomNav({super.key});
 
-  int _calculateIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
+  int _calculateIndex(BuildContext context, WidgetRef ref) {
+    final GoRouter router = ref.read(goRouterProvider);
+    final String location = router.routerDelegate?.currentConfiguration?.fullPath ?? '';
     if (location.contains('/pharmacist/dashboard')) return 0;
     if (location.contains('/pharmacist/inventory')) return 1;
     if (location.contains('/pharmacist/profile')) return 2;
@@ -18,7 +20,7 @@ class PharmacistBottomNav extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedIndex = _calculateIndex(context);
+    final selectedIndex = _calculateIndex(context, ref);
     final theme = AppTheme.colors(context);
 
     final List<Map<String, dynamic>> navItems = [

@@ -56,4 +56,14 @@ class RemoteAuthDataSource implements AuthDataSource {
     final response = await storageLayer.put('/auth/user/${user.id}', user.toJson());
     return UserModel.fromJson(response);
   }
+
+  @override
+  Future<void> sendEmailVerification(String email) async {
+    throw UnimplementedError('HTTP email verification is not implemented yet');
+  }
+
+  @override
+  Future<void> verifyEmailOtp(String code) async {
+    throw UnimplementedError('HTTP OTP verification is not implemented yet');
+  }
 }
