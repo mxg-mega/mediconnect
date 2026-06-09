@@ -75,7 +75,14 @@ PharmacyModel _$PharmacyModelFromJson(Map<String, dynamic> json) =>
           const [],
       pcnRegistrationNumber: json['pcn_registration_number'] as String?,
       pcnAgency: json['pcn_agency'] as String?,
-      verificationDocuments: const {},
+      verificationDocuments:
+          (json['verification_documents'] as Map<String, dynamic>?)?.map(
+                (k, e) => MapEntry(
+                    k,
+                    PharmacyVerificationDocument.fromJson(
+                        e as Map<String, dynamic>)),
+              ) ??
+              const {},
       operatingHours: (json['operating_hours'] as List<dynamic>?)
               ?.map((e) =>
                   OperatingHoursModel.fromJson(e as Map<String, dynamic>))
@@ -88,8 +95,7 @@ PharmacyModel _$PharmacyModelFromJson(Map<String, dynamic> json) =>
           : PharmacyRatingModel.fromJson(
               json['rating'] as Map<String, dynamic>),
       isVerified: json['is_verified'] as bool? ?? false,
-      isRegistrationComplete:
-          json['is_registration_complete'] as bool?,
+      isRegistrationComplete: json['is_registration_complete'] as bool?,
       isFeatured: json['is_featured'] as bool? ?? false,
       employeeIds: (json['employee_ids'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -115,14 +121,15 @@ Map<String, dynamic> _$PharmacyModelToJson(PharmacyModel instance) =>
       'logo_url': instance.logoUrl,
       'license_document_urls': instance.licenseDocumentUrls,
       'pcn_registration_number': instance.pcnRegistrationNumber,
-      if (instance.pcnAgency case final value?) 'pcn_agency': value,
+      'pcn_agency': instance.pcnAgency,
+      'verification_documents':
+          instance.verificationDocuments.map((k, e) => MapEntry(k, e.toJson())),
       'operating_hours':
           instance.operatingHours.map((e) => e.toJson()).toList(),
       'location': instance.location.toJson(),
       'rating': instance.rating.toJson(),
       'is_verified': instance.isVerified,
-      if (instance.isRegistrationComplete case final value?)
-        'is_registration_complete': value,
+      'is_registration_complete': instance.isRegistrationComplete,
       'is_featured': instance.isFeatured,
       'employee_ids': instance.employeeIds,
       'created_at': instance.createdAt.toIso8601String(),

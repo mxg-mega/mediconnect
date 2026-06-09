@@ -49,12 +49,17 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> sendEmailVerification(String email) async {
-    await remoteDataSource.sendEmailVerification(email);
+  Future<void> sendEmailVerification(String email, {String intent = 'signup'}) async {
+    await remoteDataSource.sendEmailVerification(email, intent: intent);
   }
 
   @override
-  Future<void> verifyEmailOtp(String code) async {
-    await remoteDataSource.verifyEmailOtp(code);
+  Future<String?> verifyEmailOtp(String email, String code, {String intent = 'signup'}) async {
+    return await remoteDataSource.verifyEmailOtp(email, code, intent: intent);
+  }
+
+  @override
+  Future<void> resetPassword(String email, String resetToken, String newPassword) async {
+    await remoteDataSource.resetPassword(email, resetToken, newPassword);
   }
 }

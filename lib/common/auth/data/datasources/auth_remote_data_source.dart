@@ -78,12 +78,17 @@ class RemoteAuthDataSource extends AuthDataSource {
   }
 
   @override
-  Future<void> sendEmailVerification(String email) async {
+  Future<void> sendEmailVerification(String email, {String intent = 'signup'}) async {
     throw UnimplementedError('HTTP email verification is not implemented yet');
   }
 
   @override
-  Future<void> verifyEmailOtp(String code) async {
+  Future<String?> verifyEmailOtp(String email, String code, {String intent = 'signup'}) async {
     throw UnimplementedError('HTTP OTP verification is not implemented yet');
+  }
+
+  @override
+  Future<void> resetPassword(String email, String resetToken, String newPassword) async {
+    throw UnimplementedError('HTTP password reset is not implemented yet');
   }
 }

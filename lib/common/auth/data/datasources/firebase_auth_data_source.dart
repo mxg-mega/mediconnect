@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -75,7 +76,7 @@ class FirebaseAuthDataSource implements AuthDataSource {
       final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
-      );
+      ).timeout(const Duration(seconds: 15));
 
       final uid = userCredential.user!.uid;
       print('FirebaseAuthDataSource: Logged into Auth. UID: $uid. Fetching profile...');
@@ -141,22 +142,41 @@ class FirebaseAuthDataSource implements AuthDataSource {
   }
   
   @override
-  Future<void> sendEmailVerification(String email) async {
+  Future<void> sendEmailVerification(String email, {String intent = 'signup'}) async {
     try {
       final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('generateOTP');
-      await callable.call({'email': email});
+      await callable.call({'email': email, 'intent': intent});
     } catch (e) {
       throw Exception('Failed to send verification email: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> verifyEmailOtp(String code) async {
+  Future<String?> verifyEmailOtp(String email, String code, {String intent = 'signup'}) async {
     try {
       final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('verifyOTP');
-      await callable.call({'code': code});
+      final result = await callable.call({'email': email, 'code': code, 'intent': intent});
+      
+      if (intent == 'password_reset') {
+        return result.data['resetToken'] as String?;
+      }
+      return null;
     } catch (e) {
       throw Exception('Failed to verify OTP: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> resetPassword(String email, String resetToken, String newPassword) async {
+    try {
+      final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('resetPassword');
+      await callable.call({
+        'email': email,
+        'resetToken': resetToken,
+        'newPassword': newPassword,
+      });
+    } catch (e) {
+      throw Exception('Failed to reset password: ${e.toString()}');
     }
   }
 

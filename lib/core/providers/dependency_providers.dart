@@ -18,6 +18,7 @@ import 'package:mediconnect/common/auth/domain/usecases/sync_linked_pharmacy_use
 import 'package:mediconnect/core/services/document_upload_service.dart';
 import 'package:mediconnect/common/auth/domain/usecases/send_email_verification_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/verify_email_otp_use_case.dart';
+import 'package:mediconnect/common/auth/domain/usecases/reset_password_use_case.dart';
 import 'package:mediconnect/common/auth/data/datasources/pharmacy_data_source.dart';
 import 'package:mediconnect/common/auth/data/datasources/firebase_pharmacy_data_source.dart';
 import 'package:mediconnect/common/auth/domain/repositories/pharmacy_repository.dart';
@@ -164,6 +165,11 @@ final sendEmailVerificationUseCaseProvider = Provider<SendEmailVerificationUseCa
 final verifyEmailOtpUseCaseProvider = Provider<VerifyEmailOtpUseCase>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
   return VerifyEmailOtpUseCase(authRepository);
+});
+
+final resetPasswordUseCaseProvider = Provider<ResetPasswordUseCase>((ref) {
+  final authRepository = ref.watch(authRepositoryProvider);
+  return ResetPasswordUseCase(authRepository);
 });
 
 final documentUploadServiceProvider = Provider<DocumentUploadService>((ref) {

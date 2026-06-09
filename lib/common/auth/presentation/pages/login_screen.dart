@@ -44,11 +44,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           context.go('/'); // Navigate to home on successful login
         }
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login Failed: ${e.toString()}')),
-          );
-        }
+        // Error is now handled by AuthNotifier and displayed inline in LoginForm
+        debugPrint('Login failed: $e');
       }
     }
   }

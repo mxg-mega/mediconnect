@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/auth/data/models/user_model.dart';
 import 'package:mediconnect/common/auth/presentation/pages/login_screen.dart';
 import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/code_verification_page.dart';
+import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/forgot_password_page.dart';
+import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/new_password_page.dart';
 import 'package:mediconnect/common/auth/presentation/pages/signup_screen.dart';
 import 'package:mediconnect/common/auth/presentation/pages/welcome_page.dart';
 import 'package:mediconnect/common/auth/presentation/pages/setup_finalization_page.dart';
@@ -51,16 +53,36 @@ import 'package:mediconnect/features/pharmacist_app/presentation/dispense_histor
 import 'package:mediconnect/features/splash_screen/splash_controller.dart';
 import 'package:mediconnect/core/providers/settings_provider.dart';
 
+/// A [ChangeNotifier] that fires whenever auth, splash, or settings state
+/// changes.  GoRouter uses this via [refreshListenable] to re-evaluate its
+/// redirect function WITHOUT being recreated – keeping all page widgets alive.
+class _RouterNotifier extends ChangeNotifier {
+  _RouterNotifier(Ref ref) {
+    ref.listen(authProvider, (_, __) => notifyListeners());
+    ref.listen(splashFinishedProvider, (_, __) => notifyListeners());
+    ref.listen(settingsProvider, (_, __) => notifyListeners());
+  }
+}
+
+final _routerNotifierProvider = Provider<_RouterNotifier>((ref) {
+  return _RouterNotifier(ref);
+});
+
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  final isSplashFinished = ref.watch(splashFinishedProvider);
-  final settings = ref.watch(settingsProvider);
+  final notifier = ref.watch(_routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/',
     debugLogDiagnostics: true,
+    refreshListenable: notifier,
 
     redirect: (context, state) {
+      // Read current values – ref.read does NOT create dependencies,
+      // so the GoRouter is NOT recreated when these change.
+      final authState = ref.read(authProvider);
+      final isSplashFinished = ref.read(splashFinishedProvider);
+      final settings = ref.read(settingsProvider);
+
       print('--- ROUTER REDIRECT TRIGGERED ---');
       print('Current Location: ${state.matchedLocation}');
       print('Splash Finished: $isSplashFinished');
@@ -87,6 +109,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isVerification = state.matchedLocation == '/code-verification';
       final isFinalization = state.matchedLocation == '/setup-finalization';
       final isCapture = state.matchedLocation == '/information-capture';
+      final isForgotPw = state.matchedLocation == '/forgot-password';
+      final isNewPw = state.matchedLocation == '/new-password';
 
       print('Is Logged In: $isLoggedIn');
       print('Has Seen Onboarding: ${settings.hasSeenOnboarding}');
@@ -97,7 +121,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           isWelcome ||
           isVerification ||
           isFinalization ||
-          isCapture;
+          isCapture ||
+          isForgotPw ||
+          isNewPw;
 
       // 3. Unauthenticated flow
       if (!isLoggedIn) {
@@ -225,14 +251,27 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordPage(),
+      ),
+      GoRoute(
+        path: '/new-password',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final email = extra?['email'] as String? ?? '';
+          final resetToken = extra?['resetToken'] as String? ?? '';
+          return NewPasswordPage(email: email, resetToken: resetToken);
+        },
+      ),
+      GoRoute(
         path: '/code-verification',
         name: 'code-verification',
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          final nextPage = extra?['nextPage'] as Widget? ?? const SetupFinalizationPage();
           final email = extra?['email'] as String? ?? ref.read(authProvider).user?.email ?? '';
+          final intent = extra?['intent'] as String? ?? 'signup';
 
-          return CodeVerificationPage(nextPage: nextPage, email: email);
+          return CodeVerificationPage(email: email, intent: intent);
         },
       ),
       GoRoute(

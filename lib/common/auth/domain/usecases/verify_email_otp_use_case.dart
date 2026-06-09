@@ -5,7 +5,7 @@ class VerifyEmailOtpUseCase {
 
   VerifyEmailOtpUseCase(this.repository);
 
-  Future<void> call(String code) async {
-    return await repository.verifyEmailOtp(code);
+  Future<String?> call(String email, String code, {String intent = 'signup'}) async {
+    return await repository.verifyEmailOtp(email, code, intent: intent);
   }
 }

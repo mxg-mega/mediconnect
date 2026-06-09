@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {setGlobalOptions} from "firebase-functions/v2";
+import * as crypto from "crypto";
 
 admin.initializeApp();
 
@@ -15,54 +16,64 @@ function generateRandomOTP(): string {
 
 /**
  * generateOTP
- * Generates an OTP, saves it to the user's document, and writes to the `mail` collection
- * to trigger the Firestore Email Extension.
+ * Generates an OTP, saves it to the user's document, and writes to the `mail` collection.
+ * Supports `intent`: 'signup' or 'password_reset'.
  */
 export const generateOTP = onCall(async (request) => {
-  const uid = request.auth?.uid;
-  if (!uid) {
-    throw new HttpsError(
-      "unauthenticated",
-      "User must be logged in to request an OTP."
-    );
-  }
-
   const email = request.data.email;
+  const intent = request.data.intent || "signup";
+
   if (!email) {
     throw new HttpsError("invalid-argument", "Email address is required.");
+  }
+
+  let uid = request.auth?.uid;
+
+  // Resolve UID if not provided by auth state (e.g. password reset)
+  if (!uid) {
+    if (intent === "password_reset") {
+      try {
+        const userRecord = await admin.auth().getUserByEmail(email);
+        uid = userRecord.uid;
+      } catch (error) {
+        // Silently succeed to prevent email enumeration attacks
+        return {success: true, message: "If the email is registered, an OTP will be sent."};
+      }
+    } else {
+      throw new HttpsError("unauthenticated", "User must be logged in for this action.");
+    }
   }
 
   const otp = generateRandomOTP();
   const db = admin.firestore();
 
   try {
-    // 1. Save the OTP to the user's document (valid for 10 minutes)
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10);
 
     await db.collection("users").doc(uid).collection("otp_codes").doc("current").set({
       code: otp,
+      intent: intent,
       expiresAt: admin.firestore.Timestamp.fromDate(expiresAt),
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // 2. Write to the `mail` collection to trigger the Email Extension
     await db.collection("mail").add({
       to: email,
       message: {
-        subject: "Your Verification Code - Mediconnect",
-        text: `Your verification code is: ${otp}. It will expire in 10 minutes.`,
+        subject: intent === "password_reset" ? "Reset Your Password - Medconnect" : "Your Verification Code - Mediconnect",
+        text: `Your code is: ${otp}. It will expire in 10 minutes.`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-            <h2 style="color: #2c3e50; text-align: center;">Mediconnect Verification</h2>
+            <h2 style="color: #2c3e50; text-align: center;">Medconnect</h2>
             <p style="color: #555; font-size: 16px;">Hello,</p>
-            <p style="color: #555; font-size: 16px;">Your verification code is:</p>
+            <p style="color: #555; font-size: 16px;">Your code is:</p>
             <div style="text-align: center; margin: 30px 0;">
               <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #3498db; background-color: #f0f8ff; padding: 10px 20px; border-radius: 8px;">
                 ${otp}
               </span>
             </div>
-            <p style="color: #555; font-size: 16px;">This code will expire in 10 minutes. If you did not request this code, please ignore this email.</p>
+            <p style="color: #555; font-size: 16px;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
             <p style="color: #999; font-size: 12px; text-align: center;">© 2026 Mediconnect</p>
           </div>
@@ -79,20 +90,28 @@ export const generateOTP = onCall(async (request) => {
 
 /**
  * verifyOTP
- * Checks if the provided OTP matches the one saved for the user and hasn't expired.
+ * Verifies the OTP. If intent is password_reset, returns a resetToken.
  */
 export const verifyOTP = onCall(async (request) => {
-  const uid = request.auth?.uid;
-  if (!uid) {
-    throw new HttpsError(
-      "unauthenticated",
-      "User must be logged in to verify an OTP."
-    );
+  const {code, email, intent = "signup"} = request.data;
+
+  if (!code || !email) {
+    throw new HttpsError("invalid-argument", "OTP code and email are required.");
   }
 
-  const {code} = request.data;
-  if (!code) {
-    throw new HttpsError("invalid-argument", "OTP code is required.");
+  let uid = request.auth?.uid;
+
+  if (!uid) {
+    if (intent === "password_reset") {
+      try {
+        const userRecord = await admin.auth().getUserByEmail(email);
+        uid = userRecord.uid;
+      } catch (error) {
+        throw new HttpsError("not-found", "User not found.");
+      }
+    } else {
+      throw new HttpsError("unauthenticated", "User must be logged in.");
+    }
   }
 
   const db = admin.firestore();
@@ -106,38 +125,92 @@ export const verifyOTP = onCall(async (request) => {
     }
 
     const data = doc.data();
-    if (!data) {
-      throw new HttpsError("internal", "Invalid OTP data.");
-    }
-
-    const {code: savedCode, expiresAt} = data;
-
-    // Check expiration
-    if (expiresAt.toDate() < new Date()) {
-      throw new HttpsError("failed-precondition", "OTP has expired.");
-    }
-
-    // Check code match
-    if (savedCode !== code) {
+    if (!data || data.code !== code) {
       throw new HttpsError("invalid-argument", "Invalid OTP code.");
     }
 
-    // Validation successful!
-    // 1. Update user profile verification status
-    await db.collection("users").doc(uid).update({
-      verification_status: "verified",
-      updated_at: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    if (data.expiresAt.toDate() < new Date()) {
+      throw new HttpsError("failed-precondition", "OTP has expired.");
+    }
 
-    // 2. Delete the OTP document so it can't be reused
+    if (data.intent !== intent) {
+      throw new HttpsError("invalid-argument", "OTP intent mismatch.");
+    }
+
     await otpRef.delete();
 
-    return {success: true, message: "OTP verified successfully."};
+    if (intent === "signup") {
+      await db.collection("users").doc(uid).update({
+        verification_status: "verified",
+        updated_at: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      return {success: true, message: "OTP verified successfully."};
+    }
+
+    if (intent === "password_reset") {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const tokenExpiresAt = new Date();
+      tokenExpiresAt.setMinutes(tokenExpiresAt.getMinutes() + 15);
+
+      await db.collection("users").doc(uid).collection("password_reset_tokens").doc("current").set({
+        token: resetToken,
+        expiresAt: admin.firestore.Timestamp.fromDate(tokenExpiresAt),
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return {success: true, resetToken: resetToken};
+    }
+
+    throw new HttpsError("internal", "Unknown intent.");
   } catch (error) {
     console.error("Error verifying OTP:", error);
-    if (error instanceof HttpsError) {
-      throw error;
-    }
+    if (error instanceof HttpsError) throw error;
     throw new HttpsError("internal", "Failed to verify OTP.");
+  }
+});
+
+/**
+ * resetPassword
+ * Uses the resetToken to update the user's password securely.
+ */
+export const resetPassword = onCall(async (request) => {
+  const {email, resetToken, newPassword} = request.data;
+
+  if (!email || !resetToken || !newPassword) {
+    throw new HttpsError("invalid-argument", "Email, resetToken, and newPassword are required.");
+  }
+
+  try {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    const uid = userRecord.uid;
+
+    const db = admin.firestore();
+    const tokenRef = db.collection("users").doc(uid).collection("password_reset_tokens").doc("current");
+    const doc = await tokenRef.get();
+
+    if (!doc.exists) {
+      throw new HttpsError("permission-denied", "Invalid or expired reset token.");
+    }
+
+    const data = doc.data();
+    if (!data || data.token !== resetToken) {
+      throw new HttpsError("permission-denied", "Invalid reset token.");
+    }
+
+    if (data.expiresAt.toDate() < new Date()) {
+      throw new HttpsError("permission-denied", "Reset token has expired.");
+    }
+
+    // Token is valid! Update password
+    await admin.auth().updateUser(uid, {password: newPassword});
+
+    // Invalidate token
+    await tokenRef.delete();
+
+    return {success: true, message: "Password updated successfully."};
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    if (error instanceof HttpsError) throw error;
+    throw new HttpsError("internal", "Failed to reset password.");
   }
 });

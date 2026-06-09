@@ -8,8 +8,10 @@ import 'package:mediconnect/common/auth/domain/usecases/sign_out_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/update_user_profile_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/send_email_verification_use_case.dart';
 import 'package:mediconnect/common/auth/domain/usecases/verify_email_otp_use_case.dart';
+import 'package:mediconnect/common/auth/domain/usecases/reset_password_use_case.dart';
 import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
 import 'package:mediconnect/core/providers/dependency_providers.dart';
+import 'package:mediconnect/core/utils/firebase_error_parser.dart';
 
 enum AuthStatus {
   uninitialized,
@@ -62,6 +64,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final UpdateUserProfileUseCase updateUserProfileUseCase;
   final SendEmailVerificationUseCase sendEmailVerificationUseCase;
   final VerifyEmailOtpUseCase verifyEmailOtpUseCase;
+  final ResetPasswordUseCase resetPasswordUseCase;
 
   AuthNotifier({
     required this.signUpUseCase,
@@ -71,6 +74,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required this.updateUserProfileUseCase,
     required this.sendEmailVerificationUseCase,
     required this.verifyEmailOtpUseCase,
+    required this.resetPasswordUseCase,
     this.syncLinkedPharmacyUseCase,
   }) : super(const AuthState()) {
     _checkCurrentUser();
@@ -99,7 +103,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: FirebaseErrorParser.parseError(e),
       );
     }
   }
@@ -121,7 +125,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         lastName: lastName,
       );
 
-      print('AuthNotifier: signUp successful. Setting status to authenticated.');
+      print(
+        'AuthNotifier: signUp successful. Setting status to authenticated.',
+      );
       state = state.copyWith(
         status: AuthStatus.authenticated,
         user: user,
@@ -131,7 +137,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       print('AuthNotifier: signUp failed. Error: $e');
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: FirebaseErrorParser.parseError(e),
       );
       rethrow;
     }
@@ -144,7 +150,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       final user = await signInUseCase(email: email, password: password);
 
-      print('AuthNotifier: signIn successful. Setting status to authenticated.');
+      print(
+        'AuthNotifier: signIn successful. Setting status to authenticated.',
+      );
       await _syncPharmacyIfNeeded(user);
       state = state.copyWith(
         status: AuthStatus.authenticated,
@@ -155,43 +163,105 @@ class AuthNotifier extends StateNotifier<AuthState> {
       print('AuthNotifier: signIn failed. Error: $e');
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: FirebaseErrorParser.parseError(e),
       );
       rethrow;
     }
   }
 
-  Future<void> sendEmailVerification(String email) async {
+  Future<void> sendEmailVerification(
+    String email, {
+    String intent = 'signup',
+  }) async {
     try {
       state = state.copyWith(status: AuthStatus.loading);
-      await sendEmailVerificationUseCase(email);
-      state = state.copyWith(status: AuthStatus.authenticated, errorMessage: null);
-    } catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.error,
-        errorMessage: e.toString(),
-      );
-      rethrow;
-    }
-  }
+      await sendEmailVerificationUseCase(email, intent: intent);
 
-  Future<void> verifyEmailOtp(String code) async {
-    try {
-      state = state.copyWith(status: AuthStatus.loading);
-      await verifyEmailOtpUseCase(code);
-      
-      // Update local user state to reflect verification
-      if (state.user != null) {
+      if (intent == 'password_reset') {
+        // Restore to unauthenticated – the user is NOT logged in during
+        // password reset. This matches the router's expectation: an
+        // unauthenticated user on an auth-flow page → no redirect.
         state = state.copyWith(
-          status: AuthStatus.authenticated,
-          user: state.user!.copyWith(verificationStatus: VerificationStatus.verified),
+          status: AuthStatus.unauthenticated,
+          errorMessage: null,
+        );
+      } else {
+        // Normal sign-up / login flow
+        state = state.copyWith(
+          status: state.user != null
+              ? AuthStatus.authenticated
+              : AuthStatus.uninitialized,
           errorMessage: null,
         );
       }
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: FirebaseErrorParser.parseError(e),
+      );
+      rethrow;
+    }
+  }
+
+  Future<String?> verifyEmailOtp(
+    String email,
+    String code, {
+    String intent = 'signup',
+  }) async {
+    try {
+      state = state.copyWith(status: AuthStatus.loading);
+      final resetToken = await verifyEmailOtpUseCase(
+        email,
+        code,
+        intent: intent,
+      );
+
+      // Update local user state to reflect verification if it's a signup
+      if (intent == 'signup' && state.user != null) {
+        state = state.copyWith(
+          status: AuthStatus.authenticated,
+          user: state.user!.copyWith(
+            verificationStatus: VerificationStatus.verified,
+          ),
+          errorMessage: null,
+        );
+      } else {
+        // For password reset, stay unauthenticated – the user is not logged in.
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          user: null,
+          errorMessage: null,
+        );
+      }
+
+      return resetToken;
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: FirebaseErrorParser.parseError(e),
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> resetPassword(
+    String email,
+    String resetToken,
+    String newPassword,
+  ) async {
+    try {
+      state = state.copyWith(status: AuthStatus.loading);
+      await resetPasswordUseCase(email, resetToken, newPassword);
+      // Clear any authenticated user after password reset
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        user: null,
+        errorMessage: null,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: FirebaseErrorParser.parseError(e),
       );
       rethrow;
     }
@@ -212,7 +282,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: FirebaseErrorParser.parseError(e),
       );
     }
   }
@@ -240,7 +310,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> updateProfileInfo({required UserModel updatedUser}) async {
     try {
       state = state.copyWith(status: AuthStatus.loading);
-      
+
       final user = await updateUserProfileUseCase(updatedUser);
 
       await _syncPharmacyIfNeeded(user);
@@ -252,7 +322,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         status: AuthStatus.error,
-        errorMessage: e.toString(),
+        errorMessage: FirebaseErrorParser.parseError(e),
       );
       rethrow;
     }
@@ -281,10 +351,15 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final signInUseCase = ref.watch(signInUseCaseProvider);
   final signOutUseCase = ref.watch(signOutUseCaseProvider);
   final getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
-  final syncLinkedPharmacyUseCase = ref.watch(syncLinkedPharmacyUseCaseProvider);
+  final syncLinkedPharmacyUseCase = ref.watch(
+    syncLinkedPharmacyUseCaseProvider,
+  );
   final updateUserProfileUseCase = ref.watch(updateUserProfileUseCaseProvider);
-  final sendEmailVerificationUseCase = ref.watch(sendEmailVerificationUseCaseProvider);
+  final sendEmailVerificationUseCase = ref.watch(
+    sendEmailVerificationUseCaseProvider,
+  );
   final verifyEmailOtpUseCase = ref.watch(verifyEmailOtpUseCaseProvider);
+  final resetPasswordUseCase = ref.watch(resetPasswordUseCaseProvider);
 
   return AuthNotifier(
     signUpUseCase: signUpUseCase,
@@ -294,6 +369,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     updateUserProfileUseCase: updateUserProfileUseCase,
     sendEmailVerificationUseCase: sendEmailVerificationUseCase,
     verifyEmailOtpUseCase: verifyEmailOtpUseCase,
+    resetPasswordUseCase: resetPasswordUseCase,
     syncLinkedPharmacyUseCase: syncLinkedPharmacyUseCase,
   );
 });
@@ -328,7 +404,8 @@ final currentPharmacyIdProvider = FutureProvider<String?>((ref) async {
     if (ownerUid != null && ownerUid.isNotEmpty) {
       return ownerUid == user.id;
     }
-    final employeeIds = (businessData['employee_ids'] as List<dynamic>?)
+    final employeeIds =
+        (businessData['employee_ids'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList() ??
         [];

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mediconnect/common/auth/presentation/pages/password_and_verification/forgot_password_page.dart';
 import 'package:mediconnect/common/auth/presentation/providers/auth_provider.dart';
 import 'package:mediconnect/common/widgets/k_elevated_button.dart';
-import 'package:mediconnect/core/router/k_navigate.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mediconnect/common/widgets/providers/app_scaffold_provider.dart';
 import 'package:mediconnect/core/constants/colors.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
@@ -83,7 +83,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () {
-                navigateToPage(context, ForgotPasswordPage());
+                context.push('/forgot-password');
               },
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.lightTheme.support.red,
@@ -91,6 +91,30 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               child: Text('Forgot Password?', style: AppTextStyles.p14Sm),
             ),
           ),
+          if (authState.hasError && authState.errorMessage != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.lightTheme.support.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.lightTheme.support.red.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: AppColors.lightTheme.support.red, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      authState.errorMessage!,
+                      style: AppTextStyles.p14Sm.copyWith(color: AppColors.lightTheme.support.red),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,

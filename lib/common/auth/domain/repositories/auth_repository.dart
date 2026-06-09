@@ -19,7 +19,9 @@ abstract class AuthRepository {
 
   Future<UserModel> updateUser(UserModel user);
 
-  Future<void> sendEmailVerification(String email);
+  Future<void> sendEmailVerification(String email, {String intent = 'signup'});
 
-  Future<void> verifyEmailOtp(String code);
+  Future<String?> verifyEmailOtp(String email, String code, {String intent = 'signup'});
+
+  Future<void> resetPassword(String email, String resetToken, String newPassword);
 }

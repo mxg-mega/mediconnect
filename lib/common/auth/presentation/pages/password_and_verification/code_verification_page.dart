@@ -12,12 +12,12 @@ import 'package:mediconnect/core/theme/app_theme.dart';
 class CodeVerificationPage extends ConsumerStatefulWidget {
   const CodeVerificationPage({
     super.key,
-    required this.nextPage,
     required this.email,
+    this.intent = 'signup',
   });
 
-  final Widget nextPage;
   final String email;
+  final String intent;
 
   @override
   ConsumerState<CodeVerificationPage> createState() =>
@@ -74,19 +74,20 @@ class _CodeVerificationPageState extends ConsumerState<CodeVerificationPage> {
     });
 
     try {
-      await ref.read(authProvider.notifier).verifyEmailOtp(_currentCode);
+      final resetToken = await ref.read(authProvider.notifier).verifyEmailOtp(
+            widget.email,
+            _currentCode,
+            intent: widget.intent,
+          );
 
       if (mounted) {
-        final authState = ref.read(authProvider);
-
-        // If the user is authenticated (e.g. signup flow), GoRouter's redirect logic
-        // will automatically take over since the verificationStatus has changed to verified.
-        // We only manually navigate if they are unauthenticated (e.g. forgot password flow).
-        if (!authState.isAuthenticated) {
-          Navigator.of(
-            context,
-          ).pushReplacement(MaterialPageRoute(builder: (_) => widget.nextPage));
+        if (widget.intent == 'password_reset') {
+          context.push('/new-password', extra: {
+            'email': widget.email,
+            'resetToken': resetToken,
+          });
         }
+        // If it's a signup flow, GoRouter's redirect automatically handles it.
       }
     } catch (e) {
       String message = e.toString();
@@ -115,7 +116,10 @@ class _CodeVerificationPageState extends ConsumerState<CodeVerificationPage> {
     });
 
     try {
-      await ref.read(authProvider.notifier).sendEmailVerification(widget.email);
+      await ref.read(authProvider.notifier).sendEmailVerification(
+            widget.email,
+            intent: widget.intent,
+          );
       _startTimer();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

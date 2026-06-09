@@ -5,7 +5,7 @@ class SendEmailVerificationUseCase {
 
   SendEmailVerificationUseCase(this.repository);
 
-  Future<void> call(String email) async {
-    return await repository.sendEmailVerification(email);
+  Future<void> call(String email, {String intent = 'signup'}) async {
+    return await repository.sendEmailVerification(email, intent: intent);
   }
 }
