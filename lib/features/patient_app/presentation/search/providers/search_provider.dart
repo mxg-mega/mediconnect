@@ -117,6 +117,26 @@ final pharmacySearchResultsProvider = StreamProvider<List<Pharmacy>>((ref) {
 });
 
 // 4. Combined Pharmacy Results
+final userLocationProvider = FutureProvider<Position?>((ref) async {
+  try {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return null;
+    
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    
+    if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+      return await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium));
+    }
+  } catch (e) {
+    print('Location Error: $e');
+  }
+  return null;
+});
+
 final combinedPharmacySearchResultsProvider = FutureProvider<List<Pharmacy>>((ref) async {
   final algoliaStream = ref.watch(pharmacySearchResultsProvider.future);
   
@@ -129,16 +149,8 @@ final combinedPharmacySearchResultsProvider = FutureProvider<List<Pharmacy>>((re
   // Fetch Google Places
   List<Pharmacy> googlePharmacies = [];
   try {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (serviceEnabled) {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
-        final position = await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium));
-        
+    final position = await ref.watch(userLocationProvider.future);
+    if (position != null) {
         final placesSource = ref.read(googlePlacesDataSourceProvider);
         final places = await placesSource.getNearbyPharmacies(position.latitude, position.longitude);
         
@@ -161,7 +173,6 @@ final combinedPharmacySearchResultsProvider = FutureProvider<List<Pharmacy>>((re
            );
         }).toList();
       }
-    }
   } catch (e) {
     print('Error fetching places: $e');
   }

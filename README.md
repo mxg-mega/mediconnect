@@ -1,6 +1,17 @@
 # MedConnect
 
-A new Flutter project.
+A comprehensive mobile application for both patients and pharmacists.
+
+## Documentation
+
+The detailed documentation for MedConnect is located in the `docs/` directory:
+
+- [Architecture & Design](docs/architecture_design.md)
+- [Data Schema](docs/data_schema.md)
+- [Developer Guide](docs/developer_guide.md)
+- [Getting Started](docs/getting_started.md)
+
+---
 
 ## Design Tokens: Typography (Figma/Zeplin -> Flutter)
 

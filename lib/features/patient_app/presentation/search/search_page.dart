@@ -9,6 +9,9 @@ import 'package:mediconnect/features/patient_app/presentation/widgets/pharmacy_c
 import 'package:mediconnect/features/patient_app/presentation/search/providers/search_provider.dart';
 import 'package:mediconnect/core/router/routes_names.dart';
 import 'package:go_router/go_router.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -21,6 +24,7 @@ class _SearchPageState extends ConsumerState<SearchPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -32,12 +36,28 @@ class _SearchPageState extends ConsumerState<SearchPage>
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = AppTheme.colors(context);
+    
+    // Listen to location updates to animate map
+    ref.listen<AsyncValue<Position?>>(userLocationProvider, (previous, next) {
+      if (next.hasValue && next.value != null && _mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(next.value!.latitude, next.value!.longitude),
+              zoom: 14,
+            ),
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: colors.neutral.bgTint,
       body: NestedScrollView(
@@ -301,6 +321,25 @@ class _SearchPageState extends ConsumerState<SearchPage>
     final searchAsync = ref.watch(combinedPharmacySearchResultsProvider);
     final colors = AppTheme.colors(context);
 
+    // Create markers from pharmacies
+    Set<Marker> markers = {};
+    if (searchAsync.hasValue && searchAsync.value != null) {
+      for (final pharmacy in searchAsync.value!) {
+        if (pharmacy.location.latitude != 0.0 || pharmacy.location.longitude != 0.0) {
+          markers.add(
+            Marker(
+              markerId: MarkerId(pharmacy.id),
+              position: LatLng(pharmacy.location.latitude, pharmacy.location.longitude),
+              infoWindow: InfoWindow(
+                title: pharmacy.name,
+                snippet: pharmacy.address,
+              ),
+            ),
+          );
+        }
+      }
+    }
+
     return Container(
       color: colors.neutral.bgTint,
       child: Column(
@@ -319,6 +358,26 @@ class _SearchPageState extends ConsumerState<SearchPage>
                   scrollGesturesEnabled: true,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,
+                  gestureRecognizers: {
+                    Factory<OneSequenceGestureRecognizer>(
+                      () => EagerGestureRecognizer(),
+                    ),
+                  },
+                  markers: markers,
+                  onMapCreated: (controller) {
+                    _mapController = controller;
+                    final locationState = ref.read(userLocationProvider);
+                    if (locationState.hasValue && locationState.value != null) {
+                      _mapController!.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                            target: LatLng(locationState.value!.latitude, locationState.value!.longitude),
+                            zoom: 14,
+                          ),
+                        ),
+                      );
+                    }
+                  },
                 ),
                 // Floating map style button
                 Positioned(

@@ -4,15 +4,62 @@ import 'package:mediconnect/common/auth/domain/entities/pharmacy.dart';
 import 'package:mediconnect/core/constants/assets.dart';
 import 'package:mediconnect/core/constants/text_styles.dart';
 import 'package:mediconnect/core/theme/app_theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:mediconnect/features/patient_app/presentation/search/providers/search_provider.dart';
 
-class PharmacyCard extends StatelessWidget {
+class PharmacyCard extends ConsumerWidget {
   final Pharmacy pharmacy;
 
   const PharmacyCard({super.key, required this.pharmacy});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppTheme.colors(context);
+
+    // Calculate Distance
+    final userLocationAsync = ref.watch(userLocationProvider);
+    String distanceText = pharmacy.address.isNotEmpty
+        ? pharmacy.address
+        : 'Distance unknown';
+    if (userLocationAsync.hasValue &&
+        userLocationAsync.value != null &&
+        pharmacy.location.latitude != 0.0) {
+      final distanceInMeters = Geolocator.distanceBetween(
+        userLocationAsync.value!.latitude,
+        userLocationAsync.value!.longitude,
+        pharmacy.location.latitude,
+        pharmacy.location.longitude,
+      );
+      distanceText = '${(distanceInMeters / 1000).toStringAsFixed(1)} km away';
+    }
+
+    // Calculate Operating Hours
+    String hoursText = 'Hours unknown';
+    if (pharmacy.operatingHours.isNotEmpty) {
+      final today = DateTime.now().weekday; // 1 = Monday
+      final days = [
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday',
+      ];
+      final todayString = days[today - 1];
+
+      final todayHours = pharmacy.operatingHours.firstWhere(
+        (h) => h.dayOfWeek.toLowerCase() == todayString,
+        orElse: () => pharmacy.operatingHours.first,
+      );
+
+      if (todayHours.isClosed) {
+        hoursText = 'Closed today';
+      } else {
+        hoursText = 'Closes ${todayHours.closeTime}';
+      }
+    }
 
     return Card(
       elevation: 0,
@@ -27,6 +74,7 @@ class PharmacyCard extends StatelessWidget {
       child: SizedBox(
         width: 280,
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (pharmacy.frontalImageUrl != null)
@@ -36,43 +84,46 @@ class PharmacyCard extends StatelessWidget {
                 ),
                 child: Image.network(
                   pharmacy.frontalImageUrl!,
-                  height: 140,
+                  height: 120,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      height: 140,
+                    return SizedBox(
+                      height: 120,
                       width: double.infinity,
-                      color: colors.neutral.bg,
-                      child: const Center(child: CircularProgressIndicator()),
+                      child: ColoredBox(
+                        color: colors.neutral.bg,
+                        child: const Center(child: CircularProgressIndicator()),
+                      ),
                     );
                   },
                   errorBuilder: (context, error, stackTrace) {
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      height: 140,
+                    return SizedBox(
+                      height: 120,
                       width: double.infinity,
-                      color: colors.neutral.bg,
-                      child: const Icon(Icons.error),
+                      child: ColoredBox(
+                        color: colors.neutral.bg,
+                        child: const Icon(Icons.error),
+                      ),
                     );
                   },
                 ),
               )
             else
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                height: 140,
+              SizedBox(
+                height: 120,
                 width: double.infinity,
-                decoration: BoxDecoration(
-                  color: colors.neutral.bg,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colors.neutral.bg,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
                   ),
-                ),
-                child: const Center(
-                  child: Icon(Icons.business_outlined, size: 40),
+                  child: const Center(
+                    child: Icon(Icons.business_outlined, size: 40),
+                  ),
                 ),
               ),
             Padding(
@@ -95,10 +146,14 @@ class PharmacyCard extends StatelessWidget {
                         color: Colors.grey,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        '10 min away • Closes 7pm',
-                        style: AppTextStyles.interP12R.copyWith(
-                          color: colors.neutral.tertiaryText,
+                      Expanded(
+                        child: Text(
+                          '$distanceText • $hoursText',
+                          style: AppTextStyles.interP12R.copyWith(
+                            color: colors.neutral.tertiaryText,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
